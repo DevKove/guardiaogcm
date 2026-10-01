@@ -196,6 +196,7 @@ export type Database = {
           natureza: string
           numero: string | null
           origem: string
+          plantao_id: string | null
           posto_id: string | null
           prioridade: number
           protocolo: number
@@ -223,6 +224,7 @@ export type Database = {
           natureza: string
           numero?: string | null
           origem?: string
+          plantao_id?: string | null
           posto_id?: string | null
           prioridade?: number
           protocolo?: never
@@ -250,6 +252,7 @@ export type Database = {
           natureza?: string
           numero?: string | null
           origem?: string
+          plantao_id?: string | null
           posto_id?: string | null
           prioridade?: number
           protocolo?: never
@@ -263,6 +266,13 @@ export type Database = {
           viatura_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "ocorrencias_plantao_id_fkey"
+            columns: ["plantao_id"]
+            isOneToOne: false
+            referencedRelation: "plantoes"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "ocorrencias_posto_id_fkey"
             columns: ["posto_id"]
@@ -278,6 +288,83 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      plantao_registros: {
+        Row: {
+          created_at: string
+          criado_por: string
+          hora: string
+          id: string
+          plantao_id: string
+          texto: string
+        }
+        Insert: {
+          created_at?: string
+          criado_por?: string
+          hora?: string
+          id?: string
+          plantao_id: string
+          texto: string
+        }
+        Update: {
+          created_at?: string
+          criado_por?: string
+          hora?: string
+          id?: string
+          plantao_id?: string
+          texto?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plantao_registros_plantao_id_fkey"
+            columns: ["plantao_id"]
+            isOneToOne: false
+            referencedRelation: "plantoes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      plantoes: {
+        Row: {
+          created_at: string
+          data_inicio: string
+          encerrado_em: string | null
+          id: string
+          iniciado_em: string
+          observacoes: string | null
+          operador_id: string
+          resumo: Json | null
+          status: string
+          turno: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          data_inicio?: string
+          encerrado_em?: string | null
+          id?: string
+          iniciado_em?: string
+          observacoes?: string | null
+          operador_id?: string
+          resumo?: Json | null
+          status?: string
+          turno: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          data_inicio?: string
+          encerrado_em?: string | null
+          id?: string
+          iniciado_em?: string
+          observacoes?: string | null
+          operador_id?: string
+          resumo?: Json | null
+          status?: string
+          turno?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       postos_fixos: {
         Row: {
@@ -432,6 +519,17 @@ export type Database = {
         Returns: boolean
       }
       is_staff: { Args: { _user_id: string }; Returns: boolean }
+      ocorrencia_bloqueada: {
+        Args: {
+          _plantao_id: string
+          _status: Database["public"]["Enums"]["ocorrencia_status"]
+        }
+        Returns: boolean
+      }
+      plantao_editavel: {
+        Args: { _plantao_id: string; _user: string }
+        Returns: boolean
+      }
     }
     Enums: {
       app_role: "admin" | "supervisor" | "operador"
