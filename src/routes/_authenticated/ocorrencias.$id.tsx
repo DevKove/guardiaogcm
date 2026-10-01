@@ -88,7 +88,7 @@ function Detalhe() {
   }
 
   async function update(patch: Record<string, unknown>, descricao: string) {
-    const { data, error } = await supabase.from("ocorrencias").update(patch).eq("id", id).select("id");
+    const { data, error } = await supabase.from("ocorrencias").update(patch as never).eq("id", id).select("id");
     if (error || !data?.length) {
       toast.error(error?.message ?? "Sem permissão para alterar esta ocorrência");
       return false;
@@ -352,7 +352,7 @@ function EditarDialog({ open, onClose, o, onSave }: { open: boolean; onClose: ()
 type Env = { id: string; tipo: string; nome: string; documento: string | null; telefone: string | null; observacao: string | null; criado_por: string };
 
 function Envolvidos({ ocorrenciaId, lista, pode, meId, isSup, onChange, log }: {
-  ocorrenciaId: string; lista: Env[]; pode: boolean; meId?: string; isSup: boolean; onChange: () => void; log: (d: string) => Promise<void>;
+  ocorrenciaId: string; lista: Env[]; pode: boolean; meId?: string | undefined; isSup: boolean; onChange: () => void; log: (d: string) => Promise<void>;
 }) {
   const vazio = { tipo: TIPOS_ENVOLVIDO[0] as string, nome: "", documento: "", telefone: "", observacao: "" };
   const [f, setF] = useState(vazio);

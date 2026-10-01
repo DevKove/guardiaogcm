@@ -43,7 +43,7 @@ function Viaturas() {
   }, [qc]);
 
   async function patch(id: string, p: Record<string, unknown>) {
-    const { error } = await supabase.from("viaturas").update(p).eq("id", id);
+    const { error } = await supabase.from("viaturas").update(p as never).eq("id", id);
     if (error) toast.error(error.message);
     else qc.invalidateQueries({ queryKey: ["viaturas"] });
   }
