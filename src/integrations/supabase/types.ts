@@ -14,6 +14,96 @@ export type Database = {
   }
   public: {
     Tables: {
+      avisos: {
+        Row: {
+          autor_id: string
+          created_at: string
+          id: string
+          mensagem: string
+          nivel: string
+          titulo: string
+        }
+        Insert: {
+          autor_id?: string
+          created_at?: string
+          id?: string
+          mensagem: string
+          nivel?: string
+          titulo: string
+        }
+        Update: {
+          autor_id?: string
+          created_at?: string
+          id?: string
+          mensagem?: string
+          nivel?: string
+          titulo?: string
+        }
+        Relationships: []
+      }
+      escalas: {
+        Row: {
+          agentes: string
+          created_at: string
+          criado_por: string
+          data: string
+          funcao: string
+          hora_fim: string
+          hora_inicio: string
+          id: string
+          observacao: string | null
+          posto_id: string | null
+          turno: string
+          updated_at: string
+          viatura_id: string | null
+        }
+        Insert: {
+          agentes: string
+          created_at?: string
+          criado_por?: string
+          data: string
+          funcao?: string
+          hora_fim?: string
+          hora_inicio?: string
+          id?: string
+          observacao?: string | null
+          posto_id?: string | null
+          turno?: string
+          updated_at?: string
+          viatura_id?: string | null
+        }
+        Update: {
+          agentes?: string
+          created_at?: string
+          criado_por?: string
+          data?: string
+          funcao?: string
+          hora_fim?: string
+          hora_inicio?: string
+          id?: string
+          observacao?: string | null
+          posto_id?: string | null
+          turno?: string
+          updated_at?: string
+          viatura_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "escalas_posto_id_fkey"
+            columns: ["posto_id"]
+            isOneToOne: false
+            referencedRelation: "postos_fixos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "escalas_viatura_id_fkey"
+            columns: ["viatura_id"]
+            isOneToOne: false
+            referencedRelation: "viaturas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ocorrencia_envolvidos: {
         Row: {
           created_at: string
@@ -106,6 +196,7 @@ export type Database = {
           natureza: string
           numero: string | null
           origem: string
+          posto_id: string | null
           prioridade: number
           protocolo: number
           referencia: string | null
@@ -132,6 +223,7 @@ export type Database = {
           natureza: string
           numero?: string | null
           origem?: string
+          posto_id?: string | null
           prioridade?: number
           protocolo?: never
           referencia?: string | null
@@ -158,6 +250,7 @@ export type Database = {
           natureza?: string
           numero?: string | null
           origem?: string
+          posto_id?: string | null
           prioridade?: number
           protocolo?: never
           referencia?: string | null
@@ -171,6 +264,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "ocorrencias_posto_id_fkey"
+            columns: ["posto_id"]
+            isOneToOne: false
+            referencedRelation: "postos_fixos"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "ocorrencias_viatura_id_fkey"
             columns: ["viatura_id"]
             isOneToOne: false
@@ -178,6 +278,51 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      postos_fixos: {
+        Row: {
+          ativo: boolean
+          bairro: string | null
+          created_at: string
+          endereco: string | null
+          horario: string | null
+          id: string
+          nome: string
+          observacao: string | null
+          responsavel: string | null
+          telefone: string | null
+          tipo: string
+          updated_at: string
+        }
+        Insert: {
+          ativo?: boolean
+          bairro?: string | null
+          created_at?: string
+          endereco?: string | null
+          horario?: string | null
+          id?: string
+          nome: string
+          observacao?: string | null
+          responsavel?: string | null
+          telefone?: string | null
+          tipo?: string
+          updated_at?: string
+        }
+        Update: {
+          ativo?: boolean
+          bairro?: string | null
+          created_at?: string
+          endereco?: string | null
+          horario?: string | null
+          id?: string
+          nome?: string
+          observacao?: string | null
+          responsavel?: string | null
+          telefone?: string | null
+          tipo?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       profiles: {
         Row: {
@@ -224,7 +369,9 @@ export type Database = {
           created_at: string
           guarnicao: string | null
           id: string
+          km_atual: number | null
           modelo: string | null
+          observacao: string | null
           ocorrencia_id: string | null
           placa: string | null
           prefixo: string
@@ -237,7 +384,9 @@ export type Database = {
           created_at?: string
           guarnicao?: string | null
           id?: string
+          km_atual?: number | null
           modelo?: string | null
+          observacao?: string | null
           ocorrencia_id?: string | null
           placa?: string | null
           prefixo: string
@@ -250,7 +399,9 @@ export type Database = {
           created_at?: string
           guarnicao?: string | null
           id?: string
+          km_atual?: number | null
           modelo?: string | null
+          observacao?: string | null
           ocorrencia_id?: string | null
           placa?: string | null
           prefixo?: string
