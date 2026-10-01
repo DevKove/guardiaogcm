@@ -12,4 +12,9 @@ export default defineConfig({
     // nitro/vite builds from this
     server: { entry: "server" },
   },
+  vite: {
+    // Pre-bundle heavy deps so the first visit to a page doesn't trigger a
+    // re-optimization that invalidates already-loaded chunks.
+    optimizeDeps: { include: ["recharts", "@radix-ui/react-dialog"] },
+  },
 });
