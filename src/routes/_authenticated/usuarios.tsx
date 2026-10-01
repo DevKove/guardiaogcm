@@ -32,9 +32,15 @@ function Usuarios() {
 
   async function setRole(userId: string, role: Role) {
     const del = await supabase.from("user_roles").delete().eq("user_id", userId);
-    if (del.error) return toast.error(del.error.message);
+    if (del.error) {
+      toast.error(del.error.message);
+      return;
+    }
     const ins = await supabase.from("user_roles").insert({ user_id: userId, role });
-    if (ins.error) return toast.error(ins.error.message);
+    if (ins.error) {
+      toast.error(ins.error.message);
+      return;
+    }
     toast.success("Perfil atualizado");
     qc.invalidateQueries({ queryKey: ["usuarios"] });
   }
