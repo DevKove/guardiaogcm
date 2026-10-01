@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.set_plantao_ocorrencia() FROM anon, authenticated, public;
