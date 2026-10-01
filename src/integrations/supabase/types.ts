@@ -14,16 +14,151 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      ocorrencia_historico: {
+        Row: {
+          created_at: string
+          descricao: string
+          id: string
+          ocorrencia_id: string
+          usuario_id: string
+        }
+        Insert: {
+          created_at?: string
+          descricao: string
+          id?: string
+          ocorrencia_id: string
+          usuario_id?: string
+        }
+        Update: {
+          created_at?: string
+          descricao?: string
+          id?: string
+          ocorrencia_id?: string
+          usuario_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ocorrencia_historico_ocorrencia_id_fkey"
+            columns: ["ocorrencia_id"]
+            isOneToOne: false
+            referencedRelation: "ocorrencias"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ocorrencias: {
+        Row: {
+          bairro: string | null
+          created_at: string
+          criado_por: string
+          encerrada_em: string | null
+          endereco: string
+          id: string
+          natureza: string
+          prioridade: number
+          protocolo: number
+          referencia: string | null
+          relato: string
+          solicitante_nome: string | null
+          solicitante_telefone: string | null
+          status: Database["public"]["Enums"]["ocorrencia_status"]
+          updated_at: string
+          viatura: string | null
+        }
+        Insert: {
+          bairro?: string | null
+          created_at?: string
+          criado_por?: string
+          encerrada_em?: string | null
+          endereco: string
+          id?: string
+          natureza: string
+          prioridade?: number
+          protocolo?: never
+          referencia?: string | null
+          relato: string
+          solicitante_nome?: string | null
+          solicitante_telefone?: string | null
+          status?: Database["public"]["Enums"]["ocorrencia_status"]
+          updated_at?: string
+          viatura?: string | null
+        }
+        Update: {
+          bairro?: string | null
+          created_at?: string
+          criado_por?: string
+          encerrada_em?: string | null
+          endereco?: string
+          id?: string
+          natureza?: string
+          prioridade?: number
+          protocolo?: never
+          referencia?: string | null
+          relato?: string
+          solicitante_nome?: string | null
+          solicitante_telefone?: string | null
+          status?: Database["public"]["Enums"]["ocorrencia_status"]
+          updated_at?: string
+          viatura?: string | null
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          id: string
+          matricula: string | null
+          nome: string
+        }
+        Insert: {
+          created_at?: string
+          id: string
+          matricula?: string | null
+          nome?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          matricula?: string | null
+          nome?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      is_staff: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "supervisor" | "operador"
+      ocorrencia_status: "aberta" | "em_atendimento" | "encerrada" | "cancelada"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +285,9 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "supervisor", "operador"],
+      ocorrencia_status: ["aberta", "em_atendimento", "encerrada", "cancelada"],
+    },
   },
 } as const
