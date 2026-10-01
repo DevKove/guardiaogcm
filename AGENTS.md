@@ -8,3 +8,8 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+## Architecture rules
+- Data access uses the browser client with RLS (roles in `user_roles`, checked via `has_role`/`is_staff`) — keeps logic simple without server functions.
+- First signed-up user becomes admin via `handle_new_user` trigger; others default to operador — bootstraps the system without manual SQL.
+- Every change to an occurrence also writes a row to `ocorrencia_historico` — audit trail.
