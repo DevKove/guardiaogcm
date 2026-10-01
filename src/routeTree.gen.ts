@@ -12,8 +12,10 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AuthenticatedEscalasRouteImport } from './routes/_authenticated/escalas'
 import { Route as AuthenticatedPainelRouteImport } from './routes/_authenticated/painel'
 import { Route as AuthenticatedPerfilRouteImport } from './routes/_authenticated/perfil'
+import { Route as AuthenticatedPostosRouteImport } from './routes/_authenticated/postos'
 import { Route as AuthenticatedRelatoriosRouteImport } from './routes/_authenticated/relatorios'
 import { Route as AuthenticatedUsuariosRouteImport } from './routes/_authenticated/usuarios'
 import { Route as AuthenticatedViaturasRouteImport } from './routes/_authenticated/viaturas'
@@ -35,6 +37,11 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedEscalasRoute = AuthenticatedEscalasRouteImport.update({
+  id: '/escalas',
+  path: '/escalas',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedPainelRoute = AuthenticatedPainelRouteImport.update({
   id: '/painel',
   path: '/painel',
@@ -43,6 +50,11 @@ const AuthenticatedPainelRoute = AuthenticatedPainelRouteImport.update({
 const AuthenticatedPerfilRoute = AuthenticatedPerfilRouteImport.update({
   id: '/perfil',
   path: '/perfil',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedPostosRoute = AuthenticatedPostosRouteImport.update({
+  id: '/postos',
+  path: '/postos',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedRelatoriosRoute = AuthenticatedRelatoriosRouteImport.update({
@@ -81,8 +93,10 @@ const AuthenticatedOcorrenciasNovaRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/escalas': typeof AuthenticatedEscalasRoute
   '/painel': typeof AuthenticatedPainelRoute
   '/perfil': typeof AuthenticatedPerfilRoute
+  '/postos': typeof AuthenticatedPostosRoute
   '/relatorios': typeof AuthenticatedRelatoriosRoute
   '/usuarios': typeof AuthenticatedUsuariosRoute
   '/viaturas': typeof AuthenticatedViaturasRoute
@@ -93,8 +107,10 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/escalas': typeof AuthenticatedEscalasRoute
   '/painel': typeof AuthenticatedPainelRoute
   '/perfil': typeof AuthenticatedPerfilRoute
+  '/postos': typeof AuthenticatedPostosRoute
   '/relatorios': typeof AuthenticatedRelatoriosRoute
   '/usuarios': typeof AuthenticatedUsuariosRoute
   '/viaturas': typeof AuthenticatedViaturasRoute
@@ -107,8 +123,10 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/_authenticated/escalas': typeof AuthenticatedEscalasRoute
   '/_authenticated/painel': typeof AuthenticatedPainelRoute
   '/_authenticated/perfil': typeof AuthenticatedPerfilRoute
+  '/_authenticated/postos': typeof AuthenticatedPostosRoute
   '/_authenticated/relatorios': typeof AuthenticatedRelatoriosRoute
   '/_authenticated/usuarios': typeof AuthenticatedUsuariosRoute
   '/_authenticated/viaturas': typeof AuthenticatedViaturasRoute
@@ -121,8 +139,10 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/escalas'
     | '/painel'
     | '/perfil'
+    | '/postos'
     | '/relatorios'
     | '/usuarios'
     | '/viaturas'
@@ -133,8 +153,10 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
+    | '/escalas'
     | '/painel'
     | '/perfil'
+    | '/postos'
     | '/relatorios'
     | '/usuarios'
     | '/viaturas'
@@ -146,8 +168,10 @@ export interface FileRouteTypes {
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/_authenticated/escalas'
     | '/_authenticated/painel'
     | '/_authenticated/perfil'
+    | '/_authenticated/postos'
     | '/_authenticated/relatorios'
     | '/_authenticated/usuarios'
     | '/_authenticated/viaturas'
@@ -185,6 +209,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/escalas': {
+      id: '/_authenticated/escalas'
+      path: '/escalas'
+      fullPath: '/escalas'
+      preLoaderRoute: typeof AuthenticatedEscalasRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/painel': {
       id: '/_authenticated/painel'
       path: '/painel'
@@ -197,6 +228,13 @@ declare module '@tanstack/react-router' {
       path: '/perfil'
       fullPath: '/perfil'
       preLoaderRoute: typeof AuthenticatedPerfilRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/postos': {
+      id: '/_authenticated/postos'
+      path: '/postos'
+      fullPath: '/postos'
+      preLoaderRoute: typeof AuthenticatedPostosRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/relatorios': {
@@ -245,8 +283,10 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedEscalasRoute: typeof AuthenticatedEscalasRoute
   AuthenticatedPainelRoute: typeof AuthenticatedPainelRoute
   AuthenticatedPerfilRoute: typeof AuthenticatedPerfilRoute
+  AuthenticatedPostosRoute: typeof AuthenticatedPostosRoute
   AuthenticatedRelatoriosRoute: typeof AuthenticatedRelatoriosRoute
   AuthenticatedUsuariosRoute: typeof AuthenticatedUsuariosRoute
   AuthenticatedViaturasRoute: typeof AuthenticatedViaturasRoute
@@ -256,8 +296,10 @@ interface AuthenticatedRouteRouteChildren {
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedEscalasRoute: AuthenticatedEscalasRoute,
   AuthenticatedPainelRoute: AuthenticatedPainelRoute,
   AuthenticatedPerfilRoute: AuthenticatedPerfilRoute,
+  AuthenticatedPostosRoute: AuthenticatedPostosRoute,
   AuthenticatedRelatoriosRoute: AuthenticatedRelatoriosRoute,
   AuthenticatedUsuariosRoute: AuthenticatedUsuariosRoute,
   AuthenticatedViaturasRoute: AuthenticatedViaturasRoute,

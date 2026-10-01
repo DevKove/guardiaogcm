@@ -103,7 +103,7 @@ function Relatorios() {
 
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
         {kpis.map((k) => (
-          <div key={k.l} className="rounded-md border bg-card p-4">
+          <div key={k.l} className="card-3d animate-rise p-4">
             <div className="text-xs text-muted-foreground">{k.l}</div>
             <div className="font-mono text-3xl font-bold text-primary">{isLoading ? "…" : k.v}</div>
           </div>
@@ -136,7 +136,7 @@ function Relatorios() {
 
 function Chart({ title, children }: { title: string; children: React.ReactElement }) {
   return (
-    <div className="rounded-md border bg-card p-4">
+    <div className="card-3d animate-rise p-4">
       <div className="mb-3 text-sm font-semibold">{title}</div>
       <div className="h-64">
         <ResponsiveContainer width="100%" height="100%">{children}</ResponsiveContainer>

@@ -61,7 +61,7 @@ function Nova() {
         <h1 className="text-2xl font-bold">Nova ocorrência</h1>
       </div>
 
-      <section className="space-y-4 rounded-md border bg-card p-5">
+      <section className="space-y-4 card-3d animate-rise p-5">
         <h2 className="font-semibold text-primary">Classificação</h2>
         <div className="grid gap-4 md:grid-cols-3">
           <div className="space-y-1">
@@ -85,7 +85,7 @@ function Nova() {
         </div>
       </section>
 
-      <section className="space-y-4 rounded-md border bg-card p-5">
+      <section className="space-y-4 card-3d animate-rise p-5">
         <h2 className="font-semibold text-primary">Solicitante</h2>
         <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-1"><Label>Nome</Label><Input value={f.solicitante_nome} onChange={(e) => set("solicitante_nome", e.target.value)} /></div>
@@ -93,7 +93,7 @@ function Nova() {
         </div>
       </section>
 
-      <section className="space-y-4 rounded-md border bg-card p-5">
+      <section className="space-y-4 card-3d animate-rise p-5">
         <h2 className="font-semibold text-primary">Local</h2>
         <div className="grid gap-4 md:grid-cols-[1fr_120px]">
           <div className="space-y-1"><Label>Logradouro *</Label><Input required value={f.endereco} onChange={(e) => set("endereco", e.target.value)} /></div>
@@ -105,7 +105,7 @@ function Nova() {
         </div>
       </section>
 
-      <section className="space-y-4 rounded-md border bg-card p-5">
+      <section className="space-y-4 card-3d animate-rise p-5">
         <h2 className="font-semibold text-primary">Relato *</h2>
         <Textarea required rows={6} value={f.relato} onChange={(e) => set("relato", e.target.value)} placeholder="Descreva os fatos relatados..." />
       </section>

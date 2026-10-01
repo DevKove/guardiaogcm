@@ -55,12 +55,12 @@ function Perfil() {
           {me?.email} · {me?.roles.map((r) => ROLE_LABEL[r]).join(", ")}
         </p>
       </div>
-      <form onSubmit={salvar} className="space-y-3 rounded-md border bg-card p-5">
+      <form onSubmit={salvar} className="space-y-3 card-3d animate-rise p-5">
         <div className="space-y-1"><Label>Nome</Label><Input required value={nome} onChange={(e) => setNome(e.target.value)} /></div>
         <div className="space-y-1"><Label>Matrícula</Label><Input value={matricula} onChange={(e) => setMatricula(e.target.value)} /></div>
         <Button type="submit">Salvar</Button>
       </form>
-      <form onSubmit={trocarSenha} className="space-y-3 rounded-md border bg-card p-5">
+      <form onSubmit={trocarSenha} className="space-y-3 card-3d animate-rise p-5">
         <h2 className="font-semibold text-primary">Alterar senha</h2>
         <div className="space-y-1"><Label>Senha atual</Label><Input type="password" required value={atual} onChange={(e) => setAtual(e.target.value)} /></div>
         <div className="space-y-1"><Label>Nova senha</Label><Input type="password" required minLength={6} value={nova} onChange={(e) => setNova(e.target.value)} /></div>

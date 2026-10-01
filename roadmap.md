@@ -7,3 +7,8 @@
 - [x] Impressão de boletim
 - [x] Relatórios com gráficos e exportação CSV
 - [x] Meu perfil
+- [x] Edição de viaturas (km, observações)
+- [x] Postos fixos (escolas, saúde...)
+- [x] Escalas de serviço
+- [x] Quadro de avisos do plantão
+- [x] Visual moderno com ícones, animações e profundidade
