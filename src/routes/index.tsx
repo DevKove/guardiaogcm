@@ -1,24 +1,58 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { Shield, Radio, FileText } from "lucide-react";
 
-// No head() here: the home route inherits title/description/og/twitter from
-// __root.tsx, and ships no og:image so serve-time hosting can inject the
-// project's social preview (explicit og:image or latest screenshot).
 export const Route = createFileRoute("/")({
+  head: () => ({
+    meta: [
+      { title: "CAD · Guarda Municipal" },
+      { name: "description", content: "Central de atendimento e registro de ocorrências da Guarda Municipal." },
+      { property: "og:title", content: "CAD · Guarda Municipal" },
+      { property: "og:description", content: "Central de atendimento e registro de ocorrências da Guarda Municipal." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+    ],
+  }),
   component: Index,
 });
 
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
 function Index() {
   return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
+    <div className="flex min-h-screen flex-col">
+      <div className="stripe-top h-2" />
+      <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col justify-center px-6 py-16">
+        <div className="flex items-center gap-3 text-primary">
+          <Shield className="h-10 w-10" />
+          <span className="font-mono text-sm tracking-widest">GUARDA CIVIL MUNICIPAL</span>
+        </div>
+        <h1 className="mt-6 text-5xl font-bold leading-tight md:text-6xl">
+          Central de Atendimento
+          <br />e Despacho <span className="text-primary">— CAD</span>
+        </h1>
+        <p className="mt-4 max-w-xl text-lg text-muted-foreground">
+          Registro, acompanhamento e encerramento de ocorrências em tempo real.
+        </p>
+        <div className="mt-8">
+          <Link
+            to="/auth"
+            className="inline-flex items-center rounded-md bg-primary px-6 py-3 font-semibold text-primary-foreground hover:opacity-90"
+          >
+            Acessar sistema
+          </Link>
+        </div>
+        <div className="mt-16 grid gap-4 md:grid-cols-3">
+          {[
+            { icon: FileText, t: "Registro padronizado", d: "Natureza, prioridade, local e relato." },
+            { icon: Radio, t: "Tempo real", d: "Painel atualiza sozinho a cada nova ocorrência." },
+            { icon: Shield, t: "Perfis de acesso", d: "Operador, supervisor e administrador." },
+          ].map((f) => (
+            <div key={f.t} className="rounded-md border bg-card p-5">
+              <f.icon className="h-5 w-5 text-primary" />
+              <div className="mt-3 font-semibold">{f.t}</div>
+              <div className="text-sm text-muted-foreground">{f.d}</div>
+            </div>
+          ))}
+        </div>
+      </main>
     </div>
   );
 }

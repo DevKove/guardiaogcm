@@ -10,33 +10,108 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AuthenticatedPainelRouteImport } from './routes/_authenticated/painel'
+import { Route as AuthenticatedUsuariosRouteImport } from './routes/_authenticated/usuarios'
+import { Route as AuthenticatedOcorrenciasIdRouteImport } from './routes/_authenticated/ocorrencias.$id'
+import { Route as AuthenticatedOcorrenciasNovaRouteImport } from './routes/_authenticated/ocorrencias.nova'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedPainelRoute = AuthenticatedPainelRouteImport.update({
+  id: '/painel',
+  path: '/painel',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedUsuariosRoute = AuthenticatedUsuariosRouteImport.update({
+  id: '/usuarios',
+  path: '/usuarios',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedOcorrenciasIdRoute =
+  AuthenticatedOcorrenciasIdRouteImport.update({
+    id: '/ocorrencias/$id',
+    path: '/ocorrencias/$id',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedOcorrenciasNovaRoute =
+  AuthenticatedOcorrenciasNovaRouteImport.update({
+    id: '/ocorrencias/nova',
+    path: '/ocorrencias/nova',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/painel': typeof AuthenticatedPainelRoute
+  '/usuarios': typeof AuthenticatedUsuariosRoute
+  '/ocorrencias/$id': typeof AuthenticatedOcorrenciasIdRoute
+  '/ocorrencias/nova': typeof AuthenticatedOcorrenciasNovaRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/painel': typeof AuthenticatedPainelRoute
+  '/usuarios': typeof AuthenticatedUsuariosRoute
+  '/ocorrencias/$id': typeof AuthenticatedOcorrenciasIdRoute
+  '/ocorrencias/nova': typeof AuthenticatedOcorrenciasNovaRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/auth': typeof AuthRoute
+  '/_authenticated/painel': typeof AuthenticatedPainelRoute
+  '/_authenticated/usuarios': typeof AuthenticatedUsuariosRoute
+  '/_authenticated/ocorrencias/$id': typeof AuthenticatedOcorrenciasIdRoute
+  '/_authenticated/ocorrencias/nova': typeof AuthenticatedOcorrenciasNovaRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/painel'
+    | '/usuarios'
+    | '/ocorrencias/$id'
+    | '/ocorrencias/nova'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/auth'
+    | '/painel'
+    | '/usuarios'
+    | '/ocorrencias/$id'
+    | '/ocorrencias/nova'
+  id:
+    | '__root__'
+    | '/'
+    | '/_authenticated'
+    | '/auth'
+    | '/_authenticated/painel'
+    | '/_authenticated/usuarios'
+    | '/_authenticated/ocorrencias/$id'
+    | '/_authenticated/ocorrencias/nova'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  AuthRoute: typeof AuthRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +123,72 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/painel': {
+      id: '/_authenticated/painel'
+      path: '/painel'
+      fullPath: '/painel'
+      preLoaderRoute: typeof AuthenticatedPainelRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/usuarios': {
+      id: '/_authenticated/usuarios'
+      path: '/usuarios'
+      fullPath: '/usuarios'
+      preLoaderRoute: typeof AuthenticatedUsuariosRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/ocorrencias/$id': {
+      id: '/_authenticated/ocorrencias/$id'
+      path: '/ocorrencias/$id'
+      fullPath: '/ocorrencias/$id'
+      preLoaderRoute: typeof AuthenticatedOcorrenciasIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/ocorrencias/nova': {
+      id: '/_authenticated/ocorrencias/nova'
+      path: '/ocorrencias/nova'
+      fullPath: '/ocorrencias/nova'
+      preLoaderRoute: typeof AuthenticatedOcorrenciasNovaRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedPainelRoute: typeof AuthenticatedPainelRoute
+  AuthenticatedUsuariosRoute: typeof AuthenticatedUsuariosRoute
+  AuthenticatedOcorrenciasIdRoute: typeof AuthenticatedOcorrenciasIdRoute
+  AuthenticatedOcorrenciasNovaRoute: typeof AuthenticatedOcorrenciasNovaRoute
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedPainelRoute: AuthenticatedPainelRoute,
+  AuthenticatedUsuariosRoute: AuthenticatedUsuariosRoute,
+  AuthenticatedOcorrenciasIdRoute: AuthenticatedOcorrenciasIdRoute,
+  AuthenticatedOcorrenciasNovaRoute: AuthenticatedOcorrenciasNovaRoute,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  AuthRoute: AuthRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -1,0 +1,110 @@
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useState } from "react";
+import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { NATUREZAS, PRIORIDADES } from "@/lib/cad";
+
+export const Route = createFileRoute("/_authenticated/ocorrencias/nova")({
+  head: () => ({ meta: [{ title: "Nova ocorrência · CAD" }] }),
+  component: Nova,
+});
+
+const selectCls =
+  "flex h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm focus:outline-none focus:ring-1 focus:ring-ring";
+
+function Nova() {
+  const navigate = useNavigate();
+  const [saving, setSaving] = useState(false);
+  const [f, setF] = useState({
+    natureza: NATUREZAS[0] as string,
+    prioridade: 3,
+    solicitante_nome: "",
+    solicitante_telefone: "",
+    endereco: "",
+    bairro: "",
+    referencia: "",
+    relato: "",
+  });
+  const set = (k: keyof typeof f, v: string | number) => setF((p) => ({ ...p, [k]: v }));
+
+  async function submit(e: React.FormEvent) {
+    e.preventDefault();
+    setSaving(true);
+    const { data: u } = await supabase.auth.getUser();
+    const { data, error } = await supabase
+      .from("ocorrencias")
+      .insert({ ...f, criado_por: u.user!.id })
+      .select("id")
+      .single();
+    if (error) {
+      setSaving(false);
+      toast.error("Erro ao registrar: " + error.message);
+      return;
+    }
+    await supabase.from("ocorrencia_historico").insert({
+      ocorrencia_id: data.id,
+      usuario_id: u.user!.id,
+      descricao: "Ocorrência registrada",
+    });
+    toast.success("Ocorrência registrada");
+    navigate({ to: "/ocorrencias/$id", params: { id: data.id } });
+  }
+
+  return (
+    <form onSubmit={submit} className="mx-auto max-w-3xl space-y-6">
+      <div>
+        <div className="font-mono text-xs tracking-widest text-muted-foreground">REGISTRO</div>
+        <h1 className="text-2xl font-bold">Nova ocorrência</h1>
+      </div>
+
+      <section className="space-y-4 rounded-md border bg-card p-5">
+        <h2 className="font-semibold text-primary">Classificação</h2>
+        <div className="grid gap-4 md:grid-cols-2">
+          <div className="space-y-1">
+            <Label>Natureza</Label>
+            <select className={selectCls} value={f.natureza} onChange={(e) => set("natureza", e.target.value)}>
+              {NATUREZAS.map((n) => <option key={n} className="bg-popover">{n}</option>)}
+            </select>
+          </div>
+          <div className="space-y-1">
+            <Label>Prioridade</Label>
+            <select className={selectCls} value={f.prioridade} onChange={(e) => set("prioridade", Number(e.target.value))}>
+              {Object.entries(PRIORIDADES).map(([k, v]) => <option key={k} value={k} className="bg-popover">{v.label}</option>)}
+            </select>
+          </div>
+        </div>
+      </section>
+
+      <section className="space-y-4 rounded-md border bg-card p-5">
+        <h2 className="font-semibold text-primary">Solicitante</h2>
+        <div className="grid gap-4 md:grid-cols-2">
+          <div className="space-y-1"><Label>Nome</Label><Input value={f.solicitante_nome} onChange={(e) => set("solicitante_nome", e.target.value)} /></div>
+          <div className="space-y-1"><Label>Telefone</Label><Input value={f.solicitante_telefone} onChange={(e) => set("solicitante_telefone", e.target.value)} /></div>
+        </div>
+      </section>
+
+      <section className="space-y-4 rounded-md border bg-card p-5">
+        <h2 className="font-semibold text-primary">Local</h2>
+        <div className="space-y-1"><Label>Endereço *</Label><Input required value={f.endereco} onChange={(e) => set("endereco", e.target.value)} /></div>
+        <div className="grid gap-4 md:grid-cols-2">
+          <div className="space-y-1"><Label>Bairro</Label><Input value={f.bairro} onChange={(e) => set("bairro", e.target.value)} /></div>
+          <div className="space-y-1"><Label>Ponto de referência</Label><Input value={f.referencia} onChange={(e) => set("referencia", e.target.value)} /></div>
+        </div>
+      </section>
+
+      <section className="space-y-4 rounded-md border bg-card p-5">
+        <h2 className="font-semibold text-primary">Relato *</h2>
+        <Textarea required rows={6} value={f.relato} onChange={(e) => set("relato", e.target.value)} placeholder="Descreva os fatos relatados..." />
+      </section>
+
+      <div className="flex justify-end gap-2">
+        <Button type="button" variant="outline" onClick={() => navigate({ to: "/painel" })}>Cancelar</Button>
+        <Button type="submit" disabled={saving}>{saving ? "Registrando..." : "Registrar ocorrência"}</Button>
+      </div>
+    </form>
+  );
+}
