@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -12,6 +12,7 @@ export const Route = createFileRoute("/_authenticated/painel")({
 
 function Painel() {
   const qc = useQueryClient();
+  const navigate = useNavigate();
   const [filtro, setFiltro] = useState<Status | "ativas" | "todas">("ativas");
   const [busca, setBusca] = useState("");
 
@@ -75,12 +76,17 @@ function Painel() {
           <div className="font-mono text-xs tracking-widest text-muted-foreground">PAINEL OPERACIONAL</div>
           <h1 className="text-2xl font-bold">Ocorrências</h1>
         </div>
-        <Input
-          placeholder="Buscar protocolo, endereço, natureza..."
-          className="max-w-xs"
-          value={busca}
-          onChange={(e) => setBusca(e.target.value)}
-        />
+        <div className="flex gap-2">
+          <Input
+            placeholder="Buscar protocolo, endereço, natureza..."
+            className="w-72"
+            value={busca}
+            onChange={(e) => setBusca(e.target.value)}
+          />
+          <Link to="/ocorrencias/nova" className="inline-flex items-center rounded-md bg-primary px-4 text-sm font-semibold text-primary-foreground hover:opacity-90">
+            + Nova ocorrência
+          </Link>
+        </div>
       </div>
 
       <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
@@ -117,7 +123,7 @@ function Painel() {
               <tr><td colSpan={7} className="px-3 py-8 text-center text-muted-foreground">Nenhuma ocorrência.</td></tr>
             )}
             {lista.map((o) => (
-              <tr key={o.id} className="border-b last:border-0 hover:bg-accent/50">
+              <tr key={o.id} onClick={() => navigate({ to: "/ocorrencias/$id", params: { id: o.id } })} className="cursor-pointer border-b last:border-0 hover:bg-accent/50">
                 <td className="px-3 py-2 font-mono">
                   <Link to="/ocorrencias/$id" params={{ id: o.id }} className="text-primary hover:underline">
                     {fmtProtocolo(o.protocolo, o.created_at)}
