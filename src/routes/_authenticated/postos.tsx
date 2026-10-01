@@ -1,0 +1,184 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+import { School, HeartPulse, Hospital, Landmark, Trees, Bus, Cross, MapPin, Phone, User, Clock, Pencil, Plus, Trash2, Search, Building2, type LucideIcon } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { useMe } from "@/hooks/use-me";
+import { PageHeader, StatCard } from "@/components/page-header";
+import { TIPOS_POSTO, selectCls } from "@/lib/cad";
+
+export const Route = createFileRoute("/_authenticated/postos")({
+  head: () => ({ meta: [{ title: "Postos fixos · CAD" }, { name: "description", content: "Escolas, unidades de saúde e prédios públicos com cobertura da Guarda." }] }),
+  component: Postos,
+});
+
+const ICONES: Record<string, LucideIcon> = {
+  Escola: School, "Unidade de Saúde": HeartPulse, "UPA / Hospital": Hospital, "Prédio público": Landmark,
+  "Praça / Parque": Trees, Terminal: Bus, Cemitério: Cross, Outro: Building2,
+};
+
+type Form = { id?: string; nome: string; tipo: string; endereco: string; bairro: string; telefone: string; responsavel: string; horario: string; observacao: string };
+const vazio: Form = { nome: "", tipo: "Escola", endereco: "", bairro: "", telefone: "", responsavel: "", horario: "", observacao: "" };
+
+function Postos() {
+  const qc = useQueryClient();
+  const { data: me } = useMe();
+  const [edit, setEdit] = useState<Form | null>(null);
+  const [q, setQ] = useState("");
+  const [tipo, setTipo] = useState("");
+  const hoje = new Date().toISOString().slice(0, 10);
+
+  const { data = [] } = useQuery({
+    queryKey: ["postos"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("postos_fixos").select("*").order("nome");
+      if (error) throw error;
+      return data;
+    },
+  });
+  const { data: escalasHoje = [] } = useQuery({
+    queryKey: ["escalas", "hoje", hoje],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("escalas").select("posto_id, agentes, turno").eq("data", hoje);
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  useEffect(() => {
+    const ch = supabase.channel("postos-live")
+      .on("postgres_changes", { event: "*", schema: "public", table: "postos_fixos" }, () => qc.invalidateQueries({ queryKey: ["postos"] }))
+      .subscribe();
+    return () => void supabase.removeChannel(ch);
+  }, [qc]);
+
+  async function patch(id: string, p: Record<string, unknown>) {
+    const { error } = await supabase.from("postos_fixos").update(p as never).eq("id", id);
+    if (error) toast.error(error.message); else qc.invalidateQueries({ queryKey: ["postos"] });
+  }
+  async function remover(id: string) {
+    if (!confirm("Remover este posto?")) return;
+    const { error } = await supabase.from("postos_fixos").delete().eq("id", id);
+    if (error) toast.error(error.message); else qc.invalidateQueries({ queryKey: ["postos"] });
+  }
+
+  const lista = data.filter((p) => (!tipo || p.tipo === tipo) && `${p.nome} ${p.bairro ?? ""} ${p.endereco ?? ""}`.toLowerCase().includes(q.toLowerCase()));
+  const cobertos = new Set(escalasHoje.map((e) => e.posto_id).filter(Boolean));
+
+  return (
+    <div className="space-y-6">
+      <PageHeader icon={School} kicker="PATRIMÔNIO PROTEGIDO" title="Postos fixos">
+        {me?.isSupervisor && <Button onClick={() => setEdit({ ...vazio })}><Plus className="h-4 w-4" /> Novo posto</Button>}
+      </PageHeader>
+
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+        <StatCard icon={Building2} label="Postos ativos" value={data.filter((p) => p.ativo).length} />
+        <StatCard icon={School} label="Escolas" value={data.filter((p) => p.tipo === "Escola").length} tone="text-info" delay={60} />
+        <StatCard icon={HeartPulse} label="Saúde" value={data.filter((p) => p.tipo === "Unidade de Saúde" || p.tipo === "UPA / Hospital").length} tone="text-success" delay={120} />
+        <StatCard icon={User} label="Cobertos hoje" value={`${cobertos.size}/${data.filter((p) => p.ativo).length}`} tone="text-warning" delay={180} />
+      </div>
+
+      <div className="flex flex-wrap gap-2">
+        <div className="relative w-full max-w-sm">
+          <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input className="pl-9" placeholder="Buscar nome, bairro, endereço..." value={q} onChange={(e) => setQ(e.target.value)} />
+        </div>
+        <select className={`${selectCls} w-auto`} value={tipo} onChange={(e) => setTipo(e.target.value)}>
+          <option value="" className="bg-popover">Todos os tipos</option>
+          {TIPOS_POSTO.map((t) => <option key={t} className="bg-popover">{t}</option>)}
+        </select>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        {lista.map((p, i) => {
+          const Icon = ICONES[p.tipo] ?? Building2;
+          const esc = escalasHoje.filter((e) => e.posto_id === p.id);
+          return (
+            <div key={p.id} className={`card-3d lift animate-rise p-4 ${!p.ativo ? "opacity-50" : ""}`} style={{ animationDelay: `${i * 40}ms` }}>
+              <div className="flex items-start gap-3">
+                <div className="icon-chip h-11 w-11 shrink-0"><Icon className="h-5 w-5" /></div>
+                <div className="min-w-0 flex-1">
+                  <div className="font-semibold leading-tight">{p.nome}</div>
+                  <div className="text-xs text-muted-foreground">{p.tipo}</div>
+                </div>
+                {esc.length > 0
+                  ? <span className="flex items-center gap-1.5 rounded-full border border-success px-2 py-0.5 text-xs text-success"><span className="live-dot h-1.5 w-1.5 rounded-full bg-success" />Coberto</span>
+                  : <span className="rounded-full border border-muted-foreground px-2 py-0.5 text-xs text-muted-foreground">Sem escala</span>}
+              </div>
+              <div className="mt-3 space-y-1.5 text-xs text-muted-foreground">
+                <div className="flex gap-1.5"><MapPin className="h-3.5 w-3.5 shrink-0" />{p.endereco || "—"}{p.bairro ? ` · ${p.bairro}` : ""}</div>
+                <div className="flex gap-1.5"><Phone className="h-3.5 w-3.5" />{p.telefone || "—"}</div>
+                <div className="flex gap-1.5"><User className="h-3.5 w-3.5" />{p.responsavel || "—"}</div>
+                <div className="flex gap-1.5"><Clock className="h-3.5 w-3.5" />{p.horario || "—"}</div>
+              </div>
+              {esc.length > 0 && (
+                <div className="mt-3 rounded-md border border-success/40 bg-success/10 p-2 text-xs">
+                  {esc.map((e, j) => <div key={j}><b>{e.turno}:</b> {e.agentes}</div>)}
+                </div>
+              )}
+              {p.observacao && <p className="mt-2 text-xs italic text-muted-foreground">{p.observacao}</p>}
+              {me?.isSupervisor && (
+                <div className="mt-3 flex gap-1 border-t pt-3">
+                  <Button size="sm" variant="ghost" onClick={() => setEdit({ id: p.id, nome: p.nome, tipo: p.tipo, endereco: p.endereco ?? "", bairro: p.bairro ?? "", telefone: p.telefone ?? "", responsavel: p.responsavel ?? "", horario: p.horario ?? "", observacao: p.observacao ?? "" })}>
+                    <Pencil className="h-3.5 w-3.5" /> Editar
+                  </Button>
+                  <Button size="sm" variant="ghost" onClick={() => patch(p.id, { ativo: !p.ativo })}>{p.ativo ? "Desativar" : "Reativar"}</Button>
+                  {me.isAdmin && <Button size="sm" variant="ghost" className="ml-auto text-destructive" onClick={() => remover(p.id)}><Trash2 className="h-3.5 w-3.5" /></Button>}
+                </div>
+              )}
+            </div>
+          );
+        })}
+        {lista.length === 0 && <div className="card-3d col-span-full p-10 text-center text-muted-foreground">Nenhum posto cadastrado.</div>}
+      </div>
+
+      <PostoDialog f={edit} onClose={() => setEdit(null)} />
+    </div>
+  );
+}
+
+function PostoDialog({ f: init, onClose }: { f: Form | null; onClose: () => void }) {
+  const qc = useQueryClient();
+  const [f, setF] = useState<Form>(vazio);
+  useEffect(() => { if (init) setF(init); }, [init]);
+  const set = (k: keyof Form) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => setF({ ...f, [k]: e.target.value });
+  async function salvar(e: React.FormEvent) {
+    e.preventDefault();
+    const { id, ...rest } = f;
+    const payload = Object.fromEntries(Object.entries(rest).map(([k, v]) => [k, v === "" ? null : v]));
+    const { error } = id
+      ? await supabase.from("postos_fixos").update(payload as never).eq("id", id)
+      : await supabase.from("postos_fixos").insert(payload as never);
+    if (error) return void toast.error(error.message);
+    toast.success(id ? "Posto atualizado" : "Posto cadastrado");
+    onClose();
+    qc.invalidateQueries({ queryKey: ["postos"] });
+  }
+  return (
+    <Dialog open={!!init} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent>
+        <DialogHeader><DialogTitle>{f.id ? "Editar posto" : "Novo posto fixo"}</DialogTitle></DialogHeader>
+        <form onSubmit={salvar} className="grid grid-cols-2 gap-3">
+          <div className="col-span-2 space-y-1"><Label>Nome *</Label><Input required placeholder="Ex: EMEF Monteiro Lobato" value={f.nome} onChange={set("nome")} /></div>
+          <div className="space-y-1">
+            <Label>Tipo</Label>
+            <select className={selectCls} value={f.tipo} onChange={set("tipo")}>{TIPOS_POSTO.map((t) => <option key={t} className="bg-popover">{t}</option>)}</select>
+          </div>
+          <div className="space-y-1"><Label>Bairro</Label><Input value={f.bairro} onChange={set("bairro")} /></div>
+          <div className="col-span-2 space-y-1"><Label>Endereço</Label><Input value={f.endereco} onChange={set("endereco")} /></div>
+          <div className="space-y-1"><Label>Telefone</Label><Input value={f.telefone} onChange={set("telefone")} /></div>
+          <div className="space-y-1"><Label>Responsável</Label><Input value={f.responsavel} onChange={set("responsavel")} /></div>
+          <div className="col-span-2 space-y-1"><Label>Horário de funcionamento</Label><Input placeholder="Ex: Seg–Sex 07h–18h" value={f.horario} onChange={set("horario")} /></div>
+          <div className="col-span-2 space-y-1"><Label>Observações</Label><Textarea rows={2} value={f.observacao} onChange={set("observacao")} /></div>
+          <Button type="submit" className="col-span-2">Salvar</Button>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
