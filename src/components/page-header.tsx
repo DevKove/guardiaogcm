@@ -7,8 +7,8 @@ export function PageHeader({ icon: Icon, kicker, title, children }: { icon: Luci
       <div className="flex items-center gap-4">
         <div className="icon-chip h-12 w-12"><Icon className="h-6 w-6" /></div>
         <div>
-          <div className="font-mono text-xs tracking-widest text-muted-foreground">{kicker}</div>
-          <h1 className="text-2xl font-bold tracking-tight">{title}</h1>
+          <div className="font-mono text-xs tracking-[0.3em] text-muted-foreground"><span className="mr-2 inline-block h-2 w-2 rounded-full bg-destructive live-dot" />{kicker}</div>
+          <h1 className="text-gradient text-3xl">{title}</h1>
         </div>
       </div>
       {children && <div className="flex gap-2">{children}</div>}

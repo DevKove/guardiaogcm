@@ -57,16 +57,16 @@ function Layout() {
 
   return (
     <div className="min-h-screen">
-      <div className="stripe-top h-1 print:hidden" />
+      <div className="siren-bar h-1.5 print:hidden" />
       <header className="glass sticky top-0 z-40 border-b print:hidden">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-4 px-4 py-2.5">
           <Link to="/painel" className="flex items-center gap-2">
-            <div className="bg-gradient-primary flex h-9 w-9 items-center justify-center rounded-xl text-primary-foreground shadow-[var(--shadow-glow)]">
+            <div className="icon-chip flex h-10 w-10 items-center justify-center text-primary-foreground shadow-[var(--shadow-glow)]">
               <Shield className="h-5 w-5" />
             </div>
             <div className="leading-tight">
-              <div className="font-mono text-sm font-bold tracking-widest text-primary">CAD·GM</div>
-              <div className="text-[10px] text-muted-foreground">Guarda Municipal</div>
+              <div className="font-mono text-base font-extrabold tracking-widest text-gradient">CAD·GM</div>
+              <div className="text-[10px] text-muted-foreground">GUARDA MUNICIPAL · 153</div>
             </div>
           </Link>
           <nav className="flex flex-1 flex-wrap gap-1">
