@@ -129,3 +129,74 @@
     var(--background) 10px 20px
   );
 }
+
+/* ===== Profundidade / 3D / animações ===== */
+:root {
+  --shadow-depth: 0 1px 0 0 color-mix(in oklab, var(--foreground) 6%, transparent) inset,
+    0 10px 30px -12px oklch(0 0 0 / 0.7), 0 2px 6px -2px oklch(0 0 0 / 0.5);
+  --shadow-glow: 0 0 0 1px color-mix(in oklab, var(--primary) 40%, transparent),
+    0 18px 40px -16px color-mix(in oklab, var(--primary) 45%, transparent);
+  --gradient-card: linear-gradient(160deg, color-mix(in oklab, var(--card) 100%, var(--foreground) 4%), var(--card) 60%, color-mix(in oklab, var(--card) 85%, black));
+  --gradient-primary: linear-gradient(135deg, var(--primary), oklch(0.7 0.18 50));
+}
+
+body {
+  background-image:
+    radial-gradient(ellipse 80% 50% at 50% -10%, color-mix(in oklab, var(--primary) 10%, transparent), transparent),
+    linear-gradient(color-mix(in oklab, var(--foreground) 3%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in oklab, var(--foreground) 3%, transparent) 1px, transparent 1px);
+  background-size: 100% 100%, 32px 32px, 32px 32px;
+  background-attachment: fixed;
+}
+
+@utility card-3d {
+  background: var(--gradient-card);
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) + 6px);
+  box-shadow: var(--shadow-depth);
+  transition: transform 0.25s cubic-bezier(.2,.8,.2,1), box-shadow 0.25s, border-color 0.25s;
+}
+@utility lift {
+  &:hover {
+    transform: perspective(900px) translateY(-4px) rotateX(2deg);
+    box-shadow: var(--shadow-glow);
+    border-color: color-mix(in oklab, var(--primary) 50%, var(--border));
+  }
+}
+@utility glass {
+  background: color-mix(in oklab, var(--sidebar) 75%, transparent);
+  backdrop-filter: blur(14px) saturate(1.4);
+}
+@utility bg-gradient-primary {
+  background-image: var(--gradient-primary);
+}
+@utility icon-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.75rem;
+  background: color-mix(in oklab, var(--primary) 15%, transparent);
+  color: var(--primary);
+  box-shadow: inset 0 1px 0 color-mix(in oklab, var(--primary) 30%, transparent);
+}
+@keyframes rise {
+  from { opacity: 0; transform: translateY(12px) scale(.98); }
+  to { opacity: 1; transform: none; }
+}
+@utility animate-rise {
+  animation: rise 0.45s cubic-bezier(.2,.8,.2,1) both;
+}
+@keyframes ping-dot {
+  75%, 100% { transform: scale(2.2); opacity: 0; }
+}
+@utility live-dot {
+  position: relative;
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 9999px;
+    background: inherit;
+    animation: ping-dot 1.6s cubic-bezier(0,0,.2,1) infinite;
+  }
+}
