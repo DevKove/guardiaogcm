@@ -1,0 +1,150 @@
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useMemo, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { Input } from "@/components/ui/input";
+import { PRIORIDADES, STATUS, fmtData, fmtProtocolo, type Status } from "@/lib/cad";
+
+export const Route = createFileRoute("/_authenticated/painel")({
+  head: () => ({ meta: [{ title: "Painel de ocorrências · CAD" }] }),
+  component: Painel,
+});
+
+function Painel() {
+  const qc = useQueryClient();
+  const [filtro, setFiltro] = useState<Status | "ativas" | "todas">("ativas");
+  const [busca, setBusca] = useState("");
+
+  const { data = [], isLoading } = useQuery({
+    queryKey: ["ocorrencias"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("ocorrencias")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(500);
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  useEffect(() => {
+    const ch = supabase
+      .channel("ocorrencias-painel")
+      .on("postgres_changes", { event: "*", schema: "public", table: "ocorrencias" }, () =>
+        qc.invalidateQueries({ queryKey: ["ocorrencias"] }),
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(ch);
+    };
+  }, [qc]);
+
+  const counts = useMemo(() => {
+    const c = { aberta: 0, em_atendimento: 0, encerrada: 0, cancelada: 0 };
+    data.forEach((o) => c[o.status as Status]++);
+    return c;
+  }, [data]);
+
+  const lista = data
+    .filter((o) =>
+      filtro === "todas" ? true : filtro === "ativas" ? o.status === "aberta" || o.status === "em_atendimento" : o.status === filtro,
+    )
+    .filter((o) => {
+      if (!busca) return true;
+      const s = busca.toLowerCase();
+      return [o.natureza, o.endereco, o.bairro, String(o.protocolo), o.solicitante_nome]
+        .join(" ")
+        .toLowerCase()
+        .includes(s);
+    })
+    .sort((a, b) => (filtro === "ativas" ? a.prioridade - b.prioridade : 0));
+
+  const cards: { k: typeof filtro; label: string; v: number; cls: string }[] = [
+    { k: "ativas", label: "Ativas", v: counts.aberta + counts.em_atendimento, cls: "text-primary" },
+    { k: "aberta", label: "Abertas", v: counts.aberta, cls: "text-warning" },
+    { k: "em_atendimento", label: "Em atendimento", v: counts.em_atendimento, cls: "text-info" },
+    { k: "encerrada", label: "Encerradas", v: counts.encerrada, cls: "text-success" },
+    { k: "todas", label: "Todas", v: data.length, cls: "text-foreground" },
+  ];
+
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <div className="font-mono text-xs tracking-widest text-muted-foreground">PAINEL OPERACIONAL</div>
+          <h1 className="text-2xl font-bold">Ocorrências</h1>
+        </div>
+        <Input
+          placeholder="Buscar protocolo, endereço, natureza..."
+          className="max-w-xs"
+          value={busca}
+          onChange={(e) => setBusca(e.target.value)}
+        />
+      </div>
+
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
+        {cards.map((c) => (
+          <button
+            key={c.k}
+            onClick={() => setFiltro(c.k)}
+            className={`rounded-md border bg-card p-4 text-left transition ${filtro === c.k ? "border-primary" : "hover:border-muted-foreground"}`}
+          >
+            <div className="text-xs text-muted-foreground">{c.label}</div>
+            <div className={`font-mono text-3xl font-bold ${c.cls}`}>{c.v}</div>
+          </button>
+        ))}
+      </div>
+
+      <div className="overflow-x-auto rounded-md border bg-card">
+        <table className="w-full text-sm">
+          <thead className="border-b text-left text-xs uppercase text-muted-foreground">
+            <tr>
+              <th className="px-3 py-2">Protocolo</th>
+              <th className="px-3 py-2">Prioridade</th>
+              <th className="px-3 py-2">Natureza</th>
+              <th className="px-3 py-2">Local</th>
+              <th className="px-3 py-2">Viatura</th>
+              <th className="px-3 py-2">Status</th>
+              <th className="px-3 py-2">Abertura</th>
+            </tr>
+          </thead>
+          <tbody>
+            {isLoading && (
+              <tr><td colSpan={7} className="px-3 py-8 text-center text-muted-foreground">Carregando...</td></tr>
+            )}
+            {!isLoading && lista.length === 0 && (
+              <tr><td colSpan={7} className="px-3 py-8 text-center text-muted-foreground">Nenhuma ocorrência.</td></tr>
+            )}
+            {lista.map((o) => (
+              <tr key={o.id} className="border-b last:border-0 hover:bg-accent/50">
+                <td className="px-3 py-2 font-mono">
+                  <Link to="/ocorrencias/$id" params={{ id: o.id }} className="text-primary hover:underline">
+                    {fmtProtocolo(o.protocolo, o.created_at)}
+                  </Link>
+                </td>
+                <td className="px-3 py-2">
+                  <span className={`rounded px-2 py-0.5 text-xs font-semibold ${PRIORIDADES[o.prioridade]?.cls}`}>
+                    {PRIORIDADES[o.prioridade]?.label}
+                  </span>
+                </td>
+                <td className="px-3 py-2">{o.natureza}</td>
+                <td className="px-3 py-2">
+                  {o.endereco}
+                  {o.bairro && <span className="text-muted-foreground"> · {o.bairro}</span>}
+                </td>
+                <td className="px-3 py-2 font-mono">{o.viatura || "—"}</td>
+                <td className="px-3 py-2">
+                  <span className={`rounded border px-2 py-0.5 text-xs ${STATUS[o.status as Status].cls}`}>
+                    {STATUS[o.status as Status].label}
+                  </span>
+                </td>
+                <td className="px-3 py-2 text-muted-foreground">{fmtData(o.created_at)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
