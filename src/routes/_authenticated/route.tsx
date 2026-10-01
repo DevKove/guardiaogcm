@@ -33,8 +33,8 @@ function Layout() {
 
   return (
     <div className="min-h-screen">
-      <div className="stripe-top h-1" />
-      <header className="border-b bg-sidebar">
+      <div className="stripe-top h-1 print:hidden" />
+      <header className="border-b bg-sidebar print:hidden">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-4 px-4 py-3">
           <Link to="/painel" className="flex items-center gap-2 text-primary">
             <Shield className="h-6 w-6" />
@@ -47,18 +47,27 @@ function Layout() {
             <Link to="/ocorrencias/nova" className={linkCls} activeProps={{ className: activeCls }}>
               <PlusCircle className="h-4 w-4" /> Nova ocorrência
             </Link>
+            <Link to="/viaturas" className={linkCls} activeProps={{ className: activeCls }}>
+              <Car className="h-4 w-4" /> Viaturas
+            </Link>
+            <Link to="/relatorios" className={linkCls} activeProps={{ className: activeCls }}>
+              <BarChart3 className="h-4 w-4" /> Relatórios
+            </Link>
             {me?.isAdmin && (
               <Link to="/usuarios" className={linkCls} activeProps={{ className: activeCls }}>
                 <Users className="h-4 w-4" /> Usuários
               </Link>
             )}
           </nav>
-          <div className="text-right text-xs">
-            <div className="font-medium">{me?.nome}</div>
-            <div className="text-muted-foreground">
-              {me?.roles.map((r) => ROLE_LABEL[r]).join(", ") || "Sem perfil"}
+          <Link to="/perfil" className="flex items-center gap-2 text-right text-xs hover:text-primary" title="Meu perfil">
+            <UserCircle className="h-5 w-5" />
+            <div>
+              <div className="font-medium">{me?.nome}</div>
+              <div className="text-muted-foreground">
+                {me?.roles.map((r) => ROLE_LABEL[r]).join(", ") || "Sem perfil"}
+              </div>
             </div>
-          </div>
+          </Link>
           <button onClick={signOut} className={linkCls} title="Sair">
             <LogOut className="h-4 w-4" />
           </button>
