@@ -53,7 +53,7 @@ function Usuarios() {
         <div className="font-mono text-xs tracking-widest text-muted-foreground">ADMINISTRAÇÃO</div>
         <h1 className="text-2xl font-bold">Usuários e perfis</h1>
       </div>
-      <div className="overflow-x-auto rounded-md border bg-card">
+      <div className="overflow-x-auto card-3d animate-rise">
         <table className="w-full text-sm">
           <thead className="border-b text-left text-xs uppercase text-muted-foreground">
             <tr><th className="px-3 py-2">Nome</th><th className="px-3 py-2">Matrícula</th><th className="px-3 py-2">Perfil</th></tr>

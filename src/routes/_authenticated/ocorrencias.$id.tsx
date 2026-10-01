@@ -203,7 +203,7 @@ function Detalhe() {
           { l: "Finalização", v: fmtData(o.encerrada_em) },
           { l: "Tempo-resposta", v: tResp !== null ? `${tResp} min` : "—" },
         ].map((x) => (
-          <div key={x.l} className="rounded-md border bg-card p-3">
+          <div key={x.l} className="card-3d animate-rise p-3">
             <div className="text-xs text-muted-foreground">{x.l}</div>
             <div className="font-mono text-sm">{x.v}</div>
           </div>
@@ -232,7 +232,7 @@ function Detalhe() {
             </div>
           )}
 
-          <div className="grid gap-4 rounded-md border bg-card p-5 md:grid-cols-2">
+          <div className="grid gap-4 card-3d animate-rise p-5 md:grid-cols-2">
             <Field l="Natureza" v={o.natureza} />
             <Field l="Origem" v={o.origem} />
             <Field l="Endereço" v={`${o.endereco}${o.numero ? ", " + o.numero : ""}`} />
@@ -242,7 +242,7 @@ function Detalhe() {
             <Field l="Solicitante" v={o.solicitante_nome} />
             <Field l="Telefone" v={o.solicitante_telefone} />
           </div>
-          <div className="rounded-md border bg-card p-5">
+          <div className="card-3d animate-rise p-5">
             <div className="text-xs uppercase text-muted-foreground">Relato</div>
             <p className="mt-2 whitespace-pre-wrap">{o.relato}</p>
           </div>
@@ -250,7 +250,7 @@ function Detalhe() {
           <Envolvidos ocorrenciaId={id} lista={envolvidos} pode={!!me} meId={me?.id} isSup={!!me?.isSupervisor} onChange={refresh} log={log} />
         </div>
 
-        <div className="space-y-3 rounded-md border bg-card p-5">
+        <div className="space-y-3 card-3d animate-rise p-5">
           <h2 className="font-semibold text-primary">Histórico</h2>
           <div className="space-y-2">
             <Textarea rows={2} placeholder="Adicionar informação..." value={nota} onChange={(e) => setNota(e.target.value)} />
@@ -376,7 +376,7 @@ function Envolvidos({ ocorrenciaId, lista, pode, meId, isSup, onChange, log }: {
   }
 
   return (
-    <div className="space-y-3 rounded-md border bg-card p-5">
+    <div className="space-y-3 card-3d animate-rise p-5">
       <div className="flex items-center justify-between">
         <h2 className="font-semibold text-primary">Envolvidos ({lista.length})</h2>
         {pode && <Button size="sm" variant="secondary" onClick={() => setAberto(!aberto)}>{aberto ? "Fechar" : "Adicionar"}</Button>}

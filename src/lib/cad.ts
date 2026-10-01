@@ -80,3 +80,8 @@ export function minutosEntre(a: string | null, b: string | null) {
   if (!a || !b) return null;
   return Math.round((new Date(b).getTime() - new Date(a).getTime()) / 60000);
 }
+
+export const TIPOS_POSTO = ["Escola", "Unidade de Saúde", "UPA / Hospital", "Prédio público", "Praça / Parque", "Terminal", "Cemitério", "Outro"] as const;
+export const TURNOS = ["Diurno", "Noturno", "Manhã", "Tarde", "Madrugada", "Extra"] as const;
+export const FUNCOES_ESCALA = ["Patrulhamento", "Posto fixo", "Ronda escolar", "Central / Despacho", "Supervisão", "Apoio", "Videomonitoramento"] as const;
+export const TIPOS_VIATURA = ["Viatura", "Motocicleta", "Tático", "Base móvel", "Bicicleta"] as const;

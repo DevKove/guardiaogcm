@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { PRIORIDADES, STATUS, fmtData, fmtProtocolo, type Status } from "@/lib/cad";
+import { QuadroAvisos } from "@/components/quadro-avisos";
 
 export const Route = createFileRoute("/_authenticated/painel")({
   head: () => ({ meta: [{ title: "Painel de ocorrências · CAD" }] }),
@@ -71,6 +72,7 @@ function Painel() {
 
   return (
     <div className="space-y-6">
+      <QuadroAvisos />
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <div className="font-mono text-xs tracking-widest text-muted-foreground">PAINEL OPERACIONAL</div>
@@ -94,7 +96,7 @@ function Painel() {
           <button
             key={c.k}
             onClick={() => setFiltro(c.k)}
-            className={`rounded-md border bg-card p-4 text-left transition ${filtro === c.k ? "border-primary" : "hover:border-muted-foreground"}`}
+            className={`card-3d animate-rise p-4 text-left transition ${filtro === c.k ? "border-primary" : "hover:border-muted-foreground"}`}
           >
             <div className="text-xs text-muted-foreground">{c.label}</div>
             <div className={`font-mono text-3xl font-bold ${c.cls}`}>{c.v}</div>
@@ -102,7 +104,7 @@ function Painel() {
         ))}
       </div>
 
-      <div className="overflow-x-auto rounded-md border bg-card">
+      <div className="overflow-x-auto card-3d animate-rise">
         <table className="w-full text-sm">
           <thead className="border-b text-left text-xs uppercase text-muted-foreground">
             <tr>
