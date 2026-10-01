@@ -14,6 +14,50 @@ export type Database = {
   }
   public: {
     Tables: {
+      ocorrencia_envolvidos: {
+        Row: {
+          created_at: string
+          criado_por: string
+          documento: string | null
+          id: string
+          nome: string
+          observacao: string | null
+          ocorrencia_id: string
+          telefone: string | null
+          tipo: string
+        }
+        Insert: {
+          created_at?: string
+          criado_por?: string
+          documento?: string | null
+          id?: string
+          nome: string
+          observacao?: string | null
+          ocorrencia_id: string
+          telefone?: string | null
+          tipo: string
+        }
+        Update: {
+          created_at?: string
+          criado_por?: string
+          documento?: string | null
+          id?: string
+          nome?: string
+          observacao?: string | null
+          ocorrencia_id?: string
+          telefone?: string | null
+          tipo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ocorrencia_envolvidos_ocorrencia_id_fkey"
+            columns: ["ocorrencia_id"]
+            isOneToOne: false
+            referencedRelation: "ocorrencias"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ocorrencia_historico: {
         Row: {
           created_at: string
@@ -49,12 +93,19 @@ export type Database = {
       ocorrencias: {
         Row: {
           bairro: string | null
+          chegada_em: string | null
           created_at: string
           criado_por: string
+          desfecho: string | null
+          despachada_em: string | null
           encerrada_em: string | null
           endereco: string
           id: string
+          latitude: number | null
+          longitude: number | null
           natureza: string
+          numero: string | null
+          origem: string
           prioridade: number
           protocolo: number
           referencia: string | null
@@ -64,15 +115,23 @@ export type Database = {
           status: Database["public"]["Enums"]["ocorrencia_status"]
           updated_at: string
           viatura: string | null
+          viatura_id: string | null
         }
         Insert: {
           bairro?: string | null
+          chegada_em?: string | null
           created_at?: string
           criado_por?: string
+          desfecho?: string | null
+          despachada_em?: string | null
           encerrada_em?: string | null
           endereco: string
           id?: string
+          latitude?: number | null
+          longitude?: number | null
           natureza: string
+          numero?: string | null
+          origem?: string
           prioridade?: number
           protocolo?: never
           referencia?: string | null
@@ -82,15 +141,23 @@ export type Database = {
           status?: Database["public"]["Enums"]["ocorrencia_status"]
           updated_at?: string
           viatura?: string | null
+          viatura_id?: string | null
         }
         Update: {
           bairro?: string | null
+          chegada_em?: string | null
           created_at?: string
           criado_por?: string
+          desfecho?: string | null
+          despachada_em?: string | null
           encerrada_em?: string | null
           endereco?: string
           id?: string
+          latitude?: number | null
+          longitude?: number | null
           natureza?: string
+          numero?: string | null
+          origem?: string
           prioridade?: number
           protocolo?: never
           referencia?: string | null
@@ -100,8 +167,17 @@ export type Database = {
           status?: Database["public"]["Enums"]["ocorrencia_status"]
           updated_at?: string
           viatura?: string | null
+          viatura_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "ocorrencias_viatura_id_fkey"
+            columns: ["viatura_id"]
+            isOneToOne: false
+            referencedRelation: "viaturas"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
@@ -142,6 +218,56 @@ export type Database = {
         }
         Relationships: []
       }
+      viaturas: {
+        Row: {
+          ativa: boolean
+          created_at: string
+          guarnicao: string | null
+          id: string
+          modelo: string | null
+          ocorrencia_id: string | null
+          placa: string | null
+          prefixo: string
+          status: Database["public"]["Enums"]["viatura_status"]
+          tipo: string
+          updated_at: string
+        }
+        Insert: {
+          ativa?: boolean
+          created_at?: string
+          guarnicao?: string | null
+          id?: string
+          modelo?: string | null
+          ocorrencia_id?: string | null
+          placa?: string | null
+          prefixo: string
+          status?: Database["public"]["Enums"]["viatura_status"]
+          tipo?: string
+          updated_at?: string
+        }
+        Update: {
+          ativa?: boolean
+          created_at?: string
+          guarnicao?: string | null
+          id?: string
+          modelo?: string | null
+          ocorrencia_id?: string | null
+          placa?: string | null
+          prefixo?: string
+          status?: Database["public"]["Enums"]["viatura_status"]
+          tipo?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "viaturas_ocorrencia_id_fkey"
+            columns: ["ocorrencia_id"]
+            isOneToOne: false
+            referencedRelation: "ocorrencias"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -159,6 +285,13 @@ export type Database = {
     Enums: {
       app_role: "admin" | "supervisor" | "operador"
       ocorrencia_status: "aberta" | "em_atendimento" | "encerrada" | "cancelada"
+      viatura_status:
+        | "disponivel"
+        | "em_deslocamento"
+        | "no_local"
+        | "retornando"
+        | "manutencao"
+        | "fora_servico"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -288,6 +421,14 @@ export const Constants = {
     Enums: {
       app_role: ["admin", "supervisor", "operador"],
       ocorrencia_status: ["aberta", "em_atendimento", "encerrada", "cancelada"],
+      viatura_status: [
+        "disponivel",
+        "em_deslocamento",
+        "no_local",
+        "retornando",
+        "manutencao",
+        "fora_servico",
+      ],
     },
   },
 } as const
