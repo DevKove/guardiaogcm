@@ -17,6 +17,7 @@ import { Route as AuthenticatedPerfilRouteImport } from './routes/_authenticated
 import { Route as AuthenticatedRelatoriosRouteImport } from './routes/_authenticated/relatorios'
 import { Route as AuthenticatedUsuariosRouteImport } from './routes/_authenticated/usuarios'
 import { Route as AuthenticatedViaturasRouteImport } from './routes/_authenticated/viaturas'
+import { Route as AuthenticatedImprimirIdRouteImport } from './routes/_authenticated/imprimir.$id'
 import { Route as AuthenticatedOcorrenciasIdRouteImport } from './routes/_authenticated/ocorrencias.$id'
 import { Route as AuthenticatedOcorrenciasNovaRouteImport } from './routes/_authenticated/ocorrencias.nova'
 
@@ -59,6 +60,11 @@ const AuthenticatedViaturasRoute = AuthenticatedViaturasRouteImport.update({
   path: '/viaturas',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedImprimirIdRoute = AuthenticatedImprimirIdRouteImport.update({
+  id: '/imprimir/$id',
+  path: '/imprimir/$id',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedOcorrenciasIdRoute =
   AuthenticatedOcorrenciasIdRouteImport.update({
     id: '/ocorrencias/$id',
@@ -80,6 +86,7 @@ export interface FileRoutesByFullPath {
   '/relatorios': typeof AuthenticatedRelatoriosRoute
   '/usuarios': typeof AuthenticatedUsuariosRoute
   '/viaturas': typeof AuthenticatedViaturasRoute
+  '/imprimir/$id': typeof AuthenticatedImprimirIdRoute
   '/ocorrencias/$id': typeof AuthenticatedOcorrenciasIdRoute
   '/ocorrencias/nova': typeof AuthenticatedOcorrenciasNovaRoute
 }
@@ -91,6 +98,7 @@ export interface FileRoutesByTo {
   '/relatorios': typeof AuthenticatedRelatoriosRoute
   '/usuarios': typeof AuthenticatedUsuariosRoute
   '/viaturas': typeof AuthenticatedViaturasRoute
+  '/imprimir/$id': typeof AuthenticatedImprimirIdRoute
   '/ocorrencias/$id': typeof AuthenticatedOcorrenciasIdRoute
   '/ocorrencias/nova': typeof AuthenticatedOcorrenciasNovaRoute
 }
@@ -104,6 +112,7 @@ export interface FileRoutesById {
   '/_authenticated/relatorios': typeof AuthenticatedRelatoriosRoute
   '/_authenticated/usuarios': typeof AuthenticatedUsuariosRoute
   '/_authenticated/viaturas': typeof AuthenticatedViaturasRoute
+  '/_authenticated/imprimir/$id': typeof AuthenticatedImprimirIdRoute
   '/_authenticated/ocorrencias/$id': typeof AuthenticatedOcorrenciasIdRoute
   '/_authenticated/ocorrencias/nova': typeof AuthenticatedOcorrenciasNovaRoute
 }
@@ -117,6 +126,7 @@ export interface FileRouteTypes {
     | '/relatorios'
     | '/usuarios'
     | '/viaturas'
+    | '/imprimir/$id'
     | '/ocorrencias/$id'
     | '/ocorrencias/nova'
   fileRoutesByTo: FileRoutesByTo
@@ -128,6 +138,7 @@ export interface FileRouteTypes {
     | '/relatorios'
     | '/usuarios'
     | '/viaturas'
+    | '/imprimir/$id'
     | '/ocorrencias/$id'
     | '/ocorrencias/nova'
   id:
@@ -140,6 +151,7 @@ export interface FileRouteTypes {
     | '/_authenticated/relatorios'
     | '/_authenticated/usuarios'
     | '/_authenticated/viaturas'
+    | '/_authenticated/imprimir/$id'
     | '/_authenticated/ocorrencias/$id'
     | '/_authenticated/ocorrencias/nova'
   fileRoutesById: FileRoutesById
@@ -208,6 +220,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedViaturasRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/imprimir/$id': {
+      id: '/_authenticated/imprimir/$id'
+      path: '/imprimir/$id'
+      fullPath: '/imprimir/$id'
+      preLoaderRoute: typeof AuthenticatedImprimirIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/ocorrencias/$id': {
       id: '/_authenticated/ocorrencias/$id'
       path: '/ocorrencias/$id'
@@ -231,6 +250,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedRelatoriosRoute: typeof AuthenticatedRelatoriosRoute
   AuthenticatedUsuariosRoute: typeof AuthenticatedUsuariosRoute
   AuthenticatedViaturasRoute: typeof AuthenticatedViaturasRoute
+  AuthenticatedImprimirIdRoute: typeof AuthenticatedImprimirIdRoute
   AuthenticatedOcorrenciasIdRoute: typeof AuthenticatedOcorrenciasIdRoute
   AuthenticatedOcorrenciasNovaRoute: typeof AuthenticatedOcorrenciasNovaRoute
 }
@@ -241,6 +261,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedRelatoriosRoute: AuthenticatedRelatoriosRoute,
   AuthenticatedUsuariosRoute: AuthenticatedUsuariosRoute,
   AuthenticatedViaturasRoute: AuthenticatedViaturasRoute,
+  AuthenticatedImprimirIdRoute: AuthenticatedImprimirIdRoute,
   AuthenticatedOcorrenciasIdRoute: AuthenticatedOcorrenciasIdRoute,
   AuthenticatedOcorrenciasNovaRoute: AuthenticatedOcorrenciasNovaRoute,
 }
