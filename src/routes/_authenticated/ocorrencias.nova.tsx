@@ -6,15 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { NATUREZAS, PRIORIDADES } from "@/lib/cad";
+import { NATUREZAS, ORIGENS, PRIORIDADES, selectCls } from "@/lib/cad";
 
 export const Route = createFileRoute("/_authenticated/ocorrencias/nova")({
   head: () => ({ meta: [{ title: "Nova ocorrência · CAD" }] }),
   component: Nova,
 });
 
-const selectCls =
-  "flex h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm focus:outline-none focus:ring-1 focus:ring-ring";
 
 function Nova() {
   const navigate = useNavigate();
@@ -22,6 +20,8 @@ function Nova() {
   const [f, setF] = useState({
     natureza: NATUREZAS[0] as string,
     prioridade: 3,
+    origem: "153",
+    numero: "",
     solicitante_nome: "",
     solicitante_telefone: "",
     endereco: "",
@@ -63,7 +63,13 @@ function Nova() {
 
       <section className="space-y-4 rounded-md border bg-card p-5">
         <h2 className="font-semibold text-primary">Classificação</h2>
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid gap-4 md:grid-cols-3">
+          <div className="space-y-1">
+            <Label>Origem</Label>
+            <select className={selectCls} value={f.origem} onChange={(e) => set("origem", e.target.value)}>
+              {ORIGENS.map((n) => <option key={n} className="bg-popover">{n}</option>)}
+            </select>
+          </div>
           <div className="space-y-1">
             <Label>Natureza</Label>
             <select className={selectCls} value={f.natureza} onChange={(e) => set("natureza", e.target.value)}>
@@ -89,7 +95,10 @@ function Nova() {
 
       <section className="space-y-4 rounded-md border bg-card p-5">
         <h2 className="font-semibold text-primary">Local</h2>
-        <div className="space-y-1"><Label>Endereço *</Label><Input required value={f.endereco} onChange={(e) => set("endereco", e.target.value)} /></div>
+        <div className="grid gap-4 md:grid-cols-[1fr_120px]">
+          <div className="space-y-1"><Label>Logradouro *</Label><Input required value={f.endereco} onChange={(e) => set("endereco", e.target.value)} /></div>
+          <div className="space-y-1"><Label>Número</Label><Input value={f.numero} onChange={(e) => set("numero", e.target.value)} /></div>
+        </div>
         <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-1"><Label>Bairro</Label><Input value={f.bairro} onChange={(e) => set("bairro", e.target.value)} /></div>
           <div className="space-y-1"><Label>Ponto de referência</Label><Input value={f.referencia} onChange={(e) => set("referencia", e.target.value)} /></div>
