@@ -2,13 +2,13 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { CheckCircle2, PlayCircle } from "lucide-react";
+import { CheckCircle2, FileText, PlayCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { PRIORIDADES, STATUS, fmtData, fmtProtocolo, type Status } from "@/lib/cad";
 import { QuadroAvisos } from "@/components/quadro-avisos";
 import { useMe } from "@/hooks/use-me";
-import { fmtDia, turnoAtual } from "@/lib/plantao";
+import { carregarAtividades, fmtDia, turnoAtual } from "@/lib/plantao";
 
 export const Route = createFileRoute("/_authenticated/painel")({
   head: () => ({ meta: [{ title: "Painel de ocorrências · CAD" }] }),
@@ -26,11 +26,18 @@ function Painel() {
   const { data: plantaoAtual, isLoading: carregandoPlantao } = useQuery({
     queryKey: ["plantao-atual"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("plantoes").select("id, operador_id, data_inicio, turno, status, iniciado_em").eq("status", "aberto").maybeSingle();
+      const { data, error } = await supabase.from("plantoes").select("id, operador_id, data_inicio, turno, status, iniciado_em, equipe, supervisor, informativo, atividades, materiais, atividades_verso, encerrado_em").eq("status", "aberto").maybeSingle();
       if (error) throw error;
       return data;
     },
     refetchInterval: 15000,
+  });
+
+  const { data: feed } = useQuery({
+    queryKey: ["plantao-home-feed", plantaoAtual?.id],
+    enabled: !!plantaoAtual,
+    queryFn: () => carregarAtividades(plantaoAtual as { id: string; operador_id: string; iniciado_em: string; encerrado_em: string | null }),
+    refetchInterval: plantaoAtual ? 15000 : false,
   });
 
   async function iniciarPlantao() {
@@ -124,6 +131,36 @@ function Painel() {
           </div>
         </div>
       </section>
+      {plantaoAtual && (
+        <section className="card-3d animate-rise space-y-4 p-4">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <div className="flex items-center gap-2 text-sm font-semibold text-primary"><FileText className="h-4 w-4" /> Relatório do plantão em tempo real</div>
+              <div className="text-xs text-muted-foreground">As informações abaixo são atualizadas automaticamente enquanto o plantão estiver aberto.</div>
+            </div>
+            <Link to="/plantao/$id" params={{ id: plantaoAtual.id }} className="text-xs font-semibold text-primary hover:underline">Abrir relatório completo</Link>
+          </div>
+          <div className="grid gap-3 md:grid-cols-4">
+            <div className="rounded-lg border p-3"><div className="text-[10px] uppercase text-muted-foreground">Equipe</div><div className="text-sm font-semibold">{plantaoAtual.equipe || "Não informada"}</div></div>
+            <div className="rounded-lg border p-3"><div className="text-[10px] uppercase text-muted-foreground">Supervisor</div><div className="text-sm font-semibold">{plantaoAtual.supervisor || "Não informado"}</div></div>
+            <div className="rounded-lg border p-3"><div className="text-[10px] uppercase text-muted-foreground">Ocorrências</div><div className="font-mono text-xl font-bold text-primary">{feed?.ocorrencias.length ?? 0}</div></div>
+            <div className="rounded-lg border p-3"><div className="text-[10px] uppercase text-muted-foreground">Lançamentos</div><div className="font-mono text-xl font-bold text-primary">{feed?.registros.length ?? 0}</div></div>
+          </div>
+          <div className="grid gap-4 lg:grid-cols-2">
+            <div>
+              <div className="mb-2 text-xs font-semibold uppercase text-muted-foreground">Informativo</div>
+              <div className="min-h-16 whitespace-pre-wrap rounded-lg border p-3 text-sm">{plantaoAtual.informativo || "Nenhuma informação lançada ainda."}</div>
+            </div>
+            <div>
+              <div className="mb-2 text-xs font-semibold uppercase text-muted-foreground">Últimos lançamentos</div>
+              <div className="space-y-1 rounded-lg border p-3 text-xs">
+                {feed?.registros.slice(0, 5).map((r) => <div key={r.id} className="border-b py-1 last:border-0"><span className="font-mono">{new Date(r.hora).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}</span> · {r.texto} <span className="text-muted-foreground">— {feed.usuarios[r.criado_por] ?? r.criado_por.slice(0, 8)}</span></div>)}
+                {!feed?.registros.length && <span className="text-muted-foreground">Nenhum lançamento ainda.</span>}
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <div className="font-mono text-xs tracking-widest text-muted-foreground">PAINEL OPERACIONAL</div>
