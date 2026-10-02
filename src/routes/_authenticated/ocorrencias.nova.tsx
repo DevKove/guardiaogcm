@@ -45,11 +45,6 @@ function Nova() {
       toast.error("Erro ao registrar: " + error.message);
       return;
     }
-    await supabase.from("ocorrencia_historico").insert({
-      ocorrencia_id: data.id,
-      usuario_id: u.user!.id,
-      descricao: "Ocorrência registrada",
-    });
     toast.success("Ocorrência registrada");
     navigate({ to: "/ocorrencias/$id", params: { id: data.id } });
   }
