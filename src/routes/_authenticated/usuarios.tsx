@@ -1,6 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Users, Plus, Pencil, Trash2, ShieldCheck, ShieldHalf, UserCog } from "lucide-react";
@@ -11,7 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { useMe } from "@/hooks/use-me";
 import { PageHeader, StatCard } from "@/components/page-header";
 import { ROLE_LABEL, fmtData, selectCls } from "@/lib/cad";
-import { listarUsuarios, salvarUsuario, excluirUsuario } from "@/lib/usuarios.functions";
+import { listarUsuarios, salvarUsuario, excluirUsuario } from "@/lib/usuarios.api";
 
 export const Route = createFileRoute("/_authenticated/usuarios")({
   head: () => ({ meta: [{ title: "Usuários · CAD" }, { name: "description", content: "Cadastro de usuários e permissões." }] }),
@@ -31,14 +30,12 @@ const PERMS: Record<Role, string> = {
 function Usuarios() {
   const { data: me } = useMe();
   const qc = useQueryClient();
-  const listar = useServerFn(listarUsuarios);
-  const excluir = useServerFn(excluirUsuario);
   const [edit, setEdit] = useState<Form | null>(null);
-  const { data = [], error } = useQuery({ queryKey: ["usuarios"], enabled: !!me?.isAdmin, queryFn: () => listar() });
+  const { data = [], error } = useQuery({ queryKey: ["usuarios"], enabled: !!me?.isAdmin, queryFn: listarUsuarios });
 
   async function remover(id: string, nome: string) {
     if (!confirm(`Excluir o usuário ${nome}? Esta ação não pode ser desfeita.`)) return;
-    try { await excluir({ data: { id } }); toast.success("Usuário excluído"); qc.invalidateQueries({ queryKey: ["usuarios"] }); }
+    try { await excluirUsuario(id); toast.success("Usuário excluído"); qc.invalidateQueries({ queryKey: ["usuarios"] }); }
     catch (e) { toast.error((e as Error).message); }
   }
 
@@ -90,7 +87,6 @@ function Usuarios() {
 
 function UsuarioDialog({ f: init, onClose }: { f: Form | null; onClose: () => void }) {
   const qc = useQueryClient();
-  const salvar = useServerFn(salvarUsuario);
   const [f, setF] = useState<Form>(vazio);
   const [busy, setBusy] = useState(false);
   useEffect(() => { if (init) setF(init); }, [init]);
@@ -99,7 +95,7 @@ function UsuarioDialog({ f: init, onClose }: { f: Form | null; onClose: () => vo
     e.preventDefault();
     setBusy(true);
     try {
-      await salvar({ data: f });
+      await salvarUsuario(f);
       toast.success(f.id ? "Usuário atualizado" : "Usuário cadastrado");
       onClose();
       qc.invalidateQueries({ queryKey: ["usuarios"] });
