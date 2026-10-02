@@ -406,3 +406,46 @@ CREATE TRIGGER ocorrencias_guard_insert
   FOR EACH ROW EXECUTE FUNCTION public.guard_ocorrencia_insert();
 
 REVOKE EXECUTE ON FUNCTION public.guard_ocorrencia_insert() FROM PUBLIC, anon, authenticated;
+
+
+-- Only the occurrence owner, supervisors and administrators may add notes or involved persons.
+-- A non-admin cannot append records to an occurrence locked by a closed plantão.
+DROP POLICY IF EXISTS "staff insert hist" ON public.ocorrencia_historico;
+CREATE POLICY "authorized insert hist"
+  ON public.ocorrencia_historico FOR INSERT TO authenticated
+  WITH CHECK (
+    usuario_id = auth.uid()
+    AND EXISTS (
+      SELECT 1 FROM public.ocorrencias o
+       WHERE o.id = ocorrencia_id
+         AND (
+           o.criado_por = auth.uid()
+           OR public.has_role(auth.uid(), 'admin')
+           OR public.has_role(auth.uid(), 'supervisor')
+         )
+         AND (
+           public.has_role(auth.uid(), 'admin')
+           OR NOT public.ocorrencia_bloqueada(o.plantao_id, o.status)
+         )
+    )
+  );
+
+DROP POLICY IF EXISTS "staff insert env" ON public.ocorrencia_envolvidos;
+CREATE POLICY "authorized insert env"
+  ON public.ocorrencia_envolvidos FOR INSERT TO authenticated
+  WITH CHECK (
+    criado_por = auth.uid()
+    AND EXISTS (
+      SELECT 1 FROM public.ocorrencias o
+       WHERE o.id = ocorrencia_id
+         AND (
+           o.criado_por = auth.uid()
+           OR public.has_role(auth.uid(), 'admin')
+           OR public.has_role(auth.uid(), 'supervisor')
+         )
+         AND (
+           public.has_role(auth.uid(), 'admin')
+           OR NOT public.ocorrencia_bloqueada(o.plantao_id, o.status)
+         )
+    )
+  );
