@@ -320,3 +320,45 @@ CREATE TRIGGER ocorrencias_audit_insert
   FOR EACH ROW EXECUTE FUNCTION public.audit_ocorrencia_insert();
 
 REVOKE EXECUTE ON FUNCTION public.audit_ocorrencia_insert() FROM PUBLIC, anon, authenticated;
+
+
+-- Atomically update a user's profile and single application role. Callable only by the service role
+-- after the server function has independently verified the requesting administrator.
+CREATE OR REPLACE FUNCTION public.admin_set_user_access(
+  _actor uuid,
+  _user_id uuid,
+  _nome text,
+  _matricula text,
+  _role public.app_role
+)
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  IF _actor IS NULL OR NOT public.has_role(_actor, 'admin') THEN
+    RAISE EXCEPTION 'Acesso restrito a administradores.';
+  END IF;
+  IF _user_id IS NULL OR length(trim(COALESCE(_nome, ''))) = 0 OR length(_nome) > 120 OR length(COALESCE(_matricula, '')) > 40 THEN
+    RAISE EXCEPTION 'Dados de perfil inválidos.';
+  END IF;
+
+  IF _role <> 'admin' AND EXISTS (
+    SELECT 1 FROM public.user_roles WHERE user_id = _user_id AND role = 'admin'
+  ) AND (SELECT count(*) FROM public.user_roles WHERE role = 'admin') <= 1 THEN
+    RAISE EXCEPTION 'Não é permitido remover o último administrador.';
+  END IF;
+
+  INSERT INTO public.profiles (id, nome, matricula)
+  VALUES (_user_id, trim(_nome), NULLIF(trim(COALESCE(_matricula, '')), ''))
+  ON CONFLICT (id) DO UPDATE
+    SET nome = EXCLUDED.nome, matricula = EXCLUDED.matricula;
+
+  DELETE FROM public.user_roles WHERE user_id = _user_id;
+  INSERT INTO public.user_roles (user_id, role) VALUES (_user_id, _role);
+END;
+$$;
+
+REVOKE ALL ON FUNCTION public.admin_set_user_access(uuid, uuid, text, text, public.app_role) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.admin_set_user_access(uuid, uuid, text, text, public.app_role) TO service_role;
