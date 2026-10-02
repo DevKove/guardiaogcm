@@ -104,11 +104,6 @@ BEGIN
   IF v_oc.status NOT IN ('aberta', 'em_atendimento') THEN
     RAISE EXCEPTION 'A ocorrência não está ativa.';
   END IF;
-  IF v_oc.plantao_id IS NOT NULL AND EXISTS (
-    SELECT 1 FROM public.plantoes p WHERE p.id = v_oc.plantao_id AND p.status = 'encerrado'
-  ) AND NOT public.has_role(v_user, 'admin') THEN
-    RAISE EXCEPTION 'O plantão foi encerrado; somente o administrador pode alterar esta ocorrência.';
-  END IF;
 
   IF v_oc.viatura_id = _viatura_id THEN RETURN; END IF;
   PERFORM set_config('app.cad_operation', 'dispatch', true);
@@ -209,11 +204,6 @@ BEGIN
   END IF;
   IF v_oc.status NOT IN ('aberta', 'em_atendimento') THEN
     RAISE EXCEPTION 'A ocorrência já foi finalizada.';
-  END IF;
-  IF v_oc.plantao_id IS NOT NULL AND EXISTS (
-    SELECT 1 FROM public.plantoes p WHERE p.id = v_oc.plantao_id AND p.status = 'encerrado'
-  ) AND NOT public.has_role(v_user, 'admin') THEN
-    RAISE EXCEPTION 'O plantão foi encerrado; somente o administrador pode alterar esta ocorrência.';
   END IF;
 
   v_status := _status::public.ocorrencia_status;
