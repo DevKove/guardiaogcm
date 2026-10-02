@@ -122,6 +122,21 @@ function Layout() {
           </nav>
 
           <div className="ml-auto flex shrink-0 items-center gap-3">
+            <label className="flex h-9 items-center gap-1.5 rounded-md border border-border px-2 text-muted-foreground" title="Personalizar aparência">
+              <Palette className="h-4 w-4 shrink-0" />
+              <select
+                aria-label="Tema visual"
+                value={theme}
+                onChange={(e) => changeTheme(e.target.value)}
+                className="max-w-[100px] bg-transparent text-xs text-foreground outline-none sm:max-w-[120px]"
+              >
+                <option value="escuro">Escuro</option>
+                <option value="claro">Claro</option>
+                <option value="cyberpunk">Cyberpunk</option>
+                <option value="oceano">Oceano</option>
+                <option value="floresta">Floresta</option>
+              </select>
+            </label>
             <Relogio />
             <Link
               to="/perfil"
