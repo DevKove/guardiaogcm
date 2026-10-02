@@ -359,7 +359,7 @@ function EditarDialog({ open, onClose, o, onSave }: { open: boolean; onClose: ()
 type Env = { id: string; tipo: string; nome: string; documento: string | null; telefone: string | null; observacao: string | null; criado_por: string };
 
 function Envolvidos({ ocorrenciaId, lista, pode, meId, isSup, onChange, log }: {
-  ocorrenciaId: string; lista: Env[]; pode: boolean; meId?: string | undefined; isSup: boolean; onChange: () => void; log: (d: string) => Promise<void>;
+  ocorrenciaId: string; lista: Env[]; pode: boolean; meId?: string | undefined; isSup: boolean; onChange: () => void; log: (d: string) => Promise<boolean>;
 }) {
   const vazio = { tipo: TIPOS_ENVOLVIDO[0] as string, nome: "", documento: "", telefone: "", observacao: "" };
   const [f, setF] = useState(vazio);
