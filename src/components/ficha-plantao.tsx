@@ -24,7 +24,12 @@ export function FichaPlantao({ plantao, editavel, operadorNome }: { plantao: Pla
 
   const { data: atv } = useQuery({
     queryKey: ["plantao-atv", plantao.id],
-    queryFn: () => carregarAtividades(plantao),
+    queryFn: async () => {
+      if (plantao.status === "encerrado" && plantao.resumo && Array.isArray(plantao.resumo.viaturas)) {
+        return plantao.resumo as Awaited<ReturnType<typeof carregarAtividades>>;
+      }
+      return carregarAtividades(plantao);
+    },
     refetchInterval: plantao.status === "aberto" ? 30000 : false,
   });
 
