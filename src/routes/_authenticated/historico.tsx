@@ -6,7 +6,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { PageHeader } from "@/components/page-header";
 import { fmtDia } from "@/lib/plantao";
-import { Badge } from "@/components/ui/badge";
 
 export const Route = createFileRoute("/_authenticated/historico")({
   head: () => ({ meta: [{ title: "Histórico de plantões · CAD" }] }),
