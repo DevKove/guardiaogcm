@@ -124,6 +124,7 @@ BEGIN
     UPDATE public.viaturas
        SET status = 'disponivel', ocorrencia_id = NULL
      WHERE id = v_oc.viatura_id AND ocorrencia_id = _ocorrencia_id;
+    IF NOT FOUND THEN RAISE EXCEPTION 'O vínculo da viatura anterior está inconsistente; despacho cancelado.'; END IF;
   END IF;
 
   UPDATE public.viaturas
@@ -168,6 +169,7 @@ BEGIN
   UPDATE public.ocorrencias SET chegada_em = now() WHERE id = _ocorrencia_id;
   UPDATE public.viaturas SET status = 'no_local'
    WHERE id = v_oc.viatura_id AND ocorrencia_id = _ocorrencia_id;
+  IF NOT FOUND THEN RAISE EXCEPTION 'O vínculo da viatura está inconsistente; chegada cancelada.'; END IF;
 END;
 $$;
 
@@ -225,6 +227,7 @@ BEGIN
     UPDATE public.viaturas
        SET status = 'disponivel', ocorrencia_id = NULL
      WHERE id = v_oc.viatura_id AND ocorrencia_id = _ocorrencia_id;
+    IF NOT FOUND THEN RAISE EXCEPTION 'O vínculo da viatura está inconsistente; encerramento cancelado.'; END IF;
   END IF;
 
   INSERT INTO public.ocorrencia_historico (ocorrencia_id, usuario_id, descricao)
@@ -277,7 +280,10 @@ BEGIN
     NEW.chegada_em IS DISTINCT FROM OLD.chegada_em OR
     NEW.encerrada_em IS DISTINCT FROM OLD.encerrada_em OR
     NEW.desfecho IS DISTINCT FROM OLD.desfecho OR
-    NEW.plantao_id IS DISTINCT FROM OLD.plantao_id;
+    NEW.plantao_id IS DISTINCT FROM OLD.plantao_id OR
+    NEW.criado_por IS DISTINCT FROM OLD.criado_por OR
+    NEW.created_at IS DISTINCT FROM OLD.created_at OR
+    NEW.protocolo IS DISTINCT FROM OLD.protocolo;
 
   IF v_protected_changed AND v_operation NOT IN ('dispatch', 'arrival', 'finish') THEN
     RAISE EXCEPTION 'Campo operacional protegido: utilize o fluxo de despacho/encerramento.';
@@ -362,3 +368,41 @@ $$;
 
 REVOKE ALL ON FUNCTION public.admin_set_user_access(uuid, uuid, text, text, public.app_role) FROM PUBLIC, anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.admin_set_user_access(uuid, uuid, text, text, public.app_role) TO service_role;
+
+
+-- A new occurrence must start in the open state and cannot arrive pre-assigned to a vehicle.
+CREATE OR REPLACE FUNCTION public.guard_ocorrencia_insert()
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  IF auth.uid() IS NULL OR NEW.criado_por IS DISTINCT FROM auth.uid() THEN
+    RAISE EXCEPTION 'A ocorrência deve ser criada pelo usuário autenticado.';
+  END IF;
+  IF NEW.status <> 'aberta'
+     OR NEW.viatura_id IS NOT NULL
+     OR NEW.viatura IS NOT NULL
+     OR NEW.despachada_em IS NOT NULL
+     OR NEW.chegada_em IS NOT NULL
+     OR NEW.encerrada_em IS NOT NULL
+     OR NEW.desfecho IS NOT NULL THEN
+    RAISE EXCEPTION 'A ocorrência deve ser criada sem despacho e no estado aberta.';
+  END IF;
+  IF NEW.plantao_id IS NOT NULL AND NOT EXISTS (
+    SELECT 1 FROM public.plantoes
+     WHERE id = NEW.plantao_id AND operador_id = auth.uid() AND status = 'aberto'
+  ) THEN
+    RAISE EXCEPTION 'Só é permitido vincular a ocorrência ao seu próprio plantão aberto.';
+  END IF;
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS ocorrencias_guard_insert ON public.ocorrencias;
+CREATE TRIGGER ocorrencias_guard_insert
+  BEFORE INSERT ON public.ocorrencias
+  FOR EACH ROW EXECUTE FUNCTION public.guard_ocorrencia_insert();
+
+REVOKE EXECUTE ON FUNCTION public.guard_ocorrencia_insert() FROM PUBLIC, anon, authenticated;
