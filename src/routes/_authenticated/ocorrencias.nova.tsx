@@ -1,7 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { PlayCircle } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -9,13 +8,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { NATUREZAS, ORIGENS, PRIORIDADES, selectCls } from "@/lib/cad";
-import { Link } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_authenticated/ocorrencias/nova")({
   head: () => ({ meta: [{ title: "Nova ocorrência · CAD" }] }),
   component: Nova,
 });
-
 
 function Nova() {
   const navigate = useNavigate();
@@ -23,12 +20,17 @@ function Nova() {
   const { data: plantao, isLoading: carregandoPlantao } = useQuery({
     queryKey: ["plantao-atual"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("plantoes").select("id, turno, data_inicio, operador_id").eq("status", "aberto").maybeSingle();
+      const { data, error } = await supabase
+        .from("plantoes")
+        .select("id, turno, data_inicio, operador_id")
+        .eq("status", "aberto")
+        .maybeSingle();
       if (error) throw error;
       return data;
     },
     refetchInterval: 15000,
   });
+
   const [f, setF] = useState({
     natureza: NATUREZAS[0] as string,
     prioridade: 3,
@@ -41,23 +43,43 @@ function Nova() {
     referencia: "",
     relato: "",
   });
+
   const set = (k: keyof typeof f, v: string | number) => setF((p) => ({ ...p, [k]: v }));
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    if (!plantao) return;
-    setSaving(true);
-    const { data: u } = await supabase.auth.getUser();
-    const { data, error } = await supabase
-      .from("ocorrencias")
-      .insert({ ...f, criado_por: u.user!.id })
-      .select("id")
-      .single();
-    if (error) {
-      setSaving(false);
-      toast.error("Erro ao registrar: " + error.message);
+
+    if (!plantao) {
+      toast.error("Não há plantão aberto. Inicie um plantão antes de registrar uma ocorrência.");
       return;
     }
+
+    setSaving(true);
+    const { data: u } = await supabase.auth.getUser();
+
+    if (!u.user) {
+      setSaving(false);
+      toast.error("Sessão expirada. Faça login novamente.");
+      navigate({ to: "/auth" });
+      return;
+    }
+
+    const { data, error } = await supabase
+      .from("ocorrencias")
+      .insert({
+        ...f,
+        criado_por: u.user.id,
+        plantao_id: plantao.id,
+      })
+      .select("id")
+      .single();
+
+    if (error) {
+      setSaving(false);
+      toast.error("Erro ao registrar ocorrência: " + error.message);
+      return;
+    }
+
     toast.success("Ocorrência registrada");
     navigate({ to: "/ocorrencias/$id", params: { id: data.id } });
   }
@@ -67,6 +89,17 @@ function Nova() {
       <div>
         <div className="font-mono text-xs tracking-widest text-muted-foreground">REGISTRO</div>
         <h1 className="text-2xl font-bold">Nova ocorrência</h1>
+        {carregandoPlantao ? (
+          <p className="mt-1 text-sm text-muted-foreground">Verificando plantão operacional...</p>
+        ) : plantao ? (
+          <p className="mt-1 text-sm text-success">
+            Plantão ativo: {plantao.turno} · {new Date(plantao.data_inicio + "T12:00:00").toLocaleDateString("pt-BR")}
+          </p>
+        ) : (
+          <p className="mt-1 text-sm text-warning">
+            Nenhum plantão aberto. Inicie um plantão para habilitar o registro.
+          </p>
+        )}
       </div>
 
       <section className="space-y-4 card-3d animate-rise p-5">
@@ -120,7 +153,9 @@ function Nova() {
 
       <div className="flex justify-end gap-2">
         <Button type="button" variant="outline" onClick={() => navigate({ to: "/painel" })}>Cancelar</Button>
-        <Button type="submit" disabled={saving}>{saving ? "Registrando..." : "Registrar ocorrência"}</Button>
+        <Button type="submit" disabled={saving || carregandoPlantao || !plantao}>
+          {saving ? "Registrando..." : "Registrar ocorrência"}
+        </Button>
       </div>
     </form>
   );
