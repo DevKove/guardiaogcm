@@ -60,7 +60,6 @@ export async function carregarAtividades(p: { id: string; operador_id: string; i
   const fim = p.encerrado_em ?? new Date(Date.now() + 60000).toISOString();
   const [oc, hist, reg] = await Promise.all([
     supabase.from("ocorrencias").select("id, protocolo, natureza, endereco, bairro, status, prioridade, created_at, desfecho, viatura, criado_por").eq("plantao_id", p.id).order("created_at"),
-    supabase.from("ocorrencia_historico").select("descricao, created_at, usuario_id, ocorrencias(protocolo)").eq("ocorrencia_id", "00000000-0000-0000-0000-000000000000").limit(0),
     supabase.from("plantao_registros").select("id, texto, hora, criado_por").eq("plantao_id", p.id).order("hora", { ascending: false }),
   ]);
 
