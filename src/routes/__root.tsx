@@ -108,7 +108,7 @@ function RootComponent() {
   useEffect(() => {
     const saved = window.localStorage.getItem("cad-theme");
     const validThemes = ["claro", "escuro", "cyberpunk", "oceano", "floresta"];
-    document.documentElement.dataset.theme = saved && validThemes.includes(saved) ? saved : "escuro";
+    document.documentElement.dataset["theme"] = saved && validThemes.includes(saved) ? saved : "escuro";
   }, []);
 
   useEffect(() => {
