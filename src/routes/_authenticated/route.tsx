@@ -47,12 +47,12 @@ function Layout() {
     const validThemes = ["claro", "escuro", "cyberpunk", "oceano", "floresta"];
     const initial = saved && validThemes.includes(saved) ? saved : "escuro";
     setTheme(initial);
-    document.documentElement.dataset.theme = initial;
+    document.documentElement.dataset["theme"] = initial;
   }, []);
 
   function changeTheme(value: string) {
     setTheme(value);
-    document.documentElement.dataset.theme = value;
+    document.documentElement.dataset["theme"] = value;
     window.localStorage.setItem("cad-theme", value);
   }
 
