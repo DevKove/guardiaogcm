@@ -1,5 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { PlayCircle } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -7,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { NATUREZAS, ORIGENS, PRIORIDADES, selectCls } from "@/lib/cad";
+import { Link } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_authenticated/ocorrencias/nova")({
   head: () => ({ meta: [{ title: "Nova ocorrência · CAD" }] }),
@@ -17,6 +20,15 @@ export const Route = createFileRoute("/_authenticated/ocorrencias/nova")({
 function Nova() {
   const navigate = useNavigate();
   const [saving, setSaving] = useState(false);
+  const { data: plantao, isLoading: carregandoPlantao } = useQuery({
+    queryKey: ["plantao-atual"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("plantoes").select("id, turno, data_inicio, operador_id").eq("status", "aberto").maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+    refetchInterval: 15000,
+  });
   const [f, setF] = useState({
     natureza: NATUREZAS[0] as string,
     prioridade: 3,
@@ -33,6 +45,7 @@ function Nova() {
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
+    if (!plantao) return;
     setSaving(true);
     const { data: u } = await supabase.auth.getUser();
     const { data, error } = await supabase
