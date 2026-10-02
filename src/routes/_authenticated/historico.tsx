@@ -1,11 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { History, Moon, Sun } from "lucide-react";
+import { History, Moon, Sun, FileText } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { PageHeader } from "@/components/page-header";
 import { fmtDia } from "@/lib/plantao";
+import { Badge } from "@/components/ui/badge";
 
 export const Route = createFileRoute("/_authenticated/historico")({
   head: () => ({ meta: [{ title: "Histórico de plantões · CAD" }] }),
@@ -56,9 +57,12 @@ function Historico() {
                     <div className="font-semibold">{p.turno} <span className="text-xs text-muted-foreground">{p.horario}</span></div>
                     <div className="text-xs text-muted-foreground">Operador: {p.operador}{p.equipe ? ` · Equipe ${p.equipe}` : ""}{p.supervisor ? ` · Sup. ${p.supervisor}` : ""}</div>
                   </div>
-                  <div className="text-right text-xs">
-                    <div className={p.status === "aberto" ? "text-success" : "text-muted-foreground"}>Finalizado</div>
-                    {n !== undefined && <div className="font-mono">{n} ocorr.</div>}
+                  <div className="flex items-center gap-3 text-right text-xs">
+                    <div>
+                      <div className="text-success">Finalizado</div>
+                      {n !== undefined && <div className="font-mono">{n} ocorr.</div>}
+                    </div>
+                    <FileText className="h-4 w-4 text-primary" />
                   </div>
                 </Link>
               );
