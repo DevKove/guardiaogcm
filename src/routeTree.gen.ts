@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedEscalasRouteImport } from './routes/_authenticated/escalas'
+import { Route as AuthenticatedHistoricoRouteImport } from './routes/_authenticated/historico'
 import { Route as AuthenticatedPainelRouteImport } from './routes/_authenticated/painel'
 import { Route as AuthenticatedPerfilRouteImport } from './routes/_authenticated/perfil'
 import { Route as AuthenticatedPostosRouteImport } from './routes/_authenticated/postos'
@@ -22,6 +23,7 @@ import { Route as AuthenticatedViaturasRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedImprimirIdRouteImport } from './routes/_authenticated/imprimir.$id'
 import { Route as AuthenticatedOcorrenciasIdRouteImport } from './routes/_authenticated/ocorrencias.$id'
 import { Route as AuthenticatedOcorrenciasNovaRouteImport } from './routes/_authenticated/ocorrencias.nova'
+import { Route as AuthenticatedPlantaoIdRouteImport } from './routes/_authenticated/plantao.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -40,6 +42,11 @@ const AuthRoute = AuthRouteImport.update({
 const AuthenticatedEscalasRoute = AuthenticatedEscalasRouteImport.update({
   id: '/escalas',
   path: '/escalas',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedHistoricoRoute = AuthenticatedHistoricoRouteImport.update({
+  id: '/historico',
+  path: '/historico',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedPainelRoute = AuthenticatedPainelRouteImport.update({
@@ -89,11 +96,17 @@ const AuthenticatedOcorrenciasNovaRoute =
     path: '/ocorrencias/nova',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedPlantaoIdRoute = AuthenticatedPlantaoIdRouteImport.update({
+  id: '/plantao/$id',
+  path: '/plantao/$id',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/escalas': typeof AuthenticatedEscalasRoute
+  '/historico': typeof AuthenticatedHistoricoRoute
   '/painel': typeof AuthenticatedPainelRoute
   '/perfil': typeof AuthenticatedPerfilRoute
   '/postos': typeof AuthenticatedPostosRoute
@@ -103,11 +116,13 @@ export interface FileRoutesByFullPath {
   '/imprimir/$id': typeof AuthenticatedImprimirIdRoute
   '/ocorrencias/$id': typeof AuthenticatedOcorrenciasIdRoute
   '/ocorrencias/nova': typeof AuthenticatedOcorrenciasNovaRoute
+  '/plantao/$id': typeof AuthenticatedPlantaoIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/escalas': typeof AuthenticatedEscalasRoute
+  '/historico': typeof AuthenticatedHistoricoRoute
   '/painel': typeof AuthenticatedPainelRoute
   '/perfil': typeof AuthenticatedPerfilRoute
   '/postos': typeof AuthenticatedPostosRoute
@@ -117,6 +132,7 @@ export interface FileRoutesByTo {
   '/imprimir/$id': typeof AuthenticatedImprimirIdRoute
   '/ocorrencias/$id': typeof AuthenticatedOcorrenciasIdRoute
   '/ocorrencias/nova': typeof AuthenticatedOcorrenciasNovaRoute
+  '/plantao/$id': typeof AuthenticatedPlantaoIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -124,6 +140,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/_authenticated/escalas': typeof AuthenticatedEscalasRoute
+  '/_authenticated/historico': typeof AuthenticatedHistoricoRoute
   '/_authenticated/painel': typeof AuthenticatedPainelRoute
   '/_authenticated/perfil': typeof AuthenticatedPerfilRoute
   '/_authenticated/postos': typeof AuthenticatedPostosRoute
@@ -133,6 +150,7 @@ export interface FileRoutesById {
   '/_authenticated/imprimir/$id': typeof AuthenticatedImprimirIdRoute
   '/_authenticated/ocorrencias/$id': typeof AuthenticatedOcorrenciasIdRoute
   '/_authenticated/ocorrencias/nova': typeof AuthenticatedOcorrenciasNovaRoute
+  '/_authenticated/plantao/$id': typeof AuthenticatedPlantaoIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -140,6 +158,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/escalas'
+    | '/historico'
     | '/painel'
     | '/perfil'
     | '/postos'
@@ -149,11 +168,13 @@ export interface FileRouteTypes {
     | '/imprimir/$id'
     | '/ocorrencias/$id'
     | '/ocorrencias/nova'
+    | '/plantao/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth'
     | '/escalas'
+    | '/historico'
     | '/painel'
     | '/perfil'
     | '/postos'
@@ -163,12 +184,14 @@ export interface FileRouteTypes {
     | '/imprimir/$id'
     | '/ocorrencias/$id'
     | '/ocorrencias/nova'
+    | '/plantao/$id'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
     | '/auth'
     | '/_authenticated/escalas'
+    | '/_authenticated/historico'
     | '/_authenticated/painel'
     | '/_authenticated/perfil'
     | '/_authenticated/postos'
@@ -178,6 +201,7 @@ export interface FileRouteTypes {
     | '/_authenticated/imprimir/$id'
     | '/_authenticated/ocorrencias/$id'
     | '/_authenticated/ocorrencias/nova'
+    | '/_authenticated/plantao/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -214,6 +238,13 @@ declare module '@tanstack/react-router' {
       path: '/escalas'
       fullPath: '/escalas'
       preLoaderRoute: typeof AuthenticatedEscalasRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/historico': {
+      id: '/_authenticated/historico'
+      path: '/historico'
+      fullPath: '/historico'
+      preLoaderRoute: typeof AuthenticatedHistoricoRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/painel': {
@@ -279,11 +310,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedOcorrenciasNovaRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/plantao/$id': {
+      id: '/_authenticated/plantao/$id'
+      path: '/plantao/$id'
+      fullPath: '/plantao/$id'
+      preLoaderRoute: typeof AuthenticatedPlantaoIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedEscalasRoute: typeof AuthenticatedEscalasRoute
+  AuthenticatedHistoricoRoute: typeof AuthenticatedHistoricoRoute
   AuthenticatedPainelRoute: typeof AuthenticatedPainelRoute
   AuthenticatedPerfilRoute: typeof AuthenticatedPerfilRoute
   AuthenticatedPostosRoute: typeof AuthenticatedPostosRoute
@@ -293,10 +332,12 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedImprimirIdRoute: typeof AuthenticatedImprimirIdRoute
   AuthenticatedOcorrenciasIdRoute: typeof AuthenticatedOcorrenciasIdRoute
   AuthenticatedOcorrenciasNovaRoute: typeof AuthenticatedOcorrenciasNovaRoute
+  AuthenticatedPlantaoIdRoute: typeof AuthenticatedPlantaoIdRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedEscalasRoute: AuthenticatedEscalasRoute,
+  AuthenticatedHistoricoRoute: AuthenticatedHistoricoRoute,
   AuthenticatedPainelRoute: AuthenticatedPainelRoute,
   AuthenticatedPerfilRoute: AuthenticatedPerfilRoute,
   AuthenticatedPostosRoute: AuthenticatedPostosRoute,
@@ -306,6 +347,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedImprimirIdRoute: AuthenticatedImprimirIdRoute,
   AuthenticatedOcorrenciasIdRoute: AuthenticatedOcorrenciasIdRoute,
   AuthenticatedOcorrenciasNovaRoute: AuthenticatedOcorrenciasNovaRoute,
+  AuthenticatedPlantaoIdRoute: AuthenticatedPlantaoIdRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
