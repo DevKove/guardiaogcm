@@ -326,41 +326,71 @@ export type Database = {
       }
       plantoes: {
         Row: {
+          atividades: string | null
+          atividades_verso: string | null
           created_at: string
           data_inicio: string
           encerrado_em: string | null
+          equipe: string | null
+          guarnicoes: Json
+          horario: string | null
           id: string
+          informativo: string | null
           iniciado_em: string
+          materiais: string | null
           observacoes: string | null
           operador_id: string
+          operador_radio: string | null
+          postos: Json
           resumo: Json | null
           status: string
+          supervisor: string | null
           turno: string
           updated_at: string
         }
         Insert: {
+          atividades?: string | null
+          atividades_verso?: string | null
           created_at?: string
           data_inicio?: string
           encerrado_em?: string | null
+          equipe?: string | null
+          guarnicoes?: Json
+          horario?: string | null
           id?: string
+          informativo?: string | null
           iniciado_em?: string
+          materiais?: string | null
           observacoes?: string | null
           operador_id?: string
+          operador_radio?: string | null
+          postos?: Json
           resumo?: Json | null
           status?: string
+          supervisor?: string | null
           turno: string
           updated_at?: string
         }
         Update: {
+          atividades?: string | null
+          atividades_verso?: string | null
           created_at?: string
           data_inicio?: string
           encerrado_em?: string | null
+          equipe?: string | null
+          guarnicoes?: Json
+          horario?: string | null
           id?: string
+          informativo?: string | null
           iniciado_em?: string
+          materiais?: string | null
           observacoes?: string | null
           operador_id?: string
+          operador_radio?: string | null
+          postos?: Json
           resumo?: Json | null
           status?: string
+          supervisor?: string | null
           turno?: string
           updated_at?: string
         }
