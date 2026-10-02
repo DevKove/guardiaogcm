@@ -23,11 +23,31 @@ export function PlantaoResumoTempoReal({ plantaoId }: { plantaoId: string }) {
     refetchInterval: 30000,
   });
 
+  // Carrega ocorrências separadamente para que uma falha em dados complementares
+  // (escalas, frota ou histórico) nunca esconda a lista principal.
+  const { data: ocorrencias = [], isLoading: ocorrenciasLoading, error: ocorrenciasError } = useQuery({
+    queryKey: ["plantao-ocorrencias", plantaoId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("ocorrencias")
+        .select("id, protocolo, natureza, endereco, bairro, status, prioridade, created_at, viatura, numero")
+        .eq("plantao_id", plantaoId)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data ?? [];
+    },
+    refetchInterval: 10000,
+  });
+
   useEffect(() => {
     const refresh = () => { void qc.invalidateQueries({ queryKey: ["plantao-live-summary", plantaoId] }); };
     const ch = supabase.channel(`plantao-resumo-${plantaoId}`)
       .on("postgres_changes", { event: "*", schema: "public", table: "plantoes", filter: `id=eq.${plantaoId}` }, refresh)
-      .on("postgres_changes", { event: "*", schema: "public", table: "ocorrencias", filter: `plantao_id=eq.${plantaoId}` }, refresh)
+      .on("postgres_changes", { event: "*", schema: "public", table: "ocorrencias", filter: `plantao_id=eq.${plantaoId}` }, () => {
+        refresh();
+        void qc.invalidateQueries({ queryKey: ["plantao-ocorrencias", plantaoId] });
+        void qc.invalidateQueries({ queryKey: ["ocorrencias"] });
+      })
       .on("postgres_changes", { event: "*", schema: "public", table: "plantao_registros", filter: `plantao_id=eq.${plantaoId}` }, refresh)
       .on("postgres_changes", { event: "*", schema: "public", table: "plantao_historico", filter: `plantao_id=eq.${plantaoId}` }, refresh)
       .on("postgres_changes", { event: "*", schema: "public", table: "ocorrencia_historico" }, refresh)
@@ -38,21 +58,22 @@ export function PlantaoResumoTempoReal({ plantaoId }: { plantaoId: string }) {
     return () => { void supabase.removeChannel(ch); };
   }, [plantaoId, qc]);
 
-  if (isLoading) return <section className="card-3d p-5 text-sm text-muted-foreground">Carregando o painel operacional em tempo real...</section>;
-  if (error) return <section className="card-3d p-5 text-sm text-destructive">Não foi possível carregar o resumo do plantão. {error.message}</section>;
-  if (!data) return null;
-
-  const abertas = data.ocorrencias.filter((o) => o.status === "aberta").length;
-  const atendimento = data.ocorrencias.filter((o) => o.status === "em_atendimento").length;
-  const encerradas = data.ocorrencias.filter((o) => o.status === "encerrada").length;
-  const viaturasAtivas = data.viaturas.filter((v) => v.ativa).length;
+  const abertas = ocorrencias.filter((o) => o.status === "aberta").length;
+  const atendimento = ocorrencias.filter((o) => o.status === "em_atendimento").length;
+  const encerradas = ocorrencias.filter((o) => o.status === "encerrada").length;
+  const viaturas = data?.viaturas ?? [];
+  const escalas = data?.escalas ?? [];
+  const postosAtivos = data?.postosAtivos ?? [];
+  const viaturasAtivas = viaturas.filter((v) => v.ativa).length;
 
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-success"><span className="live-dot h-2 w-2 rounded-full bg-success" /> Atualização em tempo real</div>
+      {isLoading && <p className="text-xs text-muted-foreground">Carregando dados complementares do plantão...</p>}
+      {error && <p className="rounded-lg border border-warning/40 p-3 text-xs text-warning">Alguns dados complementares não puderam ser carregados: {error.message}. A lista de ocorrências continua sendo atualizada separadamente.</p>}
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         {[
-          { label: "Ocorrências", value: data.ocorrencias.length, icon: Activity },
+          { label: "Ocorrências", value: ocorrencias.length, icon: Activity },
           { label: "Abertas", value: abertas, icon: Clock3 },
           { label: "Em atendimento", value: atendimento, icon: Activity },
           { label: "Viaturas ativas", value: viaturasAtivas, icon: Car },
@@ -61,13 +82,15 @@ export function PlantaoResumoTempoReal({ plantaoId }: { plantaoId: string }) {
 
       <section className="card-3d overflow-hidden p-4">
         <h3 className="mb-3 flex items-center gap-2 font-semibold text-primary"><Activity className="h-4 w-4" /> Ocorrências deste plantão</h3>
+        {ocorrenciasError && <p className="mb-2 text-sm text-destructive">Erro ao carregar ocorrências: {ocorrenciasError.message}</p>}
+        {ocorrenciasLoading && <p className="mb-2 text-xs text-muted-foreground">Carregando ocorrências...</p>}
         <div className="overflow-x-auto">
           <table className="w-full text-xs">
             <thead><tr className="border-b text-left text-muted-foreground"><th className="py-2 pr-3">Hora</th><th className="pr-3">Protocolo</th><th className="pr-3">Natureza</th><th className="pr-3">Local</th><th className="pr-3">Prioridade</th><th className="pr-3">Viatura</th><th>Status</th></tr></thead>
-            <tbody>{data.ocorrencias.map((o) => <tr key={o.id} className="border-b last:border-0"><td className="py-2 pr-3 font-mono">{hora(o.created_at)}</td><td className="pr-3 font-mono">{fmtProtocolo(o.protocolo, o.created_at)}</td><td className="pr-3">{o.natureza}</td><td className="pr-3">{o.endereco}{o.numero ? `, ${o.numero}` : ""}{o.bairro ? ` · ${o.bairro}` : ""}</td><td className="pr-3">{o.prioridade}</td><td className="pr-3">{o.viatura || "—"}</td><td>{STATUS[o.status as Status]?.label ?? o.status}</td></tr>)}</tbody>
+            <tbody>{ocorrencias.map((o) => <tr key={o.id} className="border-b last:border-0"><td className="py-2 pr-3 font-mono">{hora(o.created_at)}</td><td className="pr-3 font-mono">{fmtProtocolo(o.protocolo, o.created_at)}</td><td className="pr-3">{o.natureza}</td><td className="pr-3">{o.endereco}{o.numero ? `, ${o.numero}` : ""}{o.bairro ? ` · ${o.bairro}` : ""}</td><td className="pr-3">{o.prioridade}</td><td className="pr-3">{o.viatura || "—"}</td><td>{STATUS[o.status as Status]?.label ?? o.status}</td></tr>)}</tbody>
           </table>
         </div>
-        {!data.ocorrencias.length && <p className="py-4 text-center text-sm text-muted-foreground">Nenhuma ocorrência vinculada a este plantão até o momento.</p>}
+        {!ocorrenciasLoading && !ocorrencias.length && <p className="py-4 text-center text-sm text-muted-foreground">Nenhuma ocorrência vinculada a este plantão até o momento.</p>}
         <div className="mt-2 text-xs text-muted-foreground">{encerradas} ocorrência(s) encerrada(s) · os registros são vinculados automaticamente pelo sistema ao plantão ativo.</div>
       </section>
 
@@ -75,17 +98,17 @@ export function PlantaoResumoTempoReal({ plantaoId }: { plantaoId: string }) {
         <section className="card-3d p-4">
           <h3 className="mb-3 flex items-center gap-2 font-semibold text-primary"><Car className="h-4 w-4" /> Situação da frota</h3>
           <div className="space-y-2">
-            {data.viaturas.map((v) => <div key={v.id} className="flex flex-wrap items-center justify-between gap-2 border-b pb-2 text-xs last:border-0"><div><span className="font-mono font-bold">{v.prefixo}</span><span className="ml-2 text-muted-foreground">{v.tipo}{v.modelo ? ` · ${v.modelo}` : ""}</span><div className="mt-1 text-muted-foreground">{v.guarnicao || "Guarnição não informada"}{v.km_atual != null ? ` · ${v.km_atual.toLocaleString("pt-BR")} km` : ""}</div></div><span className={v.ativa ? "rounded-full border border-success/40 px-2 py-1 text-success" : "rounded-full border px-2 py-1 text-muted-foreground"}>{v.ativa ? (situacaoViatura[v.status] ?? v.status) : "Inativa"}</span></div>)}
-            {!data.viaturas.length && <p className="text-sm text-muted-foreground">Nenhuma viatura cadastrada.</p>}
+            {viaturas.map((v) => <div key={v.id} className="flex flex-wrap items-center justify-between gap-2 border-b pb-2 text-xs last:border-0"><div><span className="font-mono font-bold">{v.prefixo}</span><span className="ml-2 text-muted-foreground">{v.tipo}{v.modelo ? ` · ${v.modelo}` : ""}</span><div className="mt-1 text-muted-foreground">{v.guarnicao || "Guarnição não informada"}{v.km_atual != null ? ` · ${v.km_atual.toLocaleString("pt-BR")} km` : ""}</div></div><span className={v.ativa ? "rounded-full border border-success/40 px-2 py-1 text-success" : "rounded-full border px-2 py-1 text-muted-foreground"}>{v.ativa ? (situacaoViatura[v.status] ?? v.status) : "Inativa"}</span></div>)}
+            {!viaturas.length && <p className="text-sm text-muted-foreground">Nenhuma viatura cadastrada.</p>}
           </div>
         </section>
         <section className="card-3d p-4">
           <h3 className="mb-3 flex items-center gap-2 font-semibold text-primary"><Users className="h-4 w-4" /> Equipes e escalas do turno</h3>
           <div className="space-y-3">
-            {data.escalas.map((e) => <div key={e.id} className="border-b pb-2 text-xs last:border-0"><div className="font-semibold">{e.funcao} · {e.hora_inicio.slice(0, 5)}–{e.hora_fim.slice(0, 5)}</div><div className="mt-1">{e.agentes}</div>{e.observacao && <div className="mt-1 text-muted-foreground">{e.observacao}</div>}</div>)}
-            {!data.escalas.length && <p className="text-sm text-muted-foreground">Nenhuma escala cadastrada para a data e o turno deste plantão.</p>}
+            {escalas.map((e) => <div key={e.id} className="border-b pb-2 text-xs last:border-0"><div className="font-semibold">{e.funcao} · {e.hora_inicio.slice(0, 5)}–{e.hora_fim.slice(0, 5)}</div><div className="mt-1">{e.agentes}</div>{e.observacao && <div className="mt-1 text-muted-foreground">{e.observacao}</div>}</div>)}
+            {!escalas.length && <p className="text-sm text-muted-foreground">Nenhuma escala cadastrada para a data e o turno deste plantão.</p>}
           </div>
-          <div className="mt-3 border-t pt-3 text-xs text-muted-foreground">Próprios municipais ativos ({data.postosAtivos.length}): {data.postosAtivos.map((p) => p.nome).join(" · ") || "Nenhum cadastrado"}</div>
+          <div className="mt-3 border-t pt-3 text-xs text-muted-foreground">Próprios municipais ativos ({postosAtivos.length}): {postosAtivos.map((p) => p.nome).join(" · ") || "Nenhum cadastrado"}</div>
         </section>
       </div>
     </div>
