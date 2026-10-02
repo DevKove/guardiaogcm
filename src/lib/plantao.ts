@@ -38,7 +38,6 @@ export type Plantao = {
   observacoes: string | null;
 };
 
-/** Turno, horário e data de início calculados pelo relógio do sistema. */
 export function turnoAtual(agora = new Date()) {
   const h = agora.getHours();
   const diurno = h >= 6 && h < 18;
@@ -55,15 +54,40 @@ export function fmtDia(d: string) {
   return `${dd}/${m}/${y}`;
 }
 
-/** Junta tudo que o operador lançou durante o plantão. */
-export async function carregarAtividades(p: { id: string; operador_id: string; iniciado_em: string; encerrado_em: string | null }) {
+type HistoricoRow = {
+  descricao: string;
+  created_at: string;
+  usuario_id: string;
+  ocorrencias: { protocolo: number } | null;
+};
+
+type ProfileRow = { id: string; nome: string | null };
+
+export async function carregarAtividades(p: {
+  id: string;
+  operador_id: string;
+  iniciado_em: string;
+  encerrado_em: string | null;
+}): Promise<PlantaoAtividade> {
   const fim = p.encerrado_em ?? new Date(Date.now() + 60000).toISOString();
-  const [oc, hist, reg] = await Promise.all([
-    supabase.from("ocorrencias").select("id, protocolo, natureza, endereco, bairro, status, prioridade, created_at, desfecho, viatura, criado_por").eq("plantao_id", p.id).order("created_at"),
-    supabase.from("plantao_registros").select("id, texto, hora, criado_por").eq("plantao_id", p.id).order("hora", { ascending: false }),
+
+  const [oc, reg] = await Promise.all([
+    supabase
+      .from("ocorrencias")
+      .select("id, protocolo, natureza, endereco, bairro, status, prioridade, created_at, desfecho, viatura, criado_por")
+      .eq("plantao_id", p.id)
+      .order("created_at"),
+    supabase
+      .from("plantao_registros")
+      .select("id, texto, hora, criado_por")
+      .eq("plantao_id", p.id)
+      .order("hora", { ascending: false }),
   ]);
 
-  const { data: histData } = await supabase
+  if (oc.error) throw oc.error;
+  if (reg.error) throw reg.error;
+
+  const { data: rawHist, error: histError } = await supabase
     .from("ocorrencia_historico")
     .select("descricao, created_at, usuario_id, ocorrencias!inner(protocolo, plantao_id)")
     .eq("ocorrencias.plantao_id", p.id)
@@ -71,18 +95,37 @@ export async function carregarAtividades(p: { id: string; operador_id: string; i
     .lte("created_at", fim)
     .order("created_at", { ascending: false });
 
-  const ids = Array.from(new Set([
-    ...(oc.data ?? []).map((x) => x.criado_por),
-    ...(histData ?? []).map((x) => x.usuario_id),
-    ...(reg.data ?? []).map((x) => x.criado_por),
-    p.operador_id,
-  ]));
-  const { data: profiles } = ids.length ? await supabase.from("profiles").select("id, nome").in("id", ids) : { data: [] as { id: string; nome: string }[] };
-  const usuarios = Object.fromEntries((profiles ?? []).map((x) => [x.id, x.nome || x.id.slice(0, 8)]));
+  if (histError) throw histError;
+
+  const histData = (rawHist ?? []) as unknown as HistoricoRow[];
+
+  const ids = Array.from(
+    new Set([
+      ...(oc.data ?? []).map((x) => x.criado_por),
+      ...histData.map((x) => x.usuario_id),
+      ...(reg.data ?? []).map((x) => x.criado_por),
+      p.operador_id,
+    ]),
+  );
+
+  const { data: profiles, error: profileError } = ids.length
+    ? await supabase.from("profiles").select("id, nome").in("id", ids)
+    : { data: [] as ProfileRow[], error: null };
+
+  if (profileError) throw profileError;
+
+  const usuarios = Object.fromEntries(
+    ((profiles ?? []) as ProfileRow[]).map((x) => [x.id, x.nome || x.id.slice(0, 8)]),
+  );
 
   return {
     ocorrencias: oc.data ?? [],
-    acoes: (histData ?? []).map((h) => ({ descricao: h.descricao, created_at: h.created_at, usuario_id: h.usuario_id, protocolo: (h.ocorrencias as { protocolo: number } | null)?.protocolo ?? null })),
+    acoes: histData.map((h) => ({
+      descricao: h.descricao,
+      created_at: h.created_at,
+      usuario_id: h.usuario_id,
+      protocolo: h.ocorrencias?.protocolo ?? null,
+    })),
     registros: reg.data ?? [],
     usuarios,
   };
