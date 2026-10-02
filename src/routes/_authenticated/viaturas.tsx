@@ -108,28 +108,32 @@ function Viaturas() {
                 <div className="flex items-center gap-1.5"><Gauge className="h-3.5 w-3.5" />{v.km_atual != null ? `${v.km_atual.toLocaleString("pt-BR")} km` : "— km"}</div>
               </div>
               {v.observacao && <p className="mt-2 rounded-md bg-muted/50 p-2 text-xs">{v.observacao}</p>}
-              <div className="mt-3 space-y-1">
-                <Label className="text-xs">Status</Label>
-                <select
-                  className={selectCls}
-                  value={st}
-                  onChange={(e) => {
-                    const ns = e.target.value as VStatus;
-                    patch(v.id, ns === "disponivel" || ns === "manutencao" || ns === "fora_servico" ? { status: ns, ocorrencia_id: null } : { status: ns });
-                  }}
-                >
-                  {(Object.keys(VSTATUS) as VStatus[]).map((k) => <option key={k} value={k} className="bg-popover">{VSTATUS[k].label}</option>)}
-                </select>
-              </div>
+              {me?.isSupervisor && (
+                <div className="mt-3 space-y-1">
+                  <Label className="text-xs">Status</Label>
+                  <select
+                    className={selectCls}
+                    value={st}
+                    onChange={(e) => {
+                      const ns = e.target.value as VStatus;
+                      patch(v.id, ns === "disponivel" || ns === "manutencao" || ns === "fora_servico" ? { status: ns, ocorrencia_id: null } : { status: ns });
+                    }}
+                  >
+                    {(Object.keys(VSTATUS) as VStatus[]).map((k) => <option key={k} value={k} className="bg-popover">{VSTATUS[k].label}</option>)}
+                  </select>
+                </div>
+              )}
               {oc && (
                 <Link to="/ocorrencias/$id" params={{ id: oc.id }} className="mt-3 flex items-center gap-2 rounded-md border border-info p-2 text-xs text-info transition hover:bg-accent">
                   <Siren className="h-3.5 w-3.5" /> Empenhada: #{oc.protocolo} · {oc.natureza}
                 </Link>
               )}
               <div className="mt-3 flex gap-1 border-t pt-3">
-                <Button size="sm" variant="ghost" onClick={() => setEdit({ id: v.id, prefixo: v.prefixo, placa: v.placa ?? "", modelo: v.modelo ?? "", tipo: v.tipo, guarnicao: v.guarnicao ?? "", km_atual: v.km_atual?.toString() ?? "", observacao: v.observacao ?? "" })}>
-                  <Pencil className="h-3.5 w-3.5" /> Editar
-                </Button>
+                {me?.isSupervisor && (
+                  <Button size="sm" variant="ghost" onClick={() => setEdit({ id: v.id, prefixo: v.prefixo, placa: v.placa ?? "", modelo: v.modelo ?? "", tipo: v.tipo, guarnicao: v.guarnicao ?? "", km_atual: v.km_atual?.toString() ?? "", observacao: v.observacao ?? "" })}>
+                    <Pencil className="h-3.5 w-3.5" /> Editar
+                  </Button>
+                )}
                 {me?.isAdmin && (
                   <>
                     <Button size="sm" variant="ghost" onClick={() => patch(v.id, { ativa: !v.ativa })}><Power className="h-3.5 w-3.5" /> {v.ativa ? "Desativar" : "Reativar"}</Button>

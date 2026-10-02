@@ -84,7 +84,9 @@ function Detalhe() {
   }
 
   async function log(descricao: string) {
-    await supabase.from("ocorrencia_historico").insert({ ocorrencia_id: id, usuario_id: me!.id, descricao });
+    const { error } = await supabase.from("ocorrencia_historico").insert({ ocorrencia_id: id, usuario_id: me!.id, descricao });
+    if (error) toast.error("Não foi possível registrar a nota: " + error.message);
+    return !error;
   }
 
   async function update(patch: Record<string, unknown>, descricao: string) {
@@ -93,54 +95,56 @@ function Detalhe() {
       toast.error(error?.message ?? "Sem permissão para alterar esta ocorrência");
       return false;
     }
-    await log(descricao);
+    const { error: logError } = await supabase.from("ocorrencia_historico").insert({
+      ocorrencia_id: id, usuario_id: me!.id, descricao,
+    });
+    if (logError) toast.error("Alteração salva, mas não foi possível registrar a nota manual.");
     refresh();
     return true;
-  }
-
-  async function setViaturaStatus(vid: string | null, status: string, ocorrencia_id: string | null) {
-    if (!vid) return;
-    await supabase.from("viaturas").update({ status: status as never, ocorrencia_id }).eq("id", vid);
   }
 
   async function despachar() {
     const v = livres.find((x) => x.id === viaturaSel);
     if (!v || !o) return;
-    if (o.viatura_id && o.viatura_id !== v.id) await setViaturaStatus(o.viatura_id, "disponivel", null);
-    const ok = await update(
-      { viatura_id: v.id, viatura: v.prefixo, status: "em_atendimento", despachada_em: new Date().toISOString(), chegada_em: null },
-      `Viatura ${v.prefixo} despachada${v.guarnicao ? ` (${v.guarnicao})` : ""}`,
-    );
-    if (ok) {
-      await setViaturaStatus(v.id, "em_deslocamento", id);
-      setViaturaSel("");
-      toast.success(`${v.prefixo} despachada`);
-      refresh();
+    const { error } = await (supabase as never as { rpc: (name: string, args: Record<string, unknown>) => Promise<{ error: { message: string } | null }> })
+      .rpc("despachar_viatura", { _ocorrencia_id: id, _viatura_id: v.id });
+    if (error) {
+      toast.error(error.message);
+      return;
     }
+    setViaturaSel("");
+    toast.success(`${v.prefixo} despachada`);
+    refresh();
   }
 
   async function chegada() {
-    const ok = await update({ chegada_em: new Date().toISOString() }, `Viatura ${o?.viatura} chegou ao local`);
-    if (ok) {
-      await setViaturaStatus(o!.viatura_id, "no_local", id);
-      refresh();
+    const { error } = await (supabase as never as { rpc: (name: string, args: Record<string, unknown>) => Promise<{ error: { message: string } | null }> })
+      .rpc("marcar_chegada", { _ocorrencia_id: id });
+    if (error) {
+      toast.error(error.message);
+      return;
     }
+    toast.success("Chegada registrada");
+    refresh();
   }
 
   async function finalizar() {
     if (!encerrar || !o) return;
-    const texto = encerrar === "encerrada" ? `Encerrada — ${desfecho}` : "Ocorrência cancelada";
-    const ok = await update(
-      { status: encerrar, desfecho: encerrar === "encerrada" ? desfecho : "Cancelada" },
-      texto + (obsFinal.trim() ? `\n${obsFinal.trim()}` : ""),
-    );
-    if (ok) {
-      await setViaturaStatus(o.viatura_id, "disponivel", null);
-      setEncerrar(null);
-      setObsFinal("");
-      toast.success("Ocorrência finalizada");
-      refresh();
+    const { error } = await (supabase as never as { rpc: (name: string, args: Record<string, unknown>) => Promise<{ error: { message: string } | null }> })
+      .rpc("finalizar_ocorrencia", {
+        _ocorrencia_id: id,
+        _status: encerrar,
+        _desfecho: encerrar === "encerrada" ? desfecho : "Cancelada",
+        _observacao: obsFinal.trim(),
+      });
+    if (error) {
+      toast.error(error.message);
+      return;
     }
+    setEncerrar(null);
+    setObsFinal("");
+    toast.success("Ocorrência finalizada");
+    refresh();
   }
 
   async function reabrir() {
@@ -149,9 +153,10 @@ function Detalhe() {
 
   async function addNota() {
     if (!nota.trim()) return;
-    await log(nota.trim());
-    setNota("");
-    refresh();
+    if (await log(nota.trim())) {
+      setNota("");
+      refresh();
+    }
   }
 
   if (isLoading) return <div className="text-muted-foreground">Carregando...</div>;
@@ -247,15 +252,17 @@ function Detalhe() {
             <p className="mt-2 whitespace-pre-wrap">{o.relato}</p>
           </div>
 
-          <Envolvidos ocorrenciaId={id} lista={envolvidos} pode={!!me} meId={me?.id} isSup={!!me?.isSupervisor} onChange={refresh} log={log} />
+          <Envolvidos ocorrenciaId={id} lista={envolvidos} pode={podeEditar} meId={me?.id} isSup={!!me?.isSupervisor} onChange={refresh} log={log} />
         </div>
 
         <div className="space-y-3 card-3d animate-rise p-5">
           <h2 className="font-semibold text-primary">Histórico</h2>
-          <div className="space-y-2">
-            <Textarea rows={2} placeholder="Adicionar informação..." value={nota} onChange={(e) => setNota(e.target.value)} />
-            <Button size="sm" onClick={addNota} className="w-full">Adicionar</Button>
-          </div>
+          {podeEditar && (
+            <div className="space-y-2">
+              <Textarea rows={2} placeholder="Adicionar informação..." value={nota} onChange={(e) => setNota(e.target.value)} />
+              <Button size="sm" onClick={addNota} className="w-full">Adicionar</Button>
+            </div>
+          )}
           <ol className="space-y-3 border-l pl-4">
             {hist.map((h) => (
               <li key={h.id} className="text-sm">
@@ -352,7 +359,7 @@ function EditarDialog({ open, onClose, o, onSave }: { open: boolean; onClose: ()
 type Env = { id: string; tipo: string; nome: string; documento: string | null; telefone: string | null; observacao: string | null; criado_por: string };
 
 function Envolvidos({ ocorrenciaId, lista, pode, meId, isSup, onChange, log }: {
-  ocorrenciaId: string; lista: Env[]; pode: boolean; meId?: string | undefined; isSup: boolean; onChange: () => void; log: (d: string) => Promise<void>;
+  ocorrenciaId: string; lista: Env[]; pode: boolean; meId?: string | undefined; isSup: boolean; onChange: () => void; log: (d: string) => Promise<boolean>;
 }) {
   const vazio = { tipo: TIPOS_ENVOLVIDO[0] as string, nome: "", documento: "", telefone: "", observacao: "" };
   const [f, setF] = useState(vazio);

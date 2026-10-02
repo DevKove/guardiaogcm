@@ -1,0 +1,448 @@
+-- Security hardening for the operational CAD.
+-- Existing records are preserved. Review the bootstrap note in docs/SECURITY.md before deployment.
+
+-- Never grant administrator privileges based on signup order or user-supplied metadata.
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  INSERT INTO public.profiles (id, nome, matricula)
+  VALUES (
+    NEW.id,
+    COALESCE(NEW.raw_user_meta_data->>'nome', ''),
+    NULLIF(NEW.raw_user_meta_data->>'matricula', '')
+  )
+  ON CONFLICT (id) DO NOTHING;
+
+  INSERT INTO public.user_roles (user_id, role)
+  VALUES (NEW.id, 'operador')
+  ON CONFLICT (user_id, role) DO NOTHING;
+
+  RETURN NEW;
+END;
+$$;
+
+REVOKE EXECUTE ON FUNCTION public.handle_new_user() FROM PUBLIC, anon, authenticated;
+
+-- Fleet master data and status changes are restricted to supervisors and administrators.
+DROP POLICY IF EXISTS "staff update viaturas" ON public.viaturas;
+DROP POLICY IF EXISTS "supervisors update viaturas" ON public.viaturas;
+CREATE POLICY "supervisors update viaturas"
+  ON public.viaturas FOR UPDATE TO authenticated
+  USING (public.has_role(auth.uid(), 'admin') OR public.has_role(auth.uid(), 'supervisor'))
+  WITH CHECK (public.has_role(auth.uid(), 'admin') OR public.has_role(auth.uid(), 'supervisor'));
+
+-- The audit trigger records changed field names without duplicating personal data values.
+ALTER TABLE public.ocorrencia_historico
+  ALTER COLUMN usuario_id DROP NOT NULL;
+
+CREATE OR REPLACE FUNCTION public.audit_ocorrencia_update()
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_fields text[];
+BEGIN
+  SELECT array_agg(k.key ORDER BY k.key)
+    INTO v_fields
+    FROM jsonb_object_keys(to_jsonb(NEW)) AS k(key)
+   WHERE k.key <> 'updated_at'
+     AND (to_jsonb(OLD) -> k.key) IS DISTINCT FROM (to_jsonb(NEW) -> k.key);
+
+  IF COALESCE(cardinality(v_fields), 0) = 0 THEN
+    RETURN NEW;
+  END IF;
+
+  INSERT INTO public.ocorrencia_historico (ocorrencia_id, usuario_id, descricao)
+  VALUES (
+    NEW.id,
+    auth.uid(),
+    'Alteração registrada pelo banco. Campos: ' || array_to_string(v_fields, ', ')
+  );
+
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS ocorrencias_audit_update ON public.ocorrencias;
+CREATE TRIGGER ocorrencias_audit_update
+  AFTER UPDATE ON public.ocorrencias
+  FOR EACH ROW EXECUTE FUNCTION public.audit_ocorrencia_update();
+
+REVOKE EXECUTE ON FUNCTION public.audit_ocorrencia_update() FROM PUBLIC, anon, authenticated;
+
+-- Transactional dispatch: occurrence and vehicle are changed in the same transaction.
+CREATE OR REPLACE FUNCTION public.despachar_viatura(_ocorrencia_id uuid, _viatura_id uuid)
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_user uuid := auth.uid();
+  v_oc public.ocorrencias%ROWTYPE;
+  v_prefixo text;
+BEGIN
+  IF v_user IS NULL OR NOT public.is_staff(v_user) THEN
+    RAISE EXCEPTION 'Acesso não autorizado.';
+  END IF;
+
+  SELECT * INTO v_oc
+    FROM public.ocorrencias
+   WHERE id = _ocorrencia_id
+   FOR UPDATE;
+
+  IF NOT FOUND THEN RAISE EXCEPTION 'Ocorrência não encontrada.'; END IF;
+  IF NOT (v_oc.criado_por = v_user OR public.has_role(v_user, 'admin') OR public.has_role(v_user, 'supervisor')) THEN
+    RAISE EXCEPTION 'Sem permissão para despachar esta ocorrência.';
+  END IF;
+  IF v_oc.status NOT IN ('aberta', 'em_atendimento') THEN
+    RAISE EXCEPTION 'A ocorrência não está ativa.';
+  END IF;
+
+  IF v_oc.viatura_id = _viatura_id THEN RETURN; END IF;
+  PERFORM set_config('app.cad_operation', 'dispatch', true);
+
+  SELECT prefixo INTO v_prefixo
+    FROM public.viaturas
+   WHERE id = _viatura_id AND ativa = true AND status = 'disponivel' AND ocorrencia_id IS NULL
+   FOR UPDATE;
+
+  IF NOT FOUND THEN RAISE EXCEPTION 'A viatura não está disponível.'; END IF;
+
+  IF v_oc.viatura_id IS NOT NULL THEN
+    UPDATE public.viaturas
+       SET status = 'disponivel', ocorrencia_id = NULL
+     WHERE id = v_oc.viatura_id AND ocorrencia_id = _ocorrencia_id;
+    IF NOT FOUND THEN RAISE EXCEPTION 'O vínculo da viatura anterior está inconsistente; despacho cancelado.'; END IF;
+  END IF;
+
+  UPDATE public.viaturas
+     SET status = 'em_deslocamento', ocorrencia_id = _ocorrencia_id
+   WHERE id = _viatura_id;
+
+  UPDATE public.ocorrencias
+     SET viatura_id = _viatura_id,
+         viatura = v_prefixo,
+         status = 'em_atendimento',
+         despachada_em = now(),
+         chegada_em = NULL
+   WHERE id = _ocorrencia_id;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.marcar_chegada(_ocorrencia_id uuid)
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_user uuid := auth.uid();
+  v_oc public.ocorrencias%ROWTYPE;
+BEGIN
+  IF v_user IS NULL OR NOT public.is_staff(v_user) THEN
+    RAISE EXCEPTION 'Acesso não autorizado.';
+  END IF;
+
+  SELECT * INTO v_oc FROM public.ocorrencias WHERE id = _ocorrencia_id FOR UPDATE;
+  IF NOT FOUND THEN RAISE EXCEPTION 'Ocorrência não encontrada.'; END IF;
+  IF NOT (v_oc.criado_por = v_user OR public.has_role(v_user, 'admin') OR public.has_role(v_user, 'supervisor')) THEN
+    RAISE EXCEPTION 'Sem permissão para alterar esta ocorrência.';
+  END IF;
+  IF v_oc.status NOT IN ('aberta', 'em_atendimento') THEN
+    RAISE EXCEPTION 'A ocorrência não está ativa.';
+  END IF;
+  IF v_oc.viatura_id IS NULL THEN RAISE EXCEPTION 'Nenhuma viatura foi despachada.'; END IF;
+  IF v_oc.chegada_em IS NOT NULL THEN RAISE EXCEPTION 'A chegada já foi registrada.'; END IF;
+
+  PERFORM set_config('app.cad_operation', 'arrival', true);
+  UPDATE public.ocorrencias SET chegada_em = now() WHERE id = _ocorrencia_id;
+  UPDATE public.viaturas SET status = 'no_local'
+   WHERE id = v_oc.viatura_id AND ocorrencia_id = _ocorrencia_id;
+  IF NOT FOUND THEN RAISE EXCEPTION 'O vínculo da viatura está inconsistente; chegada cancelada.'; END IF;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.finalizar_ocorrencia(
+  _ocorrencia_id uuid,
+  _status text,
+  _desfecho text,
+  _observacao text DEFAULT ''
+)
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_user uuid := auth.uid();
+  v_oc public.ocorrencias%ROWTYPE;
+  v_status public.ocorrencia_status;
+BEGIN
+  IF v_user IS NULL OR NOT public.is_staff(v_user) THEN
+    RAISE EXCEPTION 'Acesso não autorizado.';
+  END IF;
+  IF _status NOT IN ('encerrada', 'cancelada') THEN
+    RAISE EXCEPTION 'Estado final inválido.';
+  END IF;
+  IF length(COALESCE(_observacao, '')) > 5000 THEN
+    RAISE EXCEPTION 'A observação excede 5000 caracteres.';
+  END IF;
+  IF _status = 'cancelada' AND length(trim(COALESCE(_observacao, ''))) = 0 THEN
+    RAISE EXCEPTION 'Informe o motivo do cancelamento.';
+  END IF;
+  IF _status = 'encerrada' AND length(trim(COALESCE(_desfecho, ''))) = 0 THEN
+    RAISE EXCEPTION 'Informe o desfecho da ocorrência.';
+  END IF;
+  IF length(COALESCE(_desfecho, '')) > 120 THEN
+    RAISE EXCEPTION 'O desfecho excede 120 caracteres.';
+  END IF;
+
+  SELECT * INTO v_oc FROM public.ocorrencias WHERE id = _ocorrencia_id FOR UPDATE;
+  IF NOT FOUND THEN RAISE EXCEPTION 'Ocorrência não encontrada.'; END IF;
+  IF NOT (v_oc.criado_por = v_user OR public.has_role(v_user, 'admin') OR public.has_role(v_user, 'supervisor')) THEN
+    RAISE EXCEPTION 'Sem permissão para finalizar esta ocorrência.';
+  END IF;
+  IF v_oc.status NOT IN ('aberta', 'em_atendimento') THEN
+    RAISE EXCEPTION 'A ocorrência já foi finalizada.';
+  END IF;
+
+  v_status := _status::public.ocorrencia_status;
+  PERFORM set_config('app.cad_operation', 'finish', true);
+  UPDATE public.ocorrencias
+     SET status = v_status,
+         desfecho = CASE WHEN v_status = 'encerrada' THEN NULLIF(trim(COALESCE(_desfecho, '')), '') ELSE 'Cancelada' END
+   WHERE id = _ocorrencia_id;
+
+  IF v_oc.viatura_id IS NOT NULL THEN
+    UPDATE public.viaturas
+       SET status = 'disponivel', ocorrencia_id = NULL
+     WHERE id = v_oc.viatura_id AND ocorrencia_id = _ocorrencia_id;
+    IF NOT FOUND THEN RAISE EXCEPTION 'O vínculo da viatura está inconsistente; encerramento cancelado.'; END IF;
+  END IF;
+
+  INSERT INTO public.ocorrencia_historico (ocorrencia_id, usuario_id, descricao)
+  VALUES (
+    _ocorrencia_id,
+    v_user,
+    CASE WHEN v_status = 'encerrada' THEN 'Ocorrência encerrada' ELSE 'Ocorrência cancelada' END ||
+      CASE WHEN length(trim(COALESCE(_observacao, ''))) > 0 THEN E'\n' || trim(_observacao) ELSE '' END
+  );
+END;
+$$;
+
+REVOKE EXECUTE ON FUNCTION public.despachar_viatura(uuid, uuid) FROM PUBLIC, anon;
+REVOKE EXECUTE ON FUNCTION public.marcar_chegada(uuid) FROM PUBLIC, anon;
+REVOKE EXECUTE ON FUNCTION public.finalizar_ocorrencia(uuid, text, text, text) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.despachar_viatura(uuid, uuid) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.marcar_chegada(uuid) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.finalizar_ocorrencia(uuid, text, text, text) TO authenticated;
+
+
+-- Prevent operators from changing protected operational fields through direct REST updates.
+CREATE OR REPLACE FUNCTION public.guard_ocorrencia_update()
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_user uuid := auth.uid();
+  v_operation text := COALESCE(current_setting('app.cad_operation', true), '');
+  v_protected_changed boolean;
+BEGIN
+  IF v_user IS NULL THEN
+    RAISE EXCEPTION 'Sessão autenticada obrigatória para alterar ocorrência.';
+  END IF;
+
+  IF public.has_role(v_user, 'admin') OR public.has_role(v_user, 'supervisor') THEN
+    RETURN NEW;
+  END IF;
+
+  IF OLD.criado_por <> v_user THEN
+    RAISE EXCEPTION 'Sem permissão para alterar esta ocorrência.';
+  END IF;
+
+  v_protected_changed :=
+    NEW.status IS DISTINCT FROM OLD.status OR
+    NEW.viatura_id IS DISTINCT FROM OLD.viatura_id OR
+    NEW.viatura IS DISTINCT FROM OLD.viatura OR
+    NEW.despachada_em IS DISTINCT FROM OLD.despachada_em OR
+    NEW.chegada_em IS DISTINCT FROM OLD.chegada_em OR
+    NEW.encerrada_em IS DISTINCT FROM OLD.encerrada_em OR
+    NEW.desfecho IS DISTINCT FROM OLD.desfecho OR
+    NEW.plantao_id IS DISTINCT FROM OLD.plantao_id OR
+    NEW.criado_por IS DISTINCT FROM OLD.criado_por OR
+    NEW.created_at IS DISTINCT FROM OLD.created_at OR
+    NEW.protocolo IS DISTINCT FROM OLD.protocolo;
+
+  IF v_protected_changed AND v_operation NOT IN ('dispatch', 'arrival', 'finish') THEN
+    RAISE EXCEPTION 'Campo operacional protegido: utilize o fluxo de despacho/encerramento.';
+  END IF;
+
+  IF v_operation NOT IN ('', 'dispatch', 'arrival', 'finish') THEN
+    RAISE EXCEPTION 'Operação interna inválida.';
+  END IF;
+
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS ocorrencias_guard_update ON public.ocorrencias;
+CREATE TRIGGER ocorrencias_guard_update
+  BEFORE UPDATE ON public.ocorrencias
+  FOR EACH ROW EXECUTE FUNCTION public.guard_ocorrencia_update();
+
+REVOKE EXECUTE ON FUNCTION public.guard_ocorrencia_update() FROM PUBLIC, anon, authenticated;
+
+-- Mark privileged transactional paths so the trigger can distinguish them from direct REST updates.
+
+
+CREATE OR REPLACE FUNCTION public.audit_ocorrencia_insert()
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  INSERT INTO public.ocorrencia_historico (ocorrencia_id, usuario_id, descricao)
+  VALUES (NEW.id, auth.uid(), 'Ocorrência registrada');
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS ocorrencias_audit_insert ON public.ocorrencias;
+CREATE TRIGGER ocorrencias_audit_insert
+  AFTER INSERT ON public.ocorrencias
+  FOR EACH ROW EXECUTE FUNCTION public.audit_ocorrencia_insert();
+
+REVOKE EXECUTE ON FUNCTION public.audit_ocorrencia_insert() FROM PUBLIC, anon, authenticated;
+
+
+-- Atomically update a user's profile and single application role. Callable only by the service role
+-- after the server function has independently verified the requesting administrator.
+CREATE OR REPLACE FUNCTION public.admin_set_user_access(
+  _actor uuid,
+  _user_id uuid,
+  _nome text,
+  _matricula text,
+  _role public.app_role
+)
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  IF _actor IS NULL OR NOT public.has_role(_actor, 'admin') THEN
+    RAISE EXCEPTION 'Acesso restrito a administradores.';
+  END IF;
+  IF _user_id IS NULL OR length(trim(COALESCE(_nome, ''))) = 0 OR length(_nome) > 120 OR length(COALESCE(_matricula, '')) > 40 THEN
+    RAISE EXCEPTION 'Dados de perfil inválidos.';
+  END IF;
+
+  IF _role <> 'admin' AND EXISTS (
+    SELECT 1 FROM public.user_roles WHERE user_id = _user_id AND role = 'admin'
+  ) AND (SELECT count(*) FROM public.user_roles WHERE role = 'admin') <= 1 THEN
+    RAISE EXCEPTION 'Não é permitido remover o último administrador.';
+  END IF;
+
+  INSERT INTO public.profiles (id, nome, matricula)
+  VALUES (_user_id, trim(_nome), NULLIF(trim(COALESCE(_matricula, '')), ''))
+  ON CONFLICT (id) DO UPDATE
+    SET nome = EXCLUDED.nome, matricula = EXCLUDED.matricula;
+
+  DELETE FROM public.user_roles WHERE user_id = _user_id;
+  INSERT INTO public.user_roles (user_id, role) VALUES (_user_id, _role);
+END;
+$$;
+
+REVOKE ALL ON FUNCTION public.admin_set_user_access(uuid, uuid, text, text, public.app_role) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.admin_set_user_access(uuid, uuid, text, text, public.app_role) TO service_role;
+
+
+-- A new occurrence must start in the open state and cannot arrive pre-assigned to a vehicle.
+CREATE OR REPLACE FUNCTION public.guard_ocorrencia_insert()
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  IF auth.uid() IS NULL OR NEW.criado_por IS DISTINCT FROM auth.uid() THEN
+    RAISE EXCEPTION 'A ocorrência deve ser criada pelo usuário autenticado.';
+  END IF;
+  IF NEW.status <> 'aberta'
+     OR NEW.viatura_id IS NOT NULL
+     OR NEW.viatura IS NOT NULL
+     OR NEW.despachada_em IS NOT NULL
+     OR NEW.chegada_em IS NOT NULL
+     OR NEW.encerrada_em IS NOT NULL
+     OR NEW.desfecho IS NOT NULL THEN
+    RAISE EXCEPTION 'A ocorrência deve ser criada sem despacho e no estado aberta.';
+  END IF;
+  IF NEW.plantao_id IS NOT NULL AND NOT EXISTS (
+    SELECT 1 FROM public.plantoes
+     WHERE id = NEW.plantao_id AND operador_id = auth.uid() AND status = 'aberto'
+  ) THEN
+    RAISE EXCEPTION 'Só é permitido vincular a ocorrência ao seu próprio plantão aberto.';
+  END IF;
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS ocorrencias_guard_insert ON public.ocorrencias;
+CREATE TRIGGER ocorrencias_guard_insert
+  BEFORE INSERT ON public.ocorrencias
+  FOR EACH ROW EXECUTE FUNCTION public.guard_ocorrencia_insert();
+
+REVOKE EXECUTE ON FUNCTION public.guard_ocorrencia_insert() FROM PUBLIC, anon, authenticated;
+
+
+-- Only the occurrence owner, supervisors and administrators may add notes or involved persons.
+-- A non-admin cannot append records to an occurrence locked by a closed plantão.
+DROP POLICY IF EXISTS "staff insert hist" ON public.ocorrencia_historico;
+CREATE POLICY "authorized insert hist"
+  ON public.ocorrencia_historico FOR INSERT TO authenticated
+  WITH CHECK (
+    usuario_id = auth.uid()
+    AND EXISTS (
+      SELECT 1 FROM public.ocorrencias o
+       WHERE o.id = ocorrencia_id
+         AND (
+           o.criado_por = auth.uid()
+           OR public.has_role(auth.uid(), 'admin')
+           OR public.has_role(auth.uid(), 'supervisor')
+         )
+         AND (
+           public.has_role(auth.uid(), 'admin')
+           OR NOT public.ocorrencia_bloqueada(o.plantao_id, o.status)
+         )
+    )
+  );
+
+DROP POLICY IF EXISTS "staff insert env" ON public.ocorrencia_envolvidos;
+CREATE POLICY "authorized insert env"
+  ON public.ocorrencia_envolvidos FOR INSERT TO authenticated
+  WITH CHECK (
+    criado_por = auth.uid()
+    AND EXISTS (
+      SELECT 1 FROM public.ocorrencias o
+       WHERE o.id = ocorrencia_id
+         AND (
+           o.criado_por = auth.uid()
+           OR public.has_role(auth.uid(), 'admin')
+           OR public.has_role(auth.uid(), 'supervisor')
+         )
+         AND (
+           public.has_role(auth.uid(), 'admin')
+           OR NOT public.ocorrencia_bloqueada(o.plantao_id, o.status)
+         )
+    )
+  );

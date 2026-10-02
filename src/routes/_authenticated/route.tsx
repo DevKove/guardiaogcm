@@ -1,7 +1,7 @@
 import { createFileRoute, Link, Outlet, redirect, useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { Shield, LogOut, LayoutList, PlusCircle, Users, Car, BarChart3, UserCircle, School, CalendarClock } from "lucide-react";
+import { Shield, LogOut, LayoutList, PlusCircle, Users, Car, BarChart3, UserCircle, School, CalendarClock, History } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useMe } from "@/hooks/use-me";
 import { ROLE_LABEL } from "@/lib/cad";
@@ -53,6 +53,7 @@ function Layout() {
     { to: "/postos", icon: School, label: "Postos fixos" },
     { to: "/escalas", icon: CalendarClock, label: "Escalas" },
     { to: "/relatorios", icon: BarChart3, label: "Relatórios" },
+    { to: "/historico", icon: History, label: "Histórico" },
   ] as const;
 
   return (

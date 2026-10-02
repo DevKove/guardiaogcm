@@ -35,7 +35,9 @@ function VerPlantao() {
           <h1 className="text-gradient text-2xl">Plantão {p.turno} · {fmtDia(p.data_inicio)}</h1>
           <div className="text-xs text-muted-foreground">Operador: {nome} · {p.status === "aberto" ? "em andamento" : "encerrado"}</div>
         </div>
-        <Button variant="outline" onClick={() => window.print()}><Printer className="h-4 w-4" /> Imprimir</Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" onClick={() => window.print()}><Printer className="h-4 w-4" /> Imprimir relatório</Button>
+        </div>
       </div>
       {p.status !== "aberto" && !me.isAdmin && (
         <div className="flex items-center gap-2 rounded border border-warning/50 p-3 text-sm text-warning print:hidden"><Lock className="h-4 w-4" /> Plantão encerrado — somente o administrador pode alterar.</div>

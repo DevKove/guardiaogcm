@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { History, Moon, Sun } from "lucide-react";
+import { History, Moon, Sun, FileText } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { PageHeader } from "@/components/page-header";
@@ -22,6 +22,7 @@ function Historico() {
       const [y, m] = mes.split("-").map(Number);
       const fim = new Date(y ?? 2026, m ?? 1, 0).getDate();
       const { data } = await supabase.from("plantoes").select("id, data_inicio, turno, horario, equipe, supervisor, status, operador_id, iniciado_em, encerrado_em, resumo")
+        .eq("status", "encerrado")
         .gte("data_inicio", `${mes}-01`).lte("data_inicio", `${mes}-${fim}`).order("data_inicio", { ascending: false });
       const ids = [...new Set((data ?? []).map((p) => p.operador_id))];
       const { data: profs } = ids.length ? await supabase.from("profiles").select("id, nome").in("id", ids) : { data: [] };
@@ -38,10 +39,13 @@ function Historico() {
         <Input type="month" value={mes} onChange={(e) => setMes(e.target.value)} className="w-44" />
       </PageHeader>
       {isLoading && <div className="text-muted-foreground">Carregando...</div>}
-      {!isLoading && !dias.length && <div className="card-3d p-6 text-center text-muted-foreground">Nenhum plantão neste mês.</div>}
+      {!isLoading && !dias.length && <div className="card-3d p-6 text-center text-muted-foreground">Nenhum plantão finalizado neste mês.</div>}
       {dias.map((d) => (
         <div key={d} className="card-3d animate-rise p-4">
-          <div className="mb-2 font-mono text-sm font-bold text-primary">{fmtDia(d)}</div>
+          <div className="mb-2 flex items-center justify-between gap-3">
+            <div className="font-mono text-sm font-bold text-primary">{fmtDia(d)}</div>
+            <div className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Plantões finalizados</div>
+          </div>
           <div className="grid gap-2 md:grid-cols-2">
             {data.filter((p) => p.data_inicio === d).sort((a, b) => ordemTurno(a.turno) - ordemTurno(b.turno)).map((p) => {
               const n = (p.resumo as { ocorrencias?: unknown[] } | null)?.ocorrencias?.length;
@@ -52,9 +56,12 @@ function Historico() {
                     <div className="font-semibold">{p.turno} <span className="text-xs text-muted-foreground">{p.horario}</span></div>
                     <div className="text-xs text-muted-foreground">Operador: {p.operador}{p.equipe ? ` · Equipe ${p.equipe}` : ""}{p.supervisor ? ` · Sup. ${p.supervisor}` : ""}</div>
                   </div>
-                  <div className="text-right text-xs">
-                    <div className={p.status === "aberto" ? "text-success" : "text-muted-foreground"}>{p.status === "aberto" ? "Em andamento" : "Encerrado"}</div>
-                    {n !== undefined && <div className="font-mono">{n} ocorr.</div>}
+                  <div className="flex items-center gap-3 text-right text-xs">
+                    <div>
+                      <div className="text-success">Finalizado</div>
+                      {n !== undefined && <div className="font-mono">{n} ocorr.</div>}
+                    </div>
+                    <FileText className="h-4 w-4 text-primary" />
                   </div>
                 </Link>
               );
