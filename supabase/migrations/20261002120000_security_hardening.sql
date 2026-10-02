@@ -299,3 +299,24 @@ CREATE TRIGGER ocorrencias_guard_update
 REVOKE EXECUTE ON FUNCTION public.guard_ocorrencia_update() FROM PUBLIC, anon, authenticated;
 
 -- Mark privileged transactional paths so the trigger can distinguish them from direct REST updates.
+
+
+CREATE OR REPLACE FUNCTION public.audit_ocorrencia_insert()
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  INSERT INTO public.ocorrencia_historico (ocorrencia_id, usuario_id, descricao)
+  VALUES (NEW.id, auth.uid(), 'Ocorrência registrada');
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS ocorrencias_audit_insert ON public.ocorrencias;
+CREATE TRIGGER ocorrencias_audit_insert
+  AFTER INSERT ON public.ocorrencias
+  FOR EACH ROW EXECUTE FUNCTION public.audit_ocorrencia_insert();
+
+REVOKE EXECUTE ON FUNCTION public.audit_ocorrencia_insert() FROM PUBLIC, anon, authenticated;
