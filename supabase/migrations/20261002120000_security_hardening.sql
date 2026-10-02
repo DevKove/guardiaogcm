@@ -159,6 +159,7 @@ BEGIN
     RAISE EXCEPTION 'A ocorrência não está ativa.';
   END IF;
   IF v_oc.viatura_id IS NULL THEN RAISE EXCEPTION 'Nenhuma viatura foi despachada.'; END IF;
+  IF v_oc.chegada_em IS NOT NULL THEN RAISE EXCEPTION 'A chegada já foi registrada.'; END IF;
 
   PERFORM set_config('app.cad_operation', 'arrival', true);
   UPDATE public.ocorrencias SET chegada_em = now() WHERE id = _ocorrencia_id;
@@ -195,6 +196,12 @@ BEGIN
   END IF;
   IF _status = 'cancelada' AND length(trim(COALESCE(_observacao, ''))) = 0 THEN
     RAISE EXCEPTION 'Informe o motivo do cancelamento.';
+  END IF;
+  IF _status = 'encerrada' AND length(trim(COALESCE(_desfecho, ''))) = 0 THEN
+    RAISE EXCEPTION 'Informe o desfecho da ocorrência.';
+  END IF;
+  IF length(COALESCE(_desfecho, '')) > 120 THEN
+    RAISE EXCEPTION 'O desfecho excede 120 caracteres.';
   END IF;
 
   SELECT * INTO v_oc FROM public.ocorrencias WHERE id = _ocorrencia_id FOR UPDATE;
