@@ -1,7 +1,7 @@
 import { createFileRoute, Link, Outlet, redirect, useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { Shield, LogOut, LayoutList, PlusCircle, Users, Car, BarChart3, UserCircle, School, CalendarClock, History, PlayCircle } from "lucide-react";
+import { Shield, LogOut, LayoutList, PlusCircle, Users, Car, BarChart3, UserCircle, School, CalendarClock, History, PlayCircle, Palette } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useMe } from "@/hooks/use-me";
 import { ROLE_LABEL } from "@/lib/cad";
@@ -40,6 +40,21 @@ function Layout() {
   const { data: me } = useMe();
   const qc = useQueryClient();
   const navigate = useNavigate();
+  const [theme, setTheme] = useState("escuro");
+
+  useEffect(() => {
+    const saved = window.localStorage.getItem("cad-theme");
+    const validThemes = ["claro", "escuro", "cyberpunk", "oceano", "floresta"];
+    const initial = saved && validThemes.includes(saved) ? saved : "escuro";
+    setTheme(initial);
+    document.documentElement.dataset.theme = initial;
+  }, []);
+
+  function changeTheme(value: string) {
+    setTheme(value);
+    document.documentElement.dataset.theme = value;
+    window.localStorage.setItem("cad-theme", value);
+  }
 
   async function signOut() {
     await qc.cancelQueries();
