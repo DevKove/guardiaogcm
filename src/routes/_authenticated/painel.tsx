@@ -36,7 +36,7 @@ function Painel() {
   const { data: feed } = useQuery({
     queryKey: ["plantao-home-feed", plantaoAtual?.id],
     enabled: !!plantaoAtual,
-    queryFn: () => carregarAtividades(plantaoAtual as { id: string; operador_id: string; iniciado_em: string; encerrado_em: string | null }),
+    queryFn: () => carregarAtividades(plantaoAtual as { id: string; operador_id: string; iniciado_em: string; encerrado_em: string | null; data_inicio: string; turno: string }),
     refetchInterval: plantaoAtual ? 15000 : false,
   });
 

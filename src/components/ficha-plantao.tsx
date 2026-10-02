@@ -24,9 +24,29 @@ export function FichaPlantao({ plantao, editavel, operadorNome }: { plantao: Pla
 
   const { data: atv } = useQuery({
     queryKey: ["plantao-atv", plantao.id],
-    queryFn: () => carregarAtividades(plantao),
-    refetchInterval: plantao.status === "aberto" ? 15000 : false,
+    queryFn: async () => {
+      if (plantao.status === "encerrado" && plantao.resumo && Array.isArray(plantao.resumo.viaturas)) {
+        return plantao.resumo as Awaited<ReturnType<typeof carregarAtividades>>;
+      }
+      return carregarAtividades(plantao);
+    },
+    refetchInterval: plantao.status === "aberto" ? 30000 : false,
   });
+
+  useEffect(() => {
+    const refresh = () => { void qc.invalidateQueries({ queryKey: ["plantao-atv", plantao.id] }); };
+    const ch = supabase.channel(`plantao-ficha-${plantao.id}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "plantoes", filter: `id=eq.${plantao.id}` }, refresh)
+      .on("postgres_changes", { event: "*", schema: "public", table: "ocorrencias", filter: `plantao_id=eq.${plantao.id}` }, refresh)
+      .on("postgres_changes", { event: "*", schema: "public", table: "plantao_registros", filter: `plantao_id=eq.${plantao.id}` }, refresh)
+      .on("postgres_changes", { event: "*", schema: "public", table: "plantao_historico", filter: `plantao_id=eq.${plantao.id}` }, refresh)
+      .on("postgres_changes", { event: "*", schema: "public", table: "ocorrencia_historico" }, refresh)
+      .on("postgres_changes", { event: "*", schema: "public", table: "viaturas" }, refresh)
+      .on("postgres_changes", { event: "*", schema: "public", table: "escalas" }, refresh)
+      .on("postgres_changes", { event: "*", schema: "public", table: "postos_fixos" }, refresh)
+      .subscribe();
+    return () => { void supabase.removeChannel(ch); };
+  }, [plantao.id, qc]);
 
   const set = <K extends keyof Plantao>(k: K, v: Plantao[K]) => setF((p) => ({ ...p, [k]: v }));
   const setG = (i: number, k: keyof Guarnicao, v: string) => set("guarnicoes", f.guarnicoes.map((g, j) => (j === i ? { ...g, [k]: v } : g)));
@@ -115,6 +135,28 @@ export function FichaPlantao({ plantao, editavel, operadorNome }: { plantao: Pla
       {editavel && (
         <div className="flex justify-end"><Button onClick={salvar} disabled={saving}><Save className="h-4 w-4" /> {saving ? "Salvando..." : "Salvar relatório"}</Button></div>
       )}
+
+      <section className="card-3d animate-rise p-4 print:hidden">
+        <h3 className="mb-2 flex items-center gap-2 font-semibold text-primary"><Car className="h-4 w-4" /> Frota e equipes vinculadas ao turno</h3>
+        <p className="mb-3 text-xs text-muted-foreground">Atualizado automaticamente quando há alterações na frota, nas escalas ou nos próprios municipais.</p>
+        <div className="grid gap-3 md:grid-cols-2">
+          <div className="rounded-lg border p-3">
+            <div className="mb-2 text-sm font-semibold">Viaturas ({atv?.viaturas.length ?? 0})</div>
+            <div className="space-y-2 text-xs">
+              {atv?.viaturas.map((v) => <div key={v.id} className="flex flex-wrap items-center justify-between gap-2 border-b pb-2 last:border-0"><span className="font-mono font-bold">{v.prefixo}</span><span className="text-muted-foreground">{v.guarnicao || "Guarnição não informada"}</span><span className={v.ativa ? "text-success" : "text-muted-foreground"}>{v.ativa ? v.status.replaceAll("_", " ") : "inativa"}</span></div>)}
+              {!atv?.viaturas.length && <span className="text-muted-foreground">Nenhuma viatura cadastrada.</span>}
+            </div>
+          </div>
+          <div className="rounded-lg border p-3">
+            <div className="mb-2 text-sm font-semibold">Escalas do turno ({atv?.escalas.length ?? 0})</div>
+            <div className="space-y-2 text-xs">
+              {atv?.escalas.map((e) => <div key={e.id} className="border-b pb-2 last:border-0"><div className="font-semibold">{e.funcao} · {e.hora_inicio.slice(0, 5)}–{e.hora_fim.slice(0, 5)}</div><div>{e.agentes}</div>{e.observacao && <div className="text-muted-foreground">{e.observacao}</div>}</div>)}
+              {!atv?.escalas.length && <span className="text-muted-foreground">Nenhuma escala cadastrada para esta data e turno.</span>}
+            </div>
+          </div>
+        </div>
+        <div className="mt-3 text-xs text-muted-foreground">Próprios municipais ativos: {atv?.postosAtivos.map((p) => p.nome).join(" · ") || "Nenhum cadastrado"}</div>
+      </section>
 
       <section className="card-3d animate-rise p-4">
         <h3 className="mb-2 flex items-center gap-2 font-semibold text-primary"><ClipboardList className="h-4 w-4" /> Solicitações e ocorrências do plantão ({atv?.ocorrencias.length ?? 0})</h3>
@@ -210,9 +252,20 @@ function RelatorioImpresso({ p, operadorNome, atv }: { p: Plantao; operadorNome:
         <div key={t} className="mt-1 border border-black"><div className="border-b border-black text-center font-bold">{t}</div><div className="min-h-8 whitespace-pre-wrap p-1">{v}</div></div>
       ))}
       <div className="mt-1 border border-black">
+        <div className="border-b border-black text-center font-bold">FROTA E ESCALAS DO TURNO</div>
+        <div className="p-1">
+          <div className="font-bold">Viaturas</div>
+          {atv?.viaturas.map((v) => <div key={v.id}>{v.prefixo} — {v.ativa ? v.status.replaceAll("_", " ") : "inativa"} — guarnição: {v.guarnicao || "não informada"} — KM: {v.km_atual ?? "não informado"}{v.observacao ? ` — ${v.observacao}` : ""}</div>)}
+          <div className="mt-1 font-bold">Escalas do turno</div>
+          {atv?.escalas.map((e) => <div key={e.id}>{e.hora_inicio.slice(0, 5)}–{e.hora_fim.slice(0, 5)} — {e.funcao} — {e.agentes}{e.observacao ? ` — ${e.observacao}` : ""}</div>)}
+          <div className="mt-1 font-bold">Próprios municipais ativos</div>
+          <div>{atv?.postosAtivos.map((p) => `${p.nome} (${p.tipo})`).join("; ") || "Nenhum cadastrado"}</div>
+        </div>
+      </div>
+      <div className="mt-1 border border-black">
         <div className="border-b border-black text-center font-bold">SOLICITAÇÕES E OCORRÊNCIAS</div>
         <div className="p-1">
-          {atv?.ocorrencias.map((o) => <div key={o.id}>{hora(o.created_at)} — {fmtProtocolo(o.protocolo, o.created_at)} — {o.natureza} — {o.endereco}{o.bairro ? `, ${o.bairro}` : ""}{o.viatura ? ` — ${o.viatura}` : ""} — {STATUS[o.status as Status]?.label} — registro: {atv?.usuarios[o.criado_por] ?? o.criado_por.slice(0, 8)}{o.desfecho ? ` (${o.desfecho})` : ""}</div>)}
+          {atv?.ocorrencias.map((o) => <div key={o.id}>{hora(o.created_at)} — {fmtProtocolo(o.protocolo, o.created_at)} — {o.natureza} — {o.endereco}{o.numero ? `, ${o.numero}` : ""}{o.bairro ? `, ${o.bairro}` : ""} — origem: {o.origem} — prioridade: {o.prioridade} — solicitante: {o.solicitante_nome || "não informado"}{o.viatura ? ` — VTR ${o.viatura}` : ""} — {STATUS[o.status as Status]?.label}{o.despachada_em ? ` — despacho ${hora(o.despachada_em)}` : ""}{o.chegada_em ? ` — chegada ${hora(o.chegada_em)}` : ""}{o.encerrada_em ? ` — encerrada ${hora(o.encerrada_em)}` : ""} — registro: {atv?.usuarios[o.criado_por] ?? o.criado_por.slice(0, 8)}{o.desfecho ? ` (${o.desfecho})` : ""}</div>)}
           {[...(atv?.registros ?? [])].reverse().map((r) => <div key={r.id}>{hora(r.hora)} — {r.texto} — registro: {atv?.usuarios[r.criado_por] ?? r.criado_por.slice(0, 8)}</div>)}
         </div>
       </div>

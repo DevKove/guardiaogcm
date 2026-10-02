@@ -1,12 +1,13 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { CheckCircle2, Clock3, FileText, LockKeyhole, PlayCircle, Square } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { useMe } from "@/hooks/use-me";
-import { fmtDia, turnoAtual, type Plantao } from "@/lib/plantao";
+import { carregarAtividades, fmtDia, turnoAtual, type Plantao } from "@/lib/plantao";
+import { PlantaoResumoTempoReal } from "@/components/plantao-tempo-real";
 
 export const Route = createFileRoute("/_authenticated/plantao")({
   head: () => ({ meta: [{ title: "Plantão · CAD" }] }),
@@ -33,6 +34,13 @@ function PlantaoControle() {
     },
     refetchInterval: 15000,
   });
+
+  useEffect(() => {
+    const ch = supabase.channel("plantao-controle-live")
+      .on("postgres_changes", { event: "*", schema: "public", table: "plantoes" }, () => { void qc.invalidateQueries({ queryKey: ["plantao-atual"] }); })
+      .subscribe();
+    return () => { void supabase.removeChannel(ch); };
+  }, [qc]);
 
   async function iniciar() {
     if (!me) return;
@@ -63,9 +71,18 @@ function PlantaoControle() {
   async function finalizar() {
     if (!plantao || !me) return;
     setSaving(true);
+    const encerradoEm = new Date().toISOString();
+    let resumo: Awaited<ReturnType<typeof carregarAtividades>>;
+    try {
+      resumo = await carregarAtividades({ ...plantao, encerrado_em: encerradoEm });
+    } catch (e) {
+      setSaving(false);
+      toast.error("Não foi possível consolidar o relatório completo. O plantão continua aberto: " + (e instanceof Error ? e.message : "erro desconhecido"));
+      return;
+    }
     const { error } = await supabase
       .from("plantoes")
-      .update({ status: "encerrado", encerrado_em: new Date().toISOString() })
+      .update({ status: "encerrado", encerrado_em: encerradoEm, resumo: { operador: me.nome, ...resumo } } as never)
       .eq("id", plantao.id)
       .eq("status", "aberto")
       .eq("operador_id", me.id);
@@ -90,6 +107,7 @@ function PlantaoControle() {
       </div>
 
       {plantao ? (
+        <>
         <section className="card-3d animate-rise space-y-5 p-5">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
@@ -111,6 +129,8 @@ function PlantaoControle() {
             <div className="flex items-center gap-2 rounded-lg border border-warning/40 bg-warning/5 p-3 text-sm text-warning"><LockKeyhole className="h-4 w-4" /> Este plantão foi iniciado por outro usuário. Você pode consultar o andamento, mas o encerramento pertence ao operador que o iniciou.</div>
           )}
         </section>
+        <PlantaoResumoTempoReal plantaoId={plantao.id} />
+        </>
       ) : (
         <section className="card-3d animate-rise space-y-5 p-5">
           <div className="flex items-center gap-3">
