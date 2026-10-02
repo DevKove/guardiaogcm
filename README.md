@@ -92,7 +92,7 @@ O frontend é publicado gratuitamente pelo **GitHub Pages**. O backend permanece
 - Operações administrativas protegidas por Edge Function.
 - Proteção por Row Level Security (RLS).
 
-### Relatórios e histórico
+### Personalização visual\n- Seletor de tema disponível no cabeçalho do sistema.\n- Temas Escuro, Claro, Cyberpunk, Oceano e Floresta.\n- Preferência salva no navegador e restaurada ao retornar ao sistema.\n\n### Relatórios e histórico
 - Relatórios operacionais.
 - Consulta de ocorrências.
 - Histórico de operações.

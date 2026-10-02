@@ -1,7 +1,7 @@
 import { createFileRoute, Link, Outlet, redirect, useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { Shield, LogOut, LayoutList, PlusCircle, Users, Car, BarChart3, UserCircle, School, CalendarClock, History, PlayCircle } from "lucide-react";
+import { Shield, LogOut, LayoutList, PlusCircle, Users, Car, BarChart3, UserCircle, School, CalendarClock, History, PlayCircle, Palette } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useMe } from "@/hooks/use-me";
 import { ROLE_LABEL } from "@/lib/cad";
@@ -40,6 +40,21 @@ function Layout() {
   const { data: me } = useMe();
   const qc = useQueryClient();
   const navigate = useNavigate();
+  const [theme, setTheme] = useState("escuro");
+
+  useEffect(() => {
+    const saved = window.localStorage.getItem("cad-theme");
+    const validThemes = ["claro", "escuro", "cyberpunk", "oceano", "floresta"];
+    const initial = saved && validThemes.includes(saved) ? saved : "escuro";
+    setTheme(initial);
+    document.documentElement.dataset["theme"] = initial;
+  }, []);
+
+  function changeTheme(value: string) {
+    setTheme(value);
+    document.documentElement.dataset["theme"] = value;
+    window.localStorage.setItem("cad-theme", value);
+  }
 
   async function signOut() {
     await qc.cancelQueries();
@@ -107,6 +122,21 @@ function Layout() {
           </nav>
 
           <div className="ml-auto flex shrink-0 items-center gap-3">
+            <label className="flex h-9 items-center gap-1.5 rounded-md border border-border px-2 text-muted-foreground" title="Personalizar aparência">
+              <Palette className="h-4 w-4 shrink-0" />
+              <select
+                aria-label="Tema visual"
+                value={theme}
+                onChange={(e) => changeTheme(e.target.value)}
+                className="max-w-[100px] bg-transparent text-xs text-foreground outline-none sm:max-w-[120px]"
+              >
+                <option value="escuro">Escuro</option>
+                <option value="claro">Claro</option>
+                <option value="cyberpunk">Cyberpunk</option>
+                <option value="oceano">Oceano</option>
+                <option value="floresta">Floresta</option>
+              </select>
+            </label>
             <Relogio />
             <Link
               to="/perfil"
