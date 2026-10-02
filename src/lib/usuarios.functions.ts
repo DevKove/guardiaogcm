@@ -116,9 +116,17 @@ export const excluirUsuario = createServerFn({ method: "POST" })
     await assertAdmin(context.supabase as never, context.userId);
     if (data.id === context.userId) throw new Error("Você não pode excluir a si mesmo.");
     const sa = await admin();
-    await sa.from("user_roles").delete().eq("user_id", data.id);
-    await sa.from("profiles").delete().eq("id", data.id);
-    const { error } = await sa.auth.admin.deleteUser(data.id);
-    if (error) throw new Error(error.message);
+    const { error: deleteError } = await sa.auth.admin.deleteUser(data.id);
+    if (deleteError) throw new Error(deleteError.message);
+
+    // Auth deletion is not part of a Postgres transaction; check every cleanup result and
+    // report explicitly if orphaned application rows need administrator attention.
+    const [{ error: rolesError }, { error: profileError }] = await Promise.all([
+      sa.from("user_roles").delete().eq("user_id", data.id),
+      sa.from("profiles").delete().eq("id", data.id),
+    ]);
+    if (rolesError || profileError) {
+      throw new Error("A conta foi removida do Auth, mas houve falha ao limpar os dados associados. Solicite uma verificação administrativa.");
+    }
     return { ok: true };
   });
