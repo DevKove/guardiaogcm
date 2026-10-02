@@ -3,18 +3,26 @@
 //   - TanStack devtools (dev-only, first), tanstackStart, viteReact, tailwindcss, tsConfigPaths,
 //     nitro (build-only using cloudflare as a default target), VITE_* env injection, @ path alias,
 //     React/TanStack dedupe, error logger plugins, and sandbox detection (port/host/strictPort).
-// You can pass additional config via defineConfig({ vite: { ... }, etc... }) if needed.
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 
 export default defineConfig({
   tanstackStart: {
-    // Redirect TanStack Start's bundled server entry to src/server.ts (our SSR error wrapper).
-    // nitro/vite builds from this
+    // GitHub Pages is static hosting. SPA mode removes the runtime SSR requirement
+    // and generates a client-side application shell.
+    spa: {
+      enabled: true,
+      prerender: {
+        outputPath: "/_shell.html",
+      },
+    },
+    // Keep the existing server entry for compatibility with the current
+    // Lovable/TanStack build pipeline. GitHub Pages will publish only the
+    // static client output.
     server: { entry: "server" },
   },
   vite: {
-    // Pre-bundle heavy deps so the first visit to a page doesn't trigger a
-    // re-optimization that invalidates already-loaded chunks.
+    // GitHub Pages project sites are served below /<repository>/.
+    base: "/guardiaogcm/",
     optimizeDeps: { include: ["recharts", "@radix-ui/react-dialog"] },
   },
 });
