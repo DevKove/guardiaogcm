@@ -146,7 +146,7 @@ export function FichaPlantao({ plantao, editavel, operadorNome }: { plantao: Pla
         <div className="space-y-1 text-xs">
           {atv?.registros.map((r) => (
             <div key={r.id} className="flex items-center gap-2 border-b py-1 last:border-0">
-              <Clock className="h-3 w-3 text-primary" /><span className="font-mono">{hora(r.hora)}</span><span className="flex-1">{r.texto}</span>
+              <Clock className="h-3 w-3 text-primary" /><span className="font-mono">{hora(r.hora)}</span><span className="flex-1">{r.texto}</span><span className="text-[10px] text-muted-foreground">{atv?.usuarios[r.criado_por] ?? r.criado_por.slice(0, 8)}</span>
               {editavel && <button onClick={() => apagar(r.id)} className="text-muted-foreground hover:text-destructive"><Trash2 className="h-3 w-3" /></button>}
             </div>
           ))}
@@ -209,7 +209,7 @@ function RelatorioImpresso({ p, operadorNome, atv }: { p: Plantao; operadorNome:
       <div className="mt-1 border border-black">
         <div className="border-b border-black text-center font-bold">SOLICITAÇÕES E OCORRÊNCIAS</div>
         <div className="p-1">
-          {atv?.ocorrencias.map((o) => <div key={o.id}>{hora(o.created_at)} — {fmtProtocolo(o.protocolo, o.created_at)} — {o.natureza} — {o.endereco}{o.bairro ? `, ${o.bairro}` : ""}{o.viatura ? ` — ${o.viatura}` : ""} — {STATUS[o.status as Status]?.label}{o.desfecho ? ` (${o.desfecho})` : ""}</div>)}
+          {atv?.ocorrencias.map((o) => <div key={o.id}>{hora(o.created_at)} — {fmtProtocolo(o.protocolo, o.created_at)} — {o.natureza} — {o.endereco}{o.bairro ? `, ${o.bairro}` : ""}{o.viatura ? ` — ${o.viatura}` : ""} — {STATUS[o.status as Status]?.label} — registro: {atv?.usuarios[o.criado_por] ?? o.criado_por.slice(0, 8)}{o.desfecho ? ` (${o.desfecho})` : ""}</div>)}
           {[...(atv?.registros ?? [])].reverse().map((r) => <div key={r.id}>{hora(r.hora)} — {r.texto}</div>)}
         </div>
       </div>
