@@ -314,7 +314,7 @@
 
 @utility card-3d {
   background: var(--surface-1);
-  border: 1px solid var(--border);
+  border: 1.5px solid var(--border);
   border-radius: var(--radius-xl);
   box-shadow: 0 8px 24px -18px oklch(0 0 0 / 0.9);
   transition: border-color 160ms ease, background-color 160ms ease, box-shadow 160ms ease;
@@ -341,7 +341,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid color-mix(in oklab, var(--primary) 28%, var(--border));
+  border: 1.5px solid color-mix(in oklab, var(--primary) 28%, var(--border));
   border-radius: 0.65rem;
   background: color-mix(in oklab, var(--primary) 10%, var(--surface-2));
   color: var(--primary);
@@ -403,4 +403,15 @@
     background: white;
     color: black;
   }
+}
+
+
+/* Molduras com contorno ligeiramente mais definido, mantendo os temas existentes. */
+.card-3d,
+.icon-chip {
+  border-width: 1.5px;
+}
+
+header.glass {
+  border-bottom-width: 1.5px;
 }
