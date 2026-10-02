@@ -68,6 +68,7 @@ export type Plantao = {
   informativo: string | null;
   atividades_verso: string | null;
   observacoes: string | null;
+  resumo?: (PlantaoAtividade & { operador?: string }) | null;
 };
 
 type HistoricoRow = {
