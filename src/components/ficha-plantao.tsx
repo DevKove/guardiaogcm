@@ -152,7 +152,7 @@ export function FichaPlantao({ plantao, editavel, operadorNome }: { plantao: Pla
           ))}
           {atv?.acoes.map((a, i) => (
             <div key={"a" + i} className="flex items-center gap-2 border-b py-1 text-muted-foreground last:border-0">
-              <Clock className="h-3 w-3" /><span className="font-mono">{hora(a.created_at)}</span><span className="flex-1">{a.protocolo ? `#${a.protocolo} · ` : ""}{a.descricao}</span>
+              <Clock className="h-3 w-3" /><span className="font-mono">{hora(a.created_at)}</span><span className="flex-1">{a.protocolo ? `#${a.protocolo} · ` : ""}{a.descricao}</span><span className="text-[10px]">{atv?.usuarios[a.usuario_id] ?? a.usuario_id.slice(0, 8)}</span>
             </div>
           ))}
           {!atv?.registros.length && !atv?.acoes.length && <div className="text-muted-foreground">Nada lançado ainda.</div>}
