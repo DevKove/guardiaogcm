@@ -1,10 +1,14 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
+import { CheckCircle2, PlayCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { PRIORIDADES, STATUS, fmtData, fmtProtocolo, type Status } from "@/lib/cad";
 import { QuadroAvisos } from "@/components/quadro-avisos";
+import { useMe } from "@/hooks/use-me";
+import { fmtDia, turnoAtual } from "@/lib/plantao";
 
 export const Route = createFileRoute("/_authenticated/painel")({
   head: () => ({ meta: [{ title: "Painel de ocorrências · CAD" }] }),
@@ -14,8 +18,35 @@ export const Route = createFileRoute("/_authenticated/painel")({
 function Painel() {
   const qc = useQueryClient();
   const navigate = useNavigate();
+  const { data: me } = useMe();
+  const atual = turnoAtual();
   const [filtro, setFiltro] = useState<Status | "ativas" | "todas">("ativas");
   const [busca, setBusca] = useState("");
+
+  const { data: plantaoAtual, isLoading: carregandoPlantao } = useQuery({
+    queryKey: ["plantao-atual"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("plantoes").select("id, operador_id, data_inicio, turno, status, iniciado_em").eq("status", "aberto").maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+    refetchInterval: 15000,
+  });
+
+  async function iniciarPlantao() {
+    if (!me) return;
+    const { data, error } = await supabase.from("plantoes").insert({
+      operador_id: me.id, data_inicio: atual.data, turno: atual.turno, horario: atual.horario, status: "aberto",
+    }).select("id").single();
+    if (error) {
+      toast.error(error.code === "23505" ? "Já existe um plantão aberto. Finalize-o antes de iniciar outro." : error.message);
+      qc.invalidateQueries({ queryKey: ["plantao-atual"] });
+      return;
+    }
+    toast.success("Plantão iniciado.");
+    qc.invalidateQueries({ queryKey: ["plantao-atual"] });
+    navigate({ to: "/plantao/$id", params: { id: data.id } });
+  }
 
   const { data = [], isLoading } = useQuery({
     queryKey: ["ocorrencias"],
@@ -73,6 +104,26 @@ function Painel() {
   return (
     <div className="space-y-6">
       <QuadroAvisos />
+      <section className="card-3d animate-rise border-primary/30 p-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <div className="flex items-center gap-2 text-sm font-semibold">
+              {plantaoAtual ? <CheckCircle2 className="h-4 w-4 text-success" /> : <PlayCircle className="h-4 w-4 text-warning" />}
+              {plantaoAtual ? "Plantão em andamento" : "Nenhum plantão aberto"}
+            </div>
+            <div className="mt-1 text-xs text-muted-foreground">
+              {plantaoAtual ? `${plantaoAtual.turno} · iniciado em ${new Date(plantaoAtual.iniciado_em).toLocaleString("pt-BR")}` : `${atual.turno} · ${fmtDia(atual.data)} · ${atual.horario}`}
+            </div>
+          </div>
+          <div>
+            {plantaoAtual ? (
+              <Link to="/plantao/$id" params={{ id: plantaoAtual.id }} className="inline-flex items-center rounded-md border px-4 py-2 text-sm font-semibold hover:bg-accent">Abrir plantão / relatório</Link>
+            ) : (
+              <button onClick={iniciarPlantao} disabled={carregandoPlantao || !me} className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90"><PlayCircle className="h-4 w-4" /> Iniciar plantão</button>
+            )}
+          </div>
+        </div>
+      </section>
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <div className="font-mono text-xs tracking-widest text-muted-foreground">PAINEL OPERACIONAL</div>
