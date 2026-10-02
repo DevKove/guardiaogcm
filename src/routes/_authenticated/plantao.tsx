@@ -6,7 +6,7 @@ import { CheckCircle2, Clock3, FileText, LockKeyhole, PlayCircle, Square } from 
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { useMe } from "@/hooks/use-me";
-import { fmtDia, turnoAtual, type Plantao } from "@/lib/plantao";
+import { carregarAtividades, fmtDia, turnoAtual, type Plantao } from "@/lib/plantao";
 import { PlantaoResumoTempoReal } from "@/components/plantao-tempo-real";
 
 export const Route = createFileRoute("/_authenticated/plantao")({
@@ -71,9 +71,18 @@ function PlantaoControle() {
   async function finalizar() {
     if (!plantao || !me) return;
     setSaving(true);
+    const encerradoEm = new Date().toISOString();
+    let resumo: Awaited<ReturnType<typeof carregarAtividades>>;
+    try {
+      resumo = await carregarAtividades({ ...plantao, encerrado_em: encerradoEm });
+    } catch (e) {
+      setSaving(false);
+      toast.error("Não foi possível consolidar o relatório completo. O plantão continua aberto: " + (e instanceof Error ? e.message : "erro desconhecido"));
+      return;
+    }
     const { error } = await supabase
       .from("plantoes")
-      .update({ status: "encerrado", encerrado_em: new Date().toISOString() })
+      .update({ status: "encerrado", encerrado_em: encerradoEm, resumo: { operador: me.nome, ...resumo } } as never)
       .eq("id", plantao.id)
       .eq("status", "aberto")
       .eq("operador_id", me.id);
