@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { STATUS, fmtData, fmtProtocolo, type Status } from "@/lib/cad";
 import { carregarAtividades, fmtDia, type Guarnicao, type Plantao, type PostoCheck } from "@/lib/plantao";
+import { useMe } from "@/hooks/use-me";
 
 const hora = (d: string) => new Date(d).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
 
@@ -18,6 +19,7 @@ export function FichaPlantao({ plantao, editavel, operadorNome }: { plantao: Pla
   const [f, setF] = useState(plantao);
   const [saving, setSaving] = useState(false);
   const [novo, setNovo] = useState("");
+  const { data: me } = useMe();
   useEffect(() => setF(plantao), [plantao]);
 
   const { data: atv } = useQuery({
@@ -44,8 +46,8 @@ export function FichaPlantao({ plantao, editavel, operadorNome }: { plantao: Pla
   }
 
   async function lancar() {
-    if (!novo.trim()) return;
-    const { error } = await supabase.from("plantao_registros").insert({ plantao_id: f.id, texto: novo.trim() });
+    if (!novo.trim() || !me?.id) return;
+    const { error } = await supabase.from("plantao_registros").insert({ plantao_id: f.id, texto: novo.trim(), criado_por: me?.id });
     if (error) { toast.error(error.message); return; }
     setNovo("");
     qc.invalidateQueries({ queryKey: ["plantao-atv", f.id] });
@@ -153,7 +155,7 @@ export function FichaPlantao({ plantao, editavel, operadorNome }: { plantao: Pla
           ))}
           {atv?.acoes.map((a, i) => (
             <div key={"a" + i} className="flex items-center gap-2 border-b py-1 text-muted-foreground last:border-0">
-              <Clock className="h-3 w-3" /><span className="font-mono">{hora(a.created_at)}</span><span className="flex-1">{a.protocolo ? `#${a.protocolo} · ` : ""}{a.descricao}</span><span className="text-[10px]">{atv?.usuarios[a.usuario_id] ?? a.usuario_id.slice(0, 8)}</span><span className="text-[10px]">{atv?.usuarios[a.usuario_id] ?? a.usuario_id.slice(0, 8)}</span>
+              <Clock className="h-3 w-3" /><span className="font-mono">{hora(a.created_at)}</span><span className="flex-1">{a.protocolo ? `#${a.protocolo} · ` : ""}{a.descricao}</span><span className="text-[10px]">{atv?.usuarios[a.usuario_id] ?? a.usuario_id.slice(0, 8)}</span>
             </div>
           ))}
           {!atv?.registros.length && !atv?.acoes.length && <div className="text-muted-foreground">Nada lançado ainda.</div>}
