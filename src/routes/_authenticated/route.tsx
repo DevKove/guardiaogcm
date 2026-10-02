@@ -84,10 +84,10 @@ function Layout() {
       <div className="siren-bar print:hidden" />
 
       <header className="glass sticky top-0 z-40 border-b border-border/90 print:hidden">
-        <div className="mx-auto flex min-h-16 max-w-[1600px] items-center gap-3 px-4 lg:px-6">
+        <div className="mx-auto grid max-w-[1600px] grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-2 px-4 py-2 lg:px-6">
           <Link
             to="/painel"
-            className="mr-2 flex shrink-0 items-center gap-3 rounded-md py-1.5 pr-2 transition-colors hover:bg-accent/60"
+            className="col-start-1 row-start-1 mr-2 flex min-w-0 items-center gap-3 rounded-md py-1.5 pr-2 transition-colors hover:bg-accent/60"
             aria-label="CAD Guarda Municipal"
           >
             <div className="icon-chip h-9 w-9 shrink-0">
@@ -101,7 +101,7 @@ function Layout() {
             </div>
           </Link>
 
-          <nav className="flex min-w-0 flex-1 items-center gap-0.5 overflow-x-auto scrollbar-none" aria-label="Navegação principal">
+          <nav className="col-span-2 row-start-2 flex w-full flex-wrap items-center gap-1 overflow-visible border-t border-border/70 pt-2" aria-label="Navegação principal">
             {items.map((i) => (
               <Link
                 key={i.to}
@@ -121,7 +121,7 @@ function Layout() {
             )}
           </nav>
 
-          <div className="ml-auto flex shrink-0 items-center gap-3">
+          <div className="col-start-2 row-start-1 ml-auto flex shrink-0 items-center gap-2 sm:gap-3">
             <label className="flex h-9 items-center gap-1.5 rounded-md border border-border px-2 text-muted-foreground" title="Personalizar aparência">
               <Palette className="h-4 w-4 shrink-0" />
               <select
