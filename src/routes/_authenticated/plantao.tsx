@@ -108,6 +108,7 @@ function PlantaoControle() {
 
       {plantao ? (
         <>
+        <PlantaoResumoTempoReal plantaoId={plantao.id} />
         <section className="card-3d animate-rise space-y-5 p-5">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
@@ -129,7 +130,6 @@ function PlantaoControle() {
             <div className="flex items-center gap-2 rounded-lg border border-warning/40 bg-warning/5 p-3 text-sm text-warning"><LockKeyhole className="h-4 w-4" /> Este plantão foi iniciado por outro usuário. Você pode consultar o andamento, mas o encerramento pertence ao operador que o iniciou.</div>
           )}
         </section>
-        <PlantaoResumoTempoReal plantaoId={plantao.id} />
         </>
       ) : (
         <section className="card-3d animate-rise space-y-5 p-5">
