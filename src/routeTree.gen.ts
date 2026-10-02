@@ -23,6 +23,7 @@ import { Route as AuthenticatedViaturasRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedImprimirIdRouteImport } from './routes/_authenticated/imprimir.$id'
 import { Route as AuthenticatedOcorrenciasIdRouteImport } from './routes/_authenticated/ocorrencias.$id'
 import { Route as AuthenticatedOcorrenciasNovaRouteImport } from './routes/_authenticated/ocorrencias.nova'
+import { Route as AuthenticatedPlantaoRouteImport } from './routes/_authenticated/plantao'
 import { Route as AuthenticatedPlantaoIdRouteImport } from './routes/_authenticated/plantao.$id'
 
 const IndexRoute = IndexRouteImport.update({
@@ -96,6 +97,11 @@ const AuthenticatedOcorrenciasNovaRoute =
     path: '/ocorrencias/nova',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedPlantaoRoute = AuthenticatedPlantaoRouteImport.update({
+  id: '/plantao',
+  path: '/plantao',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedPlantaoIdRoute = AuthenticatedPlantaoIdRouteImport.update({
   id: '/plantao/$id',
   path: '/plantao/$id',
@@ -116,6 +122,7 @@ export interface FileRoutesByFullPath {
   '/imprimir/$id': typeof AuthenticatedImprimirIdRoute
   '/ocorrencias/$id': typeof AuthenticatedOcorrenciasIdRoute
   '/ocorrencias/nova': typeof AuthenticatedOcorrenciasNovaRoute
+  '/plantao': typeof AuthenticatedPlantaoRoute
   '/plantao/$id': typeof AuthenticatedPlantaoIdRoute
 }
 export interface FileRoutesByTo {
@@ -150,6 +157,7 @@ export interface FileRoutesById {
   '/_authenticated/imprimir/$id': typeof AuthenticatedImprimirIdRoute
   '/_authenticated/ocorrencias/$id': typeof AuthenticatedOcorrenciasIdRoute
   '/_authenticated/ocorrencias/nova': typeof AuthenticatedOcorrenciasNovaRoute
+  '/_authenticated/plantao': typeof AuthenticatedPlantaoRoute
   '/_authenticated/plantao/$id': typeof AuthenticatedPlantaoIdRoute
 }
 export interface FileRouteTypes {
@@ -168,6 +176,7 @@ export interface FileRouteTypes {
     | '/imprimir/$id'
     | '/ocorrencias/$id'
     | '/ocorrencias/nova'
+    | '/plantao'
     | '/plantao/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -184,6 +193,7 @@ export interface FileRouteTypes {
     | '/imprimir/$id'
     | '/ocorrencias/$id'
     | '/ocorrencias/nova'
+    | '/plantao'
     | '/plantao/$id'
   id:
     | '__root__'
@@ -310,6 +320,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedOcorrenciasNovaRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/plantao': {
+      id: '/_authenticated/plantao'
+      path: '/plantao'
+      fullPath: '/plantao'
+      preLoaderRoute: typeof AuthenticatedPlantaoRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/plantao/$id': {
       id: '/_authenticated/plantao/$id'
       path: '/plantao/$id'
@@ -332,6 +349,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedImprimirIdRoute: typeof AuthenticatedImprimirIdRoute
   AuthenticatedOcorrenciasIdRoute: typeof AuthenticatedOcorrenciasIdRoute
   AuthenticatedOcorrenciasNovaRoute: typeof AuthenticatedOcorrenciasNovaRoute
+  AuthenticatedPlantaoRoute: typeof AuthenticatedPlantaoRoute
   AuthenticatedPlantaoIdRoute: typeof AuthenticatedPlantaoIdRoute
 }
 
@@ -347,6 +365,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedImprimirIdRoute: AuthenticatedImprimirIdRoute,
   AuthenticatedOcorrenciasIdRoute: AuthenticatedOcorrenciasIdRoute,
   AuthenticatedOcorrenciasNovaRoute: AuthenticatedOcorrenciasNovaRoute,
+  AuthenticatedPlantaoRoute: AuthenticatedPlantaoRoute,
   AuthenticatedPlantaoIdRoute: AuthenticatedPlantaoIdRoute,
 }
 
