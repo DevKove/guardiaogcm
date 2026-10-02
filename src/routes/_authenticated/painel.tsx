@@ -20,7 +20,8 @@ function Painel() {
   const navigate = useNavigate();
   const { data: me } = useMe();
   const atual = turnoAtual();
-  const [filtro, setFiltro] = useState<Status | "ativas" | "todas">("ativas");
+  // Exibe o histórico completo por padrão; os cartões permitem filtrar somente as ativas.
+  const [filtro, setFiltro] = useState<Status | "ativas" | "todas">("todas");
   const [busca, setBusca] = useState("");
 
   const { data: plantaoAtual, isLoading: carregandoPlantao } = useQuery({
