@@ -127,6 +127,7 @@ export function FichaPlantao({ plantao, editavel, operadorNome }: { plantao: Pla
                   <td className="pr-2">{o.natureza}</td>
                   <td className="pr-2 text-muted-foreground">{o.endereco}{o.bairro ? ` · ${o.bairro}` : ""}</td>
                   <td className="pr-2 font-mono">{o.viatura ?? ""}</td>
+                  <td className="pr-2 text-[10px] text-muted-foreground">{atv?.usuarios[o.criado_por] ?? o.criado_por.slice(0, 8)}</td>
                   <td>{STATUS[o.status as Status]?.label}</td>
                 </tr>
               ))}
@@ -152,7 +153,7 @@ export function FichaPlantao({ plantao, editavel, operadorNome }: { plantao: Pla
           ))}
           {atv?.acoes.map((a, i) => (
             <div key={"a" + i} className="flex items-center gap-2 border-b py-1 text-muted-foreground last:border-0">
-              <Clock className="h-3 w-3" /><span className="font-mono">{hora(a.created_at)}</span><span className="flex-1">{a.protocolo ? `#${a.protocolo} · ` : ""}{a.descricao}</span><span className="text-[10px]">{atv?.usuarios[a.usuario_id] ?? a.usuario_id.slice(0, 8)}</span>
+              <Clock className="h-3 w-3" /><span className="font-mono">{hora(a.created_at)}</span><span className="flex-1">{a.protocolo ? `#${a.protocolo} · ` : ""}{a.descricao}</span><span className="text-[10px]">{atv?.usuarios[a.usuario_id] ?? a.usuario_id.slice(0, 8)}</span><span className="text-[10px]">{atv?.usuarios[a.usuario_id] ?? a.usuario_id.slice(0, 8)}</span>
             </div>
           ))}
           {!atv?.registros.length && !atv?.acoes.length && <div className="text-muted-foreground">Nada lançado ainda.</div>}
