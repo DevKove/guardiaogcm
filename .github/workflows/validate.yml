@@ -1,0 +1,34 @@
+name: Validate application
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - security/hardening-cad
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      VITE_SUPABASE_URL: https://example.supabase.co
+      VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_ci_placeholder
+      SUPABASE_URL: https://example.supabase.co
+      SUPABASE_PUBLISHABLE_KEY: sb_publishable_ci_placeholder
+      # Never provide real production secrets to CI for lint/build.
+      SUPABASE_SERVICE_ROLE_KEY: sb_secret_ci_placeholder
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Install Bun
+        uses: oven-sh/setup-bun@v2
+      - name: Install locked dependencies
+        run: bun install --frozen-lockfile
+      - name: Lint
+        run: bun run lint
+      - name: Build
+        run: bun run build
