@@ -252,15 +252,17 @@ function Detalhe() {
             <p className="mt-2 whitespace-pre-wrap">{o.relato}</p>
           </div>
 
-          <Envolvidos ocorrenciaId={id} lista={envolvidos} pode={!!me} meId={me?.id} isSup={!!me?.isSupervisor} onChange={refresh} log={log} />
+          <Envolvidos ocorrenciaId={id} lista={envolvidos} pode={podeEditar} meId={me?.id} isSup={!!me?.isSupervisor} onChange={refresh} log={log} />
         </div>
 
         <div className="space-y-3 card-3d animate-rise p-5">
           <h2 className="font-semibold text-primary">Histórico</h2>
-          <div className="space-y-2">
-            <Textarea rows={2} placeholder="Adicionar informação..." value={nota} onChange={(e) => setNota(e.target.value)} />
-            <Button size="sm" onClick={addNota} className="w-full">Adicionar</Button>
-          </div>
+          {podeEditar && (
+            <div className="space-y-2">
+              <Textarea rows={2} placeholder="Adicionar informação..." value={nota} onChange={(e) => setNota(e.target.value)} />
+              <Button size="sm" onClick={addNota} className="w-full">Adicionar</Button>
+            </div>
+          )}
           <ol className="space-y-3 border-l pl-4">
             {hist.map((h) => (
               <li key={h.id} className="text-sm">
