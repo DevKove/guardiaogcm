@@ -20,7 +20,7 @@ function Historico() {
     queryKey: ["plantao", "historico", mes],
     queryFn: async () => {
       const [y, m] = mes.split("-").map(Number);
-      const fim = new Date(y, m, 0).getDate();
+      const fim = new Date(y ?? 2026, m ?? 1, 0).getDate();
       const { data } = await supabase.from("plantoes").select("id, data_inicio, turno, horario, equipe, supervisor, status, operador_id, iniciado_em, encerrado_em, resumo")
         .gte("data_inicio", `${mes}-01`).lte("data_inicio", `${mes}-${fim}`).order("data_inicio", { ascending: false });
       const ids = [...new Set((data ?? []).map((p) => p.operador_id))];

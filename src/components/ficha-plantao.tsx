@@ -38,7 +38,7 @@ export function FichaPlantao({ plantao, editavel, operadorNome }: { plantao: Pla
       informativo: f.informativo, atividades_verso: f.atividades_verso, turno: f.turno, data_inicio: f.data_inicio,
     } as never).eq("id", f.id);
     setSaving(false);
-    if (error) return toast.error("Erro ao salvar: " + error.message);
+    if (error) { toast.error("Erro ao salvar: " + error.message); return; }
     toast.success("Relatório salvo");
     qc.invalidateQueries({ queryKey: ["plantao"] });
   }
@@ -46,7 +46,7 @@ export function FichaPlantao({ plantao, editavel, operadorNome }: { plantao: Pla
   async function lancar() {
     if (!novo.trim()) return;
     const { error } = await supabase.from("plantao_registros").insert({ plantao_id: f.id, texto: novo.trim() });
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     setNovo("");
     qc.invalidateQueries({ queryKey: ["plantao-atv", f.id] });
   }
@@ -177,7 +177,7 @@ function Texto({ l, v, dis, on }: { l: string; v: string | null; dis: boolean; o
 }
 
 /** Versão em papel, no formato do relatório de plantão da GCM (só aparece na impressão). */
-function RelatorioImpresso({ p, operadorNome, atv }: { p: Plantao; operadorNome: string; atv?: Awaited<ReturnType<typeof carregarAtividades>> }) {
+function RelatorioImpresso({ p, operadorNome, atv }: { p: Plantao; operadorNome: string; atv?: Awaited<ReturnType<typeof carregarAtividades>> | undefined }) {
   const B = "border border-black px-1 py-0.5";
   return (
     <div className="print-only hidden text-[10px] text-black print:block">
