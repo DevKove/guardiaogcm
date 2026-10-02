@@ -35,7 +35,7 @@ export function PlantaoAtual() {
       postos: (postos ?? []).map((p) => ({ nome: p.nome, ok: true, obs: "" })),
     } as never);
     setBusy(false);
-    if (error) return toast.error("Erro ao iniciar plantão: " + error.message);
+    if (error) { toast.error("Erro ao iniciar plantão: " + error.message); return; }
     toast.success(`Plantão ${t.turno} iniciado`);
     qc.invalidateQueries({ queryKey: ["plantao"] });
   }
@@ -49,7 +49,7 @@ export function PlantaoAtual() {
       resumo: { operador: me!.nome, ...atv },
     } as never).eq("id", plantao.id);
     setBusy(false);
-    if (error) return toast.error("Erro ao encerrar: " + error.message);
+    if (error) { toast.error("Erro ao encerrar: " + error.message); return; }
     toast.success("Plantão encerrado e salvo no histórico");
     qc.invalidateQueries({ queryKey: ["plantao"] });
   }
