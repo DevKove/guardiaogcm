@@ -210,7 +210,7 @@ function RelatorioImpresso({ p, operadorNome, atv }: { p: Plantao; operadorNome:
         <div className="border-b border-black text-center font-bold">SOLICITAÇÕES E OCORRÊNCIAS</div>
         <div className="p-1">
           {atv?.ocorrencias.map((o) => <div key={o.id}>{hora(o.created_at)} — {fmtProtocolo(o.protocolo, o.created_at)} — {o.natureza} — {o.endereco}{o.bairro ? `, ${o.bairro}` : ""}{o.viatura ? ` — ${o.viatura}` : ""} — {STATUS[o.status as Status]?.label} — registro: {atv?.usuarios[o.criado_por] ?? o.criado_por.slice(0, 8)}{o.desfecho ? ` (${o.desfecho})` : ""}</div>)}
-          {[...(atv?.registros ?? [])].reverse().map((r) => <div key={r.id}>{hora(r.hora)} — {r.texto}</div>)}
+          {[...(atv?.registros ?? [])].reverse().map((r) => <div key={r.id}>{hora(r.hora)} — {r.texto} — registro: {atv?.usuarios[r.criado_por] ?? r.criado_por.slice(0, 8)}</div>)}
         </div>
       </div>
       <div className="mt-1 border border-black"><div className="border-b border-black text-center font-bold">ATIVIDADES VERSO</div><div className="min-h-8 whitespace-pre-wrap p-1">{p.atividades_verso}</div></div>
