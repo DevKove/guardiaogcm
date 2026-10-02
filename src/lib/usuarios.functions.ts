@@ -54,8 +54,23 @@ export const salvarUsuario = createServerFn({ method: "POST" })
     await assertAdmin(context.supabase as never, context.userId);
     const sa = await admin();
     let id = data.id;
+    let createdByThisRequest = false;
     if (id) {
-      if (id === context.userId && data.role !== "admin") throw new Error("Você não pode remover seu próprio perfil de administrador.");
+      if (id === context.userId && data.role !== "admin") {
+        throw new Error("Você não pode remover seu próprio perfil de administrador.");
+      }
+      // Fail early on a last-admin demotion; the database function repeats this check transactionally.
+      if (data.role !== "admin") {
+        const { data: existingRole, error: roleReadError } = await sa
+          .from("user_roles").select("user_id").eq("user_id", id).eq("role", "admin").maybeSingle();
+        if (roleReadError) throw new Error("Não foi possível validar o papel atual do usuário.");
+        if (existingRole) {
+          const { count, error: countError } = await sa
+            .from("user_roles").select("user_id", { count: "exact", head: true }).eq("role", "admin");
+          if (countError) throw new Error("Não foi possível validar a quantidade de administradores.");
+          if ((count ?? 0) <= 1) throw new Error("Não é permitido remover o último administrador.");
+        }
+      }
       const { error } = await sa.auth.admin.updateUserById(id, {
         email: data.email,
         ...(data.senha ? { password: data.senha } : {}),
@@ -70,11 +85,27 @@ export const salvarUsuario = createServerFn({ method: "POST" })
       });
       if (error) throw new Error(error.message);
       id = c.user.id;
+      createdByThisRequest = true;
     }
-    await sa.from("profiles").update({ nome: data.nome, matricula: data.matricula || null }).eq("id", id);
-    await sa.from("user_roles").delete().eq("user_id", id);
-    const { error: rErr } = await sa.from("user_roles").insert({ user_id: id, role: data.role });
-    if (rErr) throw new Error(rErr.message);
+
+    const { error: accessError } = await (sa as never as {
+      rpc: (fn: string, args: Record<string, unknown>) => Promise<{ error: { message: string } | null }>;
+    }).rpc("admin_set_user_access", {
+      _actor: context.userId,
+      _user_id: id,
+      _nome: data.nome,
+      _matricula: data.matricula,
+      _role: data.role,
+    });
+    if (accessError) {
+      if (createdByThisRequest) {
+        const { error: rollbackError } = await sa.auth.admin.deleteUser(id);
+        if (rollbackError) {
+          throw new Error("Falha ao configurar acesso e não foi possível remover a conta recém-criada. Verifique o usuário no painel administrativo.");
+        }
+      }
+      throw new Error("Não foi possível salvar perfil e permissões: " + accessError.message);
+    }
     return { ok: true };
   });
 
