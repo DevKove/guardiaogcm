@@ -111,6 +111,7 @@ BEGIN
   END IF;
 
   IF v_oc.viatura_id = _viatura_id THEN RETURN; END IF;
+  PERFORM set_config('app.cad_operation', 'dispatch', true);
 
   SELECT prefixo INTO v_prefixo
     FROM public.viaturas
@@ -163,6 +164,7 @@ BEGIN
   END IF;
   IF v_oc.viatura_id IS NULL THEN RAISE EXCEPTION 'Nenhuma viatura foi despachada.'; END IF;
 
+  PERFORM set_config('app.cad_operation', 'arrival', true);
   UPDATE public.ocorrencias SET chegada_em = now() WHERE id = _ocorrencia_id;
   UPDATE public.viaturas SET status = 'no_local'
    WHERE id = v_oc.viatura_id AND ocorrencia_id = _ocorrencia_id;
@@ -213,6 +215,7 @@ BEGIN
   END IF;
 
   v_status := _status::public.ocorrencia_status;
+  PERFORM set_config('app.cad_operation', 'finish', true);
   UPDATE public.ocorrencias
      SET status = v_status,
          desfecho = CASE WHEN v_status = 'encerrada' THEN NULLIF(trim(COALESCE(_desfecho, '')), '') ELSE 'Cancelada' END
@@ -240,3 +243,59 @@ REVOKE EXECUTE ON FUNCTION public.finalizar_ocorrencia(uuid, text, text, text) F
 GRANT EXECUTE ON FUNCTION public.despachar_viatura(uuid, uuid) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.marcar_chegada(uuid) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.finalizar_ocorrencia(uuid, text, text, text) TO authenticated;
+
+
+-- Prevent operators from changing protected operational fields through direct REST updates.
+CREATE OR REPLACE FUNCTION public.guard_ocorrencia_update()
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_user uuid := auth.uid();
+  v_operation text := COALESCE(current_setting('app.cad_operation', true), '');
+  v_protected_changed boolean;
+BEGIN
+  IF v_user IS NULL THEN
+    RAISE EXCEPTION 'Sessão autenticada obrigatória para alterar ocorrência.';
+  END IF;
+
+  IF public.has_role(v_user, 'admin') OR public.has_role(v_user, 'supervisor') THEN
+    RETURN NEW;
+  END IF;
+
+  IF OLD.criado_por <> v_user THEN
+    RAISE EXCEPTION 'Sem permissão para alterar esta ocorrência.';
+  END IF;
+
+  v_protected_changed :=
+    NEW.status IS DISTINCT FROM OLD.status OR
+    NEW.viatura_id IS DISTINCT FROM OLD.viatura_id OR
+    NEW.viatura IS DISTINCT FROM OLD.viatura OR
+    NEW.despachada_em IS DISTINCT FROM OLD.despachada_em OR
+    NEW.chegada_em IS DISTINCT FROM OLD.chegada_em OR
+    NEW.encerrada_em IS DISTINCT FROM OLD.encerrada_em OR
+    NEW.desfecho IS DISTINCT FROM OLD.desfecho OR
+    NEW.plantao_id IS DISTINCT FROM OLD.plantao_id;
+
+  IF v_protected_changed AND v_operation NOT IN ('dispatch', 'arrival', 'finish') THEN
+    RAISE EXCEPTION 'Campo operacional protegido: utilize o fluxo de despacho/encerramento.';
+  END IF;
+
+  IF v_operation NOT IN ('', 'dispatch', 'arrival', 'finish') THEN
+    RAISE EXCEPTION 'Operação interna inválida.';
+  END IF;
+
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS ocorrencias_guard_update ON public.ocorrencias;
+CREATE TRIGGER ocorrencias_guard_update
+  BEFORE UPDATE ON public.ocorrencias
+  FOR EACH ROW EXECUTE FUNCTION public.guard_ocorrencia_update();
+
+REVOKE EXECUTE ON FUNCTION public.guard_ocorrencia_update() FROM PUBLIC, anon, authenticated;
+
+-- Mark privileged transactional paths so the trigger can distinguish them from direct REST updates.
