@@ -18,14 +18,20 @@ export const Route = createFileRoute("/_authenticated")({
 
 function Relogio() {
   const [d, setD] = useState(new Date());
+
   useEffect(() => {
     const t = setInterval(() => setD(new Date()), 1000);
     return () => clearInterval(t);
   }, []);
+
   return (
-    <div className="hidden text-right font-mono leading-tight lg:block">
-      <div className="text-sm font-bold text-primary">{d.toLocaleTimeString("pt-BR")}</div>
-      <div className="text-[10px] text-muted-foreground">{d.toLocaleDateString("pt-BR", { weekday: "short", day: "2-digit", month: "short" })}</div>
+    <div className="hidden border-l pl-4 text-right leading-tight lg:block">
+      <div className="font-mono text-sm font-semibold tracking-tight text-foreground">
+        {d.toLocaleTimeString("pt-BR")}
+      </div>
+      <div className="mt-0.5 text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+        {d.toLocaleDateString("pt-BR", { weekday: "short", day: "2-digit", month: "short" })}
+      </div>
     </div>
   );
 }
@@ -43,8 +49,9 @@ function Layout() {
   }
 
   const linkCls =
-    "flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-muted-foreground transition-all hover:bg-accent hover:text-foreground hover:-translate-y-0.5";
-  const activeCls = "!bg-primary/15 !text-primary shadow-[inset_0_-2px_0_var(--primary)]";
+    "inline-flex items-center gap-2 rounded-md border border-transparent px-3 py-2 text-[13px] font-medium text-muted-foreground transition-colors hover:border-border hover:bg-accent hover:text-foreground";
+  const activeCls =
+    "!border-primary/25 !bg-primary/10 !text-primary";
 
   const items = [
     { to: "/painel", icon: LayoutList, label: "Ocorrências" },
@@ -58,45 +65,75 @@ function Layout() {
   ] as const;
 
   return (
-    <div className="min-h-screen">
-      <div className="siren-bar h-1.5 print:hidden" />
-      <header className="glass sticky top-0 z-40 border-b print:hidden">
-        <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-4 px-4 py-2.5">
-          <Link to="/painel" className="flex items-center gap-2">
-            <div className="icon-chip flex h-10 w-10 items-center justify-center text-primary-foreground shadow-[var(--shadow-glow)]">
-              <Shield className="h-5 w-5" />
+    <div className="min-h-screen bg-background">
+      <div className="siren-bar print:hidden" />
+
+      <header className="glass sticky top-0 z-40 border-b border-border/90 print:hidden">
+        <div className="mx-auto flex min-h-16 max-w-[1600px] items-center gap-3 px-4 lg:px-6">
+          <Link
+            to="/painel"
+            className="mr-2 flex shrink-0 items-center gap-3 rounded-md py-1.5 pr-2 transition-colors hover:bg-accent/60"
+            aria-label="CAD Guarda Municipal"
+          >
+            <div className="icon-chip h-9 w-9 shrink-0">
+              <Shield className="h-[18px] w-[18px]" strokeWidth={2.2} />
             </div>
-            <div className="leading-tight">
-              <div className="font-mono text-base font-extrabold tracking-widest text-gradient">CAD·GM</div>
-              <div className="text-[10px] text-muted-foreground">GUARDA MUNICIPAL · 153</div>
+            <div className="hidden leading-none sm:block">
+              <div className="text-[15px] font-bold tracking-tight text-foreground">CAD Guarda Municipal</div>
+              <div className="mt-1 text-[9px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                Central de Atendimento e Despacho
+              </div>
             </div>
           </Link>
-          <nav className="flex flex-1 flex-wrap gap-1">
+
+          <nav className="flex min-w-0 flex-1 items-center gap-0.5 overflow-x-auto scrollbar-none" aria-label="Navegação principal">
             {items.map((i) => (
-              <Link key={i.to} to={i.to} className={linkCls} activeProps={{ className: activeCls }}>
-                <i.icon className="h-4 w-4" /> {i.label}
+              <Link
+                key={i.to}
+                to={i.to}
+                className={linkCls}
+                activeProps={{ className: activeCls }}
+              >
+                <i.icon className="h-4 w-4 shrink-0" strokeWidth={1.9} />
+                <span className="whitespace-nowrap">{i.label}</span>
               </Link>
             ))}
             {me?.isAdmin && (
               <Link to="/usuarios" className={linkCls} activeProps={{ className: activeCls }}>
-                <Users className="h-4 w-4" /> Usuários
+                <Users className="h-4 w-4 shrink-0" strokeWidth={1.9} />
+                <span>Usuários</span>
               </Link>
             )}
           </nav>
-          <Relogio />
-          <Link to="/perfil" className="flex items-center gap-2 rounded-lg px-2 py-1 text-right text-xs transition hover:bg-accent" title="Meu perfil">
-            <UserCircle className="h-6 w-6 text-primary" />
-            <div>
-              <div className="font-medium">{me?.nome}</div>
-              <div className="text-muted-foreground">{me?.roles.map((r) => ROLE_LABEL[r]).join(", ") || "Sem perfil"}</div>
-            </div>
-          </Link>
-          <button onClick={signOut} className={linkCls} title="Sair">
-            <LogOut className="h-4 w-4" />
-          </button>
+
+          <div className="ml-auto flex shrink-0 items-center gap-3">
+            <Relogio />
+            <Link
+              to="/perfil"
+              className="hidden items-center gap-2 rounded-md border border-transparent px-2 py-1.5 text-right transition-colors hover:border-border hover:bg-accent sm:flex"
+              title="Meu perfil"
+            >
+              <UserCircle className="h-6 w-6 text-primary" strokeWidth={1.8} />
+              <div className="max-w-32 leading-tight">
+                <div className="truncate text-xs font-semibold text-foreground">{me?.nome}</div>
+                <div className="truncate text-[10px] text-muted-foreground">
+                  {me?.roles.map((r) => ROLE_LABEL[r]).join(", ") || "Sem perfil"}
+                </div>
+              </div>
+            </Link>
+            <button
+              onClick={signOut}
+              className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-border text-muted-foreground transition-colors hover:border-destructive/40 hover:bg-destructive/10 hover:text-destructive"
+              title="Sair"
+              aria-label="Sair"
+            >
+              <LogOut className="h-4 w-4" strokeWidth={1.9} />
+            </button>
+          </div>
         </div>
       </header>
-      <main className="mx-auto max-w-7xl px-4 py-6">
+
+      <main className="mx-auto max-w-[1600px] px-4 py-6 lg:px-6 lg:py-7">
         <Outlet />
       </main>
     </div>
