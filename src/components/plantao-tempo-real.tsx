@@ -137,6 +137,7 @@ export function PlantaoResumoTempoReal({ plantao }: { plantao: Plantao }) {
         th,td { border:1px solid #cbd5e1; padding:5px; vertical-align:top; overflow-wrap:anywhere; } tr { break-inside: avoid; }
         .empty { color:#64748b; font-style:italic; } .footer { margin-top:18px; padding-top:8px; border-top:1px solid #cbd5e1; color:#64748b; font-size:9px; }
         @media screen { body { max-width: 1200px; margin: 24px auto; padding: 24px; } .print-button { padding: 10px 16px; margin-bottom: 16px; } }
+        @media print { .print-button { display: none !important; } }
       </style></head><body>
       <button class="print-button" onclick="window.print()">Salvar como PDF / Imprimir</button>
       <header><h1>GUARDA CIVIL MUNICIPAL · CAD</h1><div style="font-size:15px;font-weight:bold">Relatório operacional de plantão</div>
