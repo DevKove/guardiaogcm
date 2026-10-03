@@ -147,7 +147,7 @@ function Viaturas() {
         {lista.length === 0 && <div className="card-3d col-span-full p-10 text-center text-muted-foreground">Nenhuma viatura encontrada.</div>}
       </div>
 
-      <<ViaturaDialog f={edit} onClose={() => setEdit(null)} podeTudo={!!me?.isSupervisor} />
+      <ViaturaDialog f={edit} onClose={() => setEdit(null)} podeTudo={!!me?.isSupervisor} />
     </div>
   );
 }
