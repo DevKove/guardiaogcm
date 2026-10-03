@@ -109,12 +109,12 @@ function PlantaoControle() {
     const integrantes = form.temEquipes ? form.integrantes : [];
     const selecionados = efetivo.filter((m) => integrantes.includes(m.id));
     const supervisor = selecionados.find((m) => m.id === form.supervisorId);
-    const operadorRadio = selecionados.find((m) => m.id === form.operadorRadioId);
+    const operadorRadio = form.temEquipes ? selecionados.find((m) => m.id === form.operadorRadioId) : undefined;
     const { data, error } = await supabase.rpc("iniciar_plantao", {
       p_nome_plantao: form.nome,
       p_supervisor_id: form.temEquipes ? (form.supervisorId || null) : null,
       p_integrantes: integrantes,
-      p_operador_radio_id: form.operadorRadioId || null,
+      p_operador_radio_id: form.temEquipes ? (form.operadorRadioId || null) : null,
       p_data_inicio: atual.data,
       p_turno: atual.turno,
       p_horario: atual.horario,
@@ -239,7 +239,7 @@ function PlantaoInicioDialog({
   onClose: () => void;
   efetivo: { id: string; nome: string; matricula: string | null; tipo: string; funcao: string }[];
   saving: boolean;
-  onConfirm: (form: { nome: string; supervisorId: string; integrantes: string[]; operadorRadioId: string }) => Promise<void>;
+  onConfirm: (form: { nome: string; temEquipes: boolean; supervisorId: string; integrantes: string[]; operadorRadioId: string }) => Promise<void>;
 }) {
   const [nome, setNome] = useState<"ALPHA" | "BRAVO" | "CHARLIE" | "DELTA">("ALPHA");
   const [temEquipes, setTemEquipes] = useState(true);
