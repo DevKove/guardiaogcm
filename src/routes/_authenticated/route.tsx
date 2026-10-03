@@ -171,11 +171,11 @@ function Layout() {
                 <div
                   role="menu"
                   aria-label="Selecionar tema"
-                  className="absolute right-0 top-[calc(100%+0.45rem)] z-50 w-64 overflow-hidden rounded-lg border border-slate-600 bg-slate-950 p-1.5 text-white shadow-2xl ring-1 ring-black/30 animate-rise"
+                  className="absolute right-0 top-[calc(100%+0.45rem)] z-[100] w-64 overflow-hidden rounded-lg border p-1.5 shadow-2xl ring-1 ring-black/30 animate-rise"\n                  style={{ backgroundColor: "#020617", color: "#ffffff", borderColor: "#475569", boxShadow: "0 20px 40px rgba(0,0,0,.45)" }}
                 >
-                  <div className="border-b border-slate-700 px-2.5 py-2">
-                    <div className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-300">Tema visual</div>
-                    <div className="mt-0.5 text-[11px] text-slate-400">Escolha a aparência do CAD</div>
+                  <div className="border-b px-2.5 py-2" style={{ borderColor: "#334155" }}>
+                    <div className="text-[10px] font-bold uppercase tracking-[0.12em]" style={{ color: "#cbd5e1" }}>Tema visual</div>
+                    <div className="mt-0.5 text-[11px]" style={{ color: "#94a3b8" }}>Escolha a aparência do CAD</div>
                   </div>
                   <div className="pt-1">
                     {themes.map((item) => {
@@ -187,16 +187,16 @@ function Layout() {
                           role="menuitemradio"
                           aria-checked={active}
                           onClick={() => changeTheme(item.value)}
-                          className={`flex w-full items-center gap-3 rounded-md px-2.5 py-2 text-left transition-colors ${active ? "bg-primary/25 text-white ring-1 ring-primary/40" : "text-white hover:bg-white/10"}`}
+                          className={`flex w-full items-center gap-3 rounded-md px-2.5 py-2 text-left transition-colors ${active ? "ring-1 ring-primary/40" : ""}`}\n                          style={{ backgroundColor: active ? "rgba(59,130,246,.20)" : "transparent", color: "#ffffff" }}\n                          onMouseEnter={(event) => { if (!active) event.currentTarget.style.backgroundColor = "rgba(255,255,255,.10)"; }}\n                          onMouseLeave={(event) => { if (!active) event.currentTarget.style.backgroundColor = "transparent"; }}
                         >
-                          <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-md border ${active ? "border-primary/60 bg-primary/20 text-primary" : "border-slate-600 bg-slate-900 text-slate-300"}`}>
+                          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border"\n                            style={{ borderColor: active ? "rgba(96,165,250,.70)" : "#475569", backgroundColor: active ? "rgba(59,130,246,.18)" : "#0f172a", color: active ? "#60a5fa" : "#cbd5e1" }}>
                             <Palette className="h-4 w-4" />
                           </span>
                           <span className="min-w-0 flex-1">
-                            <span className="block text-xs font-semibold text-white">{item.label}</span>
-                            <span className="block truncate text-[10px] text-slate-400">{item.description}</span>
+                            <span className="block text-xs font-semibold" style={{ color: "#ffffff" }}>{item.label}</span>
+                            <span className="block truncate text-[10px]" style={{ color: "#94a3b8" }}>{item.description}</span>
                           </span>
-                          {active && <Check className="h-4 w-4 shrink-0 text-primary" aria-hidden="true" />}
+                          {active && <Check className="h-4 w-4 shrink-0" style={{ color: "#60a5fa" }} aria-hidden="true" />}
                         </button>
                       );
                     })}
