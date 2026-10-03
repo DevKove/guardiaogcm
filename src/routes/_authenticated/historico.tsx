@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
+import { useMe } from "@/hooks/use-me";
 import { History, Moon, Sun, FileText } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
@@ -16,6 +17,7 @@ const ordemTurno = (t: string) => (t === "Diurno" ? 0 : t === "Noturno" ? 1 : 2)
 
 function Historico() {
   const [mes, setMes] = useState(new Date().toISOString().slice(0, 7));
+  const { data: me } = useMe();
   const { data = [], isLoading } = useQuery({
     queryKey: ["plantao", "historico", mes],
     queryFn: async () => {
@@ -60,6 +62,7 @@ function Historico() {
                     <div>
                       <div className="text-success">Finalizado</div>
                       {n !== undefined && <div className="font-mono">{n} ocorr.</div>}
+                      {me?.isAdmin && <div className="mt-1 font-semibold text-primary">Abrir para editar</div>}
                     </div>
                     <FileText className="h-4 w-4 text-primary" />
                   </div>
