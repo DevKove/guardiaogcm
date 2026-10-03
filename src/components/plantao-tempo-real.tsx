@@ -38,11 +38,18 @@ export function PlantaoResumoTempoReal({ plantao }: { plantao: Plantao }) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("ocorrencias")
-        .select("id, protocolo, natureza, endereco, bairro, status, prioridade, created_at, viatura, numero")
+        .select("id, protocolo, natureza, endereco, bairro, status, prioridade, created_at, updated_at, viatura, numero")
         .eq("plantao_id", plantaoId)
         .order("created_at", { ascending: false });
       if (error) throw error;
-      return data ?? [];
+      const inicioMs = new Date(plantao.iniciado_em).getTime();
+      const fimMs = new Date(plantao.encerrado_em ?? new Date().toISOString()).getTime();
+      return (data ?? []).filter((o) => {
+        const criado = new Date(o.created_at).getTime();
+        const alterado = new Date(o.updated_at).getTime();
+        return (Number.isFinite(criado) && criado >= inicioMs && criado <= fimMs) ||
+          (Number.isFinite(alterado) && alterado >= inicioMs && alterado <= fimMs);
+      });
     },
     refetchInterval: 10000,
   });
@@ -86,7 +93,9 @@ export function PlantaoResumoTempoReal({ plantao }: { plantao: Plantao }) {
     const usadaEmOcorrencia = viaturasUsadasEmOcorrencias.has(prefixo) ||
       [...viaturasUsadasEmOcorrencias].some((identificacao) => identificacao.includes(prefixo));
     const usadaEmEscala = idsViaturasEscaladas.has(v.id);
-    const alteradaDurantePlantao = v.updated_at ? new Date(v.updated_at).getTime() >= inicioPlantao : false;
+    const atualizacao = v.updated_at ? new Date(v.updated_at).getTime() : Number.NaN;
+    const fimPlantao = new Date(plantao.encerrado_em ?? new Date().toISOString()).getTime();
+    const alteradaDurantePlantao = Number.isFinite(atualizacao) && atualizacao >= inicioPlantao && atualizacao <= fimPlantao;
     return usadaEmOcorrencia || usadaEmEscala || alteradaDurantePlantao;
   });
   // Próprios municipais só aparecem quando foram associados a uma escala do turno.
@@ -101,6 +110,7 @@ export function PlantaoResumoTempoReal({ plantao }: { plantao: Plantao }) {
       return;
     }
 
+    try {
     const usuarios = data?.usuarios ?? {};
     const occurrenceRows = ocorrencias.map((o) => `<tr>
       <td>${cell(hora(o.created_at))}</td><td>${cell(fmtProtocolo(o.protocolo, o.created_at))}</td>
@@ -110,13 +120,12 @@ export function PlantaoResumoTempoReal({ plantao }: { plantao: Plantao }) {
     const fleetRows = viaturas.map((v) => `<tr><td>${cell(v.prefixo)}</td><td>${cell(v.tipo + (v.modelo ? " · " + v.modelo : ""))}</td><td>${cell(v.guarnicao)}</td><td>${cell(v.km_atual == null ? "—" : v.km_atual.toLocaleString("pt-BR") + " km")}</td><td>${cell(v.ativa ? (situacaoViatura[v.status] ?? v.status) : "Inativa")}</td></tr>`).join("");
     const scaleRows = escalas.map((e) => `<tr><td>${cell(e.funcao)}</td><td>${cell(e.hora_inicio.slice(0, 5) + "–" + e.hora_fim.slice(0, 5))}</td><td>${cell(e.agentes)}</td><td>${cell(e.observacao)}</td></tr>`).join("");
     const postRows = postosAtivos.map((p) => `<tr><td>${cell(p.nome)}</td><td>${cell(p.tipo)}</td><td>${cell([p.endereco, p.bairro].filter(Boolean).join(" · "))}</td></tr>`).join("");
-    const recordRows = registros.map((r) => `<tr><td>${cell(dataHora(r.hora))}</td><td>${cell(r.texto)}</td><td>${cell(usuarios[r.criado_por] ?? r.criado_por.slice(0, 8))}</td></tr>`).join("");
-    const actionRows = acoes.map((a) => `<tr><td>${cell(dataHora(a.created_at))}</td><td>${cell(a.protocolo ? fmtProtocolo(a.protocolo, a.created_at) : "—")}</td><td>${cell(a.descricao)}</td><td>${cell(usuarios[a.usuario_id] ?? a.usuario_id.slice(0, 8))}</td></tr>`).join("");
+    const recordRows = registros.map((r) => `<tr><td>${cell(dataHora(r.hora))}</td><td>${cell(r.texto)}</td><td>${cell(usuarios[r.criado_por] ?? (r.criado_por ? r.criado_por.slice(0, 8) : "—"))}</td></tr>`).join("");
+    const actionRows = acoes.map((a) => `<tr><td>${cell(dataHora(a.created_at))}</td><td>${cell(a.protocolo ? fmtProtocolo(a.protocolo, a.created_at) : "—")}</td><td>${cell(a.descricao)}</td><td>${cell(usuarios[a.usuario_id] ?? (a.usuario_id ? a.usuario_id.slice(0, 8) : "—"))}</td></tr>`).join("");
     const generatedAt = new Date().toLocaleString("pt-BR");
 
-    try {
       janela.document.open();
-    janela.document.write(`<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>Relatório de Plantão - ${cell(fmtDia(plantao.data_inicio))}</title>
+      janela.document.write(`<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>Relatório de Plantão - ${cell(fmtDia(plantao.data_inicio))}</title>
       <style>
         @page { size: A4 landscape; margin: 12mm; }
         * { box-sizing: border-box; } body { font: 10px Arial, sans-serif; color: #172033; margin: 0; }
@@ -143,12 +152,16 @@ export function PlantaoResumoTempoReal({ plantao }: { plantao: Plantao }) {
       <div class="footer">Documento gerado pelo sistema CAD. Conferir os registros antes de arquivar ou compartilhar.</div>
       <script>window.addEventListener("load", () => setTimeout(() => window.print(), 300));</script>
       </body></html>`);
-    janela.document.close();
-    janela.focus();
-    } catch (e) {
-      janela.document.open();
-      janela.document.write(`<!doctype html><html lang="pt-BR"><meta charset="utf-8"><title>Erro ao gerar relatório</title><body style="font:16px Arial;padding:24px;color:#172033"><h1>Não foi possível gerar o relatório</h1><p>${cell(e instanceof Error ? e.message : "Erro inesperado")}</p><p>Feche esta janela e tente novamente.</p></body></html>`);
       janela.document.close();
+      janela.focus();
+    } catch (e) {
+      try {
+        janela.document.open();
+        janela.document.write(`<!doctype html><html lang="pt-BR"><meta charset="utf-8"><title>Erro ao gerar relatório</title><body style="font:16px Arial;padding:24px;color:#172033"><h1>Não foi possível gerar o relatório</h1><p>${cell(e instanceof Error ? e.message : "Erro inesperado")}</p><p>Feche esta janela e tente novamente.</p></body></html>`);
+        janela.document.close();
+      } catch {
+        window.alert("Não foi possível montar o relatório. Atualize a página e tente novamente.");
+      }
     }
   }
 

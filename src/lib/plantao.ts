@@ -10,6 +10,7 @@ export type PlantaoAtividade = {
     status: string;
     prioridade: number;
     created_at: string;
+    updated_at: string;
     desfecho: string | null;
     viatura: string | null;
     criado_por: string;
@@ -22,7 +23,7 @@ export type PlantaoAtividade = {
     encerrada_em: string | null;
   }[];
   viaturas: { id: string; prefixo: string; placa: string | null; modelo: string | null; tipo: string; status: string; guarnicao: string | null; ativa: boolean; km_atual: number | null; observacao: string | null; updated_at: string }[];
-  escalas: { id: string; agentes: string; funcao: string; hora_inicio: string; hora_fim: string; observacao: string | null; viatura_id: string | null; posto_id: string | null; criado_por: string }[];
+  escalas: { id: string; agentes: string; funcao: string; hora_inicio: string; hora_fim: string; observacao: string | null; viatura_id: string | null; posto_id: string | null; criado_por: string; created_at: string; updated_at: string }[];
   postosAtivos: { id: string; nome: string; tipo: string; endereco: string | null; bairro: string | null }[];
   acoes: { descricao: string; created_at: string; protocolo: number | null; usuario_id: string }[];
   registros: { id: string; texto: string; hora: string; criado_por: string }[];
@@ -106,12 +107,19 @@ export async function carregarAtividades(p: {
   data_inicio: string;
   turno: string;
 }): Promise<PlantaoAtividade> {
-  const fim = p.encerrado_em ?? new Date(Date.now() + 60000).toISOString();
+  const fim = p.encerrado_em ?? new Date().toISOString();
+  const inicioMs = new Date(p.iniciado_em).getTime();
+  const fimMs = new Date(fim).getTime();
+  const durantePlantao = (value?: string | null) => {
+    if (!value) return false;
+    const time = new Date(value).getTime();
+    return Number.isFinite(time) && time >= inicioMs && time <= fimMs;
+  };
 
   const [oc, reg, viaturas, escalas, postosAtivos] = await Promise.all([
     supabase
       .from("ocorrencias")
-      .select("id, protocolo, natureza, endereco, bairro, status, prioridade, created_at, desfecho, viatura, criado_por, origem, numero, solicitante_nome, relato, despachada_em, chegada_em, encerrada_em")
+      .select("id, protocolo, natureza, endereco, bairro, status, prioridade, created_at, updated_at, desfecho, viatura, criado_por, origem, numero, solicitante_nome, relato, despachada_em, chegada_em, encerrada_em")
       .eq("plantao_id", p.id)
       .order("created_at"),
     supabase
@@ -120,7 +128,7 @@ export async function carregarAtividades(p: {
       .eq("plantao_id", p.id)
       .order("hora", { ascending: false }),
     supabase.from("viaturas").select("id, prefixo, placa, modelo, tipo, status, guarnicao, ativa, km_atual, observacao, updated_at").order("prefixo"),
-    supabase.from("escalas").select("id, agentes, funcao, hora_inicio, hora_fim, observacao, viatura_id, posto_id, criado_por").eq("data", p.data_inicio).eq("turno", p.turno).order("hora_inicio"),
+    supabase.from("escalas").select("id, agentes, funcao, hora_inicio, hora_fim, observacao, viatura_id, posto_id, criado_por, created_at, updated_at").eq("data", p.data_inicio).eq("turno", p.turno).order("hora_inicio"),
     supabase.from("postos_fixos").select("id, nome, tipo, endereco, bairro").eq("ativo", true).order("nome"),
   ]);
 
@@ -140,14 +148,17 @@ export async function carregarAtividades(p: {
 
   if (histError) throw histError;
 
+  const ocorrenciasDoPlantao = (oc.data ?? []).filter((x) => durantePlantao(x.created_at) || durantePlantao(x.updated_at));
+  const registrosDoPlantao = (reg.data ?? []).filter((x) => durantePlantao(x.hora));
+  const escalasDoPlantao = (escalas.data ?? []).filter((x) => durantePlantao(x.created_at) || durantePlantao(x.updated_at));
   const histData = (rawHist ?? []) as unknown as HistoricoRow[];
 
   const ids = Array.from(
     new Set([
-      ...(oc.data ?? []).map((x) => x.criado_por),
+      ...ocorrenciasDoPlantao.map((x) => x.criado_por),
       ...histData.map((x) => x.usuario_id),
-      ...(reg.data ?? []).map((x) => x.criado_por),
-      ...(escalas.data ?? []).map((x) => x.criado_por),
+      ...registrosDoPlantao.map((x) => x.criado_por),
+      ...escalasDoPlantao.map((x) => x.criado_por),
       p.operador_id,
     ]),
   );
@@ -163,9 +174,9 @@ export async function carregarAtividades(p: {
   );
 
   return {
-    ocorrencias: oc.data ?? [],
+    ocorrencias: ocorrenciasDoPlantao,
     viaturas: viaturas.data ?? [],
-    escalas: escalas.data ?? [],
+    escalas: escalasDoPlantao,
     postosAtivos: postosAtivos.data ?? [],
     acoes: histData.map((h) => ({
       descricao: h.descricao,
@@ -173,7 +184,7 @@ export async function carregarAtividades(p: {
       usuario_id: h.usuario_id,
       protocolo: h.ocorrencias?.protocolo ?? null,
     })),
-    registros: reg.data ?? [],
+    registros: registrosDoPlantao,
     usuarios,
   };
 }
