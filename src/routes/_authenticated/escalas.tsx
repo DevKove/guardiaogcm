@@ -191,10 +191,17 @@ function EscalaDialog({ f: init, onClose, postos, viaturas, efetivo }: { f: Form
     if (!equipeIds.length) return void toast.error("Selecione ao menos um integrante ativo da Equipe.");
     const membros = efetivo.filter((m) => equipeIds.includes(m.id));
     const { id } = f;
-    const r = { ...f };
-    delete r.id;
-    delete r.equipe_ids;
-    const payload = { ...r, agentes: membros.map((m) => m.nome).join(", "), posto_id: r.posto_id || null, viatura_id: r.viatura_id || null, observacao: r.observacao || null };
+    const payload = {
+      data: f.data,
+      turno: f.turno,
+      hora_inicio: f.hora_inicio,
+      hora_fim: f.hora_fim,
+      agentes: membros.map((m) => m.nome).join(", "),
+      funcao: f.funcao,
+      posto_id: f.posto_id || null,
+      viatura_id: f.viatura_id || null,
+      observacao: f.observacao || null,
+    };
     let escalaId = id;
     if (id) {
       const { error } = await supabase.from("escalas").update(payload as never).eq("id", id);
