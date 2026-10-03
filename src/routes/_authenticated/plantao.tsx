@@ -212,8 +212,8 @@ function PlantaoControle() {
             <div className="font-semibold">Próximo plantão sugerido</div>
             <div className="mt-1 text-muted-foreground">{atual.turno} · {fmtDia(atual.data)} · {atual.horario}</div>
           </div>
-          <Button onClick={() => setMostrarInicio(true)} disabled={saving || efetivo.length === 0}><PlayCircle className="h-4 w-4" /> Iniciar plantão</Button>
-          {efetivo.length === 0 && <p className="text-xs text-warning">Cadastre integrantes ativos em Equipe antes de iniciar o plantão.</p>}
+          <Button onClick={() => setMostrarInicio(true)} disabled={saving}><PlayCircle className="h-4 w-4" /> Iniciar plantão</Button>
+          {efetivo.length === 0 && <p className="text-xs text-muted-foreground">Não há guardas ativos cadastrados. Você poderá iniciar sem equipe e adicionar integrantes posteriormente, quando disponíveis.</p>}
           <PlantaoInicioDialog
             open={mostrarInicio}
             onClose={() => setMostrarInicio(false)}
