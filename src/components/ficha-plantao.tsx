@@ -2,7 +2,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Car, CheckCircle2, ClipboardList, Clock, MapPin, Radio, Save, Trash2, AlertTriangle } from "lucide-react";
+import { Car, CheckCircle2, ClipboardList, Clock, MapPin, Radio, Save, Trash2, AlertTriangle, Users } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,6 +20,14 @@ export function FichaPlantao({ plantao, editavel, operadorNome }: { plantao: Pla
   const [saving, setSaving] = useState(false);
   const [novo, setNovo] = useState("");
   const { data: me } = useMe();
+  const { data: efetivo = [] } = useQuery({
+    queryKey: ["equipe-plantao"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("equipe").select("id, nome, matricula, tipo, funcao").eq("ativo", true).order("nome");
+      if (error) throw error;
+      return data as { id: string; nome: string; matricula: string | null; tipo: string; funcao: string }[];
+    },
+  });
   useEffect(() => setF(plantao), [plantao]);
 
   const { data: atv } = useQuery({
@@ -93,6 +101,7 @@ export function FichaPlantao({ plantao, editavel, operadorNome }: { plantao: Pla
 
       <section className="card-3d animate-rise overflow-x-auto p-4">
         <h3 className="mb-2 flex items-center gap-2 font-semibold text-primary"><Car className="h-4 w-4" /> Guarnições</h3>
+        <p className="mb-2 flex items-center gap-1 text-xs text-muted-foreground"><Users className="h-3.5 w-3.5" /> Os integrantes abaixo vêm do cadastro de Equipe e são gravados no plantão.</p>
         <table className="w-full text-xs">
           <thead className="text-left uppercase text-muted-foreground">
             <tr><th className="py-1 pr-2">VTR</th><th className="pr-2">Encarregado</th><th className="pr-2">Condutor</th><th className="pr-2">Auxiliar 01</th><th>Auxiliar 02</th></tr>
@@ -102,7 +111,14 @@ export function FichaPlantao({ plantao, editavel, operadorNome }: { plantao: Pla
               <tr key={i}>
                 <td className="py-1 pr-2 font-mono font-bold whitespace-nowrap">{g.viatura}</td>
                 {(["encarregado", "condutor", "aux1", "aux2"] as const).map((k) => (
-                  <td key={k} className="pr-2"><Input className={cell} disabled={dis} value={g[k]} onChange={(e) => setG(i, k, e.target.value)} /></td>
+                  <td key={k} className="pr-2">
+                    {dis ? <Input className={cell} disabled value={g[k]} /> : (
+                      <select className={cell + " w-full rounded-md border border-input bg-background px-2 outline-none"} value={g[k]} onChange={(e) => setG(i, k, e.target.value)}>
+                        <option value="" className="bg-popover">Selecionar integrante</option>
+                        {efetivo.map((m) => <option key={m.id} value={m.nome} className="bg-popover">{m.nome} · {m.tipo}{m.matricula ? ` · ${m.matricula}` : ""}</option>)}
+                      </select>
+                    )}
+                  </td>
                 ))}
               </tr>
             ))}
