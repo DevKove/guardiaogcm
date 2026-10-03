@@ -69,11 +69,29 @@ export function PlantaoResumoTempoReal({ plantao }: { plantao: Plantao }) {
   const abertas = ocorrencias.filter((o) => o.status === "aberta").length;
   const atendimento = ocorrencias.filter((o) => o.status === "em_atendimento").length;
   const encerradas = ocorrencias.filter((o) => o.status === "encerrada").length;
-  const viaturas = data?.viaturas ?? [];
+  const todasViaturas = data?.viaturas ?? [];
   const escalas = data?.escalas ?? [];
-  const postosAtivos = data?.postosAtivos ?? [];
   const registros = data?.registros ?? [];
   const acoes = data?.acoes ?? [];
+
+  // Exibe apenas viaturas que tiveram participação operacional neste plantão:
+  // vinculadas a ocorrência, a uma escala do turno ou alteradas após seu início.
+  const inicioPlantao = new Date(plantao.iniciado_em).getTime();
+  const viaturasUsadasEmOcorrencias = new Set(
+    ocorrencias.map((o) => (o.viatura ?? "").trim().toLocaleLowerCase("pt-BR")).filter(Boolean),
+  );
+  const idsViaturasEscaladas = new Set(escalas.map((e) => e.viatura_id).filter(Boolean));
+  const viaturas = todasViaturas.filter((v) => {
+    const prefixo = v.prefixo.trim().toLocaleLowerCase("pt-BR");
+    const usadaEmOcorrencia = viaturasUsadasEmOcorrencias.has(prefixo) ||
+      [...viaturasUsadasEmOcorrencias].some((identificacao) => identificacao.includes(prefixo));
+    const usadaEmEscala = idsViaturasEscaladas.has(v.id);
+    const alteradaDurantePlantao = v.updated_at ? new Date(v.updated_at).getTime() >= inicioPlantao : false;
+    return usadaEmOcorrencia || usadaEmEscala || alteradaDurantePlantao;
+  });
+  // Próprios municipais só aparecem quando foram associados a uma escala do turno.
+  const idsPostosEscalados = new Set(escalas.map((e) => e.posto_id).filter(Boolean));
+  const postosAtivos = (data?.postosAtivos ?? []).filter((p) => idsPostosEscalados.has(p.id));
   const viaturasAtivas = viaturas.filter((v) => v.ativa).length;
 
   function gerarPdf() {
@@ -83,6 +101,7 @@ export function PlantaoResumoTempoReal({ plantao }: { plantao: Plantao }) {
       return;
     }
 
+    const usuarios = data?.usuarios ?? {};
     const occurrenceRows = ocorrencias.map((o) => `<tr>
       <td>${cell(hora(o.created_at))}</td><td>${cell(fmtProtocolo(o.protocolo, o.created_at))}</td>
       <td>${cell(o.natureza)}</td><td>${cell([o.endereco, o.numero, o.bairro].filter(Boolean).join(", "))}</td>
@@ -93,9 +112,10 @@ export function PlantaoResumoTempoReal({ plantao }: { plantao: Plantao }) {
     const postRows = postosAtivos.map((p) => `<tr><td>${cell(p.nome)}</td><td>${cell(p.tipo)}</td><td>${cell([p.endereco, p.bairro].filter(Boolean).join(" · "))}</td></tr>`).join("");
     const recordRows = registros.map((r) => `<tr><td>${cell(dataHora(r.hora))}</td><td>${cell(r.texto)}</td><td>${cell(usuarios[r.criado_por] ?? r.criado_por.slice(0, 8))}</td></tr>`).join("");
     const actionRows = acoes.map((a) => `<tr><td>${cell(dataHora(a.created_at))}</td><td>${cell(a.protocolo ? fmtProtocolo(a.protocolo, a.created_at) : "—")}</td><td>${cell(a.descricao)}</td><td>${cell(usuarios[a.usuario_id] ?? a.usuario_id.slice(0, 8))}</td></tr>`).join("");
-    const usuarios = data?.usuarios ?? {};
     const generatedAt = new Date().toLocaleString("pt-BR");
 
+    try {
+      janela.document.open();
     janela.document.write(`<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>Relatório de Plantão - ${cell(fmtDia(plantao.data_inicio))}</title>
       <style>
         @page { size: A4 landscape; margin: 12mm; }
@@ -115,7 +135,7 @@ export function PlantaoResumoTempoReal({ plantao }: { plantao: Plantao }) {
       Início: ${cell(dataHora(plantao.iniciado_em))} · Situação: ${cell(plantao.status === "aberto" ? "Em andamento" : "Encerrado")} · Emitido em: ${cell(generatedAt)}</div></header>
       <div class="stats"><div class="stat">Total de ocorrências<b>${ocorrencias.length}</b></div><div class="stat">Abertas<b>${abertas}</b></div><div class="stat">Em atendimento<b>${atendimento}</b></div><div class="stat">Viaturas ativas<b>${viaturasAtivas}</b></div></div>
       <h2>1. Ocorrências do plantão</h2><table><thead><tr><th>Hora</th><th>Protocolo</th><th>Natureza</th><th>Local</th><th>Prioridade</th><th>Viatura</th><th>Status</th></tr></thead><tbody>${occurrenceRows || '<tr><td colspan="7" class="empty">Nenhuma ocorrência vinculada a este plantão.</td></tr>'}</tbody></table>
-      <h2>2. Situação da frota</h2><table><thead><tr><th>Prefixo</th><th>Tipo / modelo</th><th>Guarnição</th><th>Odômetro</th><th>Situação</th></tr></thead><tbody>${fleetRows || '<tr><td colspan="5" class="empty">Nenhuma viatura cadastrada ou dados indisponíveis.</td></tr>'}</tbody></table>
+      <h2>2. Viaturas utilizadas ou alteradas neste plantão</h2><table><thead><tr><th>Prefixo</th><th>Tipo / modelo</th><th>Guarnição</th><th>Odômetro</th><th>Situação</th></tr></thead><tbody>${fleetRows || '<tr><td colspan="5" class="empty">Nenhuma viatura utilizada ou alterada neste plantão.</td></tr>'}</tbody></table>
       <h2>3. Equipes e escalas do turno</h2><table><thead><tr><th>Função</th><th>Horário</th><th>Equipe / agentes</th><th>Observação</th></tr></thead><tbody>${scaleRows || '<tr><td colspan="4" class="empty">Nenhuma escala cadastrada ou dados indisponíveis.</td></tr>'}</tbody></table>
       <h2>4. Próprios municipais ativos</h2><table><thead><tr><th>Local</th><th>Tipo</th><th>Endereço</th></tr></thead><tbody>${postRows || '<tr><td colspan="3" class="empty">Nenhum próprio municipal ativo cadastrado.</td></tr>'}</tbody></table>
       <h2>5. Lançamentos do plantão</h2><table><thead><tr><th>Data / hora</th><th>Registro</th><th>Responsável</th></tr></thead><tbody>${recordRows || '<tr><td colspan="3" class="empty">Nenhum lançamento registrado.</td></tr>'}</tbody></table>
@@ -124,6 +144,12 @@ export function PlantaoResumoTempoReal({ plantao }: { plantao: Plantao }) {
       <script>window.addEventListener("load", () => setTimeout(() => window.print(), 300));</script>
       </body></html>`);
     janela.document.close();
+    janela.focus();
+    } catch (e) {
+      janela.document.open();
+      janela.document.write(`<!doctype html><html lang="pt-BR"><meta charset="utf-8"><title>Erro ao gerar relatório</title><body style="font:16px Arial;padding:24px;color:#172033"><h1>Não foi possível gerar o relatório</h1><p>${cell(e instanceof Error ? e.message : "Erro inesperado")}</p><p>Feche esta janela e tente novamente.</p></body></html>`);
+      janela.document.close();
+    }
   }
 
   return (
