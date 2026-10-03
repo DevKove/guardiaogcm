@@ -21,11 +21,8 @@ export const Route = createFileRoute("/auth")({
 
 function AuthPage() {
   const navigate = useNavigate();
-  const [mode, setMode] = useState<"login" | "signup">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [nome, setNome] = useState("");
-  const [matricula, setMatricula] = useState("");
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -36,24 +33,15 @@ function AuthPage() {
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
+    if (loading) return;
     setLoading(true);
     try {
-      if (mode === "login") {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) throw error;
-        navigate({ to: "/painel" });
-      } else {
-        const { error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: { emailRedirectTo: window.location.origin + "/painel", data: { nome, matricula } },
-        });
-        if (error) throw error;
-        toast.success("Cadastro realizado. Confirme pelo link enviado ao seu e-mail.");
-        setMode("login");
-      }
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Erro ao autenticar");
+      const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
+      if (error) throw error;
+      navigate({ to: "/painel" });
+    } catch {
+      // Keep authentication failures generic to avoid exposing account state or provider details.
+      toast.error("Não foi possível autenticar. Confira os dados e tente novamente.");
     } finally {
       setLoading(false);
     }
@@ -68,37 +56,19 @@ function AuthPage() {
             <Shield className="h-6 w-6" />
             <span className="font-mono text-xs tracking-widest">CAD · GUARDA MUNICIPAL</span>
           </div>
-          <h1 className="text-2xl font-bold">{mode === "login" ? "Entrar" : "Solicitar acesso"}</h1>
-          {mode === "signup" && (
-            <>
-              <div className="space-y-1">
-                <Label>Nome completo</Label>
-                <Input required value={nome} onChange={(e) => setNome(e.target.value)} />
-              </div>
-              <div className="space-y-1">
-                <Label>Matrícula</Label>
-                <Input value={matricula} onChange={(e) => setMatricula(e.target.value)} />
-              </div>
-            </>
-          )}
+          <h1 className="text-2xl font-bold">Entrar</h1>
+          <p className="text-sm text-muted-foreground">Acesso exclusivo a usuários autorizados pela administração.</p>
           <div className="space-y-1">
             <Label>E-mail</Label>
-            <Input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
+            <Input type="email" autoComplete="username" required maxLength={255} value={email} onChange={(e) => setEmail(e.target.value)} />
           </div>
           <div className="space-y-1">
             <Label>Senha</Label>
-            <Input type="password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} />
+            <Input type="password" autoComplete="current-password" required value={password} onChange={(e) => setPassword(e.target.value)} />
           </div>
           <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? "Aguarde..." : mode === "login" ? "Entrar" : "Cadastrar"}
+            {loading ? "Autenticando..." : "Entrar"}
           </Button>
-          <button
-            type="button"
-            onClick={() => setMode(mode === "login" ? "signup" : "login")}
-            className="w-full text-sm text-muted-foreground hover:text-foreground"
-          >
-            {mode === "login" ? "Não tem conta? Solicitar acesso" : "Já tenho conta"}
-          </button>
         </form>
       </div>
     </div>
