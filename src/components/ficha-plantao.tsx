@@ -82,9 +82,9 @@ export function FichaPlantao({ plantao, editavel, operadorNome }: { plantao: Pla
     const membros = efetivo.filter((m) => integranteIds.includes(m.id));
     const supervisor = membros.find((m) => m.id === f.supervisor_id);
     const operadorRadio = membros.find((m) => m.id === f.operador_radio_id);
-    if (f.status === "aberto" && (!f.nome_plantao || !f.supervisor_id || !integranteIds.length || !integranteIds.includes(f.supervisor_id))) {
+    if (f.status === "aberto" && (!f.nome_plantao || (integranteIds.length > 0 && (!f.supervisor_id || !integranteIds.includes(f.supervisor_id))))) {
       setSaving(false);
-      toast.error("Selecione nome do plantão, supervisor e integrantes ativos da Equipe.");
+      toast.error("Selecione o nome do plantão e, havendo equipe, o supervisor entre os integrantes.");
       return;
     }
     const { error } = await supabase.from("plantoes").update({
@@ -136,7 +136,7 @@ export function FichaPlantao({ plantao, editavel, operadorNome }: { plantao: Pla
         <Campo l="Nome do plantão"><select className={selectCls} disabled={dis} value={f.nome_plantao ?? ""} onChange={(e) => set("nome_plantao", e.target.value as Plantao["nome_plantao"])}><option value="" className="bg-popover">Selecionar</option>{["ALPHA","BRAVO","CHARLIE","DELTA"].map((x) => <option key={x} value={x} className="bg-popover">{x}</option>)}</select></Campo>
         <Campo l="Supervisor"><select className={selectCls} disabled={dis} value={f.supervisor_id ?? ""} onChange={(e) => set("supervisor_id", e.target.value || null)}><option value="" className="bg-popover">Selecionar supervisor</option>{efetivo.filter((m) => integranteIds.includes(m.id)).map((m) => <option key={m.id} value={m.id} className="bg-popover">{m.nome} · {m.funcao}</option>)}</select></Campo>
         <Campo l="Operador(a) de rádio"><select className={selectCls} disabled={dis} value={f.operador_radio_id ?? ""} onChange={(e) => set("operador_radio_id", e.target.value || null)}><option value="" className="bg-popover">Não informado</option>{efetivo.filter((m) => integranteIds.includes(m.id)).map((m) => <option key={m.id} value={m.id} className="bg-popover">{m.nome} · {m.funcao}</option>)}</select></Campo>
-        <div className="md:col-span-2 space-y-1"><Label className="text-[10px] uppercase text-muted-foreground">Integrantes do plantão</Label><select multiple className="min-h-24 w-full rounded-md border border-input bg-background px-2 py-1 text-xs outline-none" disabled={dis} value={integranteIds} onChange={(e) => { const ids = Array.from(e.target.selectedOptions).map((o) => o.value); setIntegranteIds(ids); if (f.supervisor_id && !ids.includes(f.supervisor_id)) set("supervisor_id", null); if (f.operador_radio_id && !ids.includes(f.operador_radio_id)) set("operador_radio_id", null); }}>{efetivo.map((m) => <option key={m.id} value={m.id}>{m.nome} · {m.tipo}{m.matricula ? ` · ${m.matricula}` : ""}</option>)}</select><p className="text-[10px] text-muted-foreground">Somente integrantes ativos cadastrados em Equipe.</p></div>
+        <div className="md:col-span-2 space-y-1"><Label className="text-[10px] uppercase text-muted-foreground">Guardas presentes no plantão</Label><select multiple className="min-h-24 w-full rounded-md border border-input bg-background px-2 py-1 text-xs outline-none" disabled={dis} value={integranteIds} onChange={(e) => { const ids = Array.from(e.target.selectedOptions).map((o) => o.value); setIntegranteIds(ids); if (f.supervisor_id && !ids.includes(f.supervisor_id)) set("supervisor_id", null); if (f.operador_radio_id && !ids.includes(f.operador_radio_id)) set("operador_radio_id", null); }}>{efetivo.map((m) => <option key={m.id} value={m.id}>{m.nome} · {m.tipo}{m.matricula ? ` · ${m.matricula}` : ""}</option>)}</select><p className="text-[10px] text-muted-foreground">Somente guardas ativos cadastrados em Equipe. Enquanto o plantão estiver aberto, novos integrantes podem ser adicionados ou retirados.</p></div>
       </section>
 
       <section className="card-3d animate-rise overflow-x-auto p-4">
