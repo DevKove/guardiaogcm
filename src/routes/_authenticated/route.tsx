@@ -171,7 +171,8 @@ function Layout() {
                 <div
                   role="menu"
                   aria-label="Selecionar tema"
-                  className="absolute right-0 top-[calc(100%+0.45rem)] z-[100] w-64 overflow-hidden rounded-lg border p-1.5 shadow-2xl ring-1 ring-black/30 animate-rise"\n                  style={{ backgroundColor: "#020617", color: "#ffffff", borderColor: "#475569", boxShadow: "0 20px 40px rgba(0,0,0,.45)" }}
+                  className="absolute right-0 top-[calc(100%+0.45rem)] z-[100] w-64 overflow-hidden rounded-lg border p-1.5 shadow-2xl ring-1 ring-black/30 animate-rise"
+                  style={{ backgroundColor: "#020617", color: "#ffffff", borderColor: "#475569", boxShadow: "0 20px 40px rgba(0,0,0,.45)" }}
                 >
                   <div className="border-b px-2.5 py-2" style={{ borderColor: "#334155" }}>
                     <div className="text-[10px] font-bold uppercase tracking-[0.12em]" style={{ color: "#cbd5e1" }}>Tema visual</div>
@@ -187,9 +188,13 @@ function Layout() {
                           role="menuitemradio"
                           aria-checked={active}
                           onClick={() => changeTheme(item.value)}
-                          className={`flex w-full items-center gap-3 rounded-md px-2.5 py-2 text-left transition-colors ${active ? "ring-1 ring-primary/40" : ""}`}\n                          style={{ backgroundColor: active ? "rgba(59,130,246,.20)" : "transparent", color: "#ffffff" }}\n                          onMouseEnter={(event) => { if (!active) event.currentTarget.style.backgroundColor = "rgba(255,255,255,.10)"; }}\n                          onMouseLeave={(event) => { if (!active) event.currentTarget.style.backgroundColor = "transparent"; }}
+                          className={`flex w-full items-center gap-3 rounded-md px-2.5 py-2 text-left transition-colors ${active ? "ring-1 ring-primary/40" : ""}`}
+                          style={{ backgroundColor: active ? "rgba(59,130,246,.20)" : "transparent", color: "#ffffff" }}
+                          onMouseEnter={(event) => { if (!active) event.currentTarget.style.backgroundColor = "rgba(255,255,255,.10)"; }}
+                          onMouseLeave={(event) => { if (!active) event.currentTarget.style.backgroundColor = "transparent"; }}
                         >
-                          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border"\n                            style={{ borderColor: active ? "rgba(96,165,250,.70)" : "#475569", backgroundColor: active ? "rgba(59,130,246,.18)" : "#0f172a", color: active ? "#60a5fa" : "#cbd5e1" }}>
+                          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border"
+                            style={{ borderColor: active ? "rgba(96,165,250,.70)" : "#475569", backgroundColor: active ? "rgba(59,130,246,.18)" : "#0f172a", color: active ? "#60a5fa" : "#cbd5e1" }}>
                             <Palette className="h-4 w-4" />
                           </span>
                           <span className="min-w-0 flex-1">
