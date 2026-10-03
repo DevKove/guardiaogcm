@@ -8,18 +8,16 @@ import { Button } from "@/components/ui/button";
 import { useMe } from "@/hooks/use-me";
 import { carregarAtividades, fmtDia, turnoAtual, type Plantao } from "@/lib/plantao";
 import { PlantaoResumoTempoReal } from "@/components/plantao-tempo-real";
+import { FichaPlantao } from "@/components/ficha-plantao";
 
 export const Route = createFileRoute("/_authenticated/plantao")({
-  validateSearch: (search) => ({
-    historico: typeof search.historico === "string" ? search.historico : undefined,
-  }),
   head: () => ({ meta: [{ title: "Plantão · CAD" }] }),
   component: PlantaoControle,
 });
 
 function PlantaoControle() {
   const { data: me } = useMe();
-  const { historico } = Route.useSearch();
+  const [historico] = useState(() => new URLSearchParams(window.location.search).get("historico") ?? "");
   const navigate = useNavigate();
   const qc = useQueryClient();
   const [saving, setSaving] = useState(false);
