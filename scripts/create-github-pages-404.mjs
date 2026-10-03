@@ -1,10 +1,23 @@
-import { copyFile } from "node:fs/promises";
-import { access } from "node:fs/promises";
+import { access, copyFile } from "node:fs/promises";
+
+const publicDir = ".output/public";
+const shellPath = `${publicDir}/_shell.html`;
+const indexPath = `${publicDir}/index.html`;
+const fallbackPath = `${publicDir}/404.html`;
 
 try {
-  await access("dist/index.html");
-  await copyFile("dist/index.html", "dist/404.html");
-  console.log("GitHub Pages SPA fallback: dist/404.html criado.");
+  let sourcePath = null;
+
+  try {
+    await access(shellPath);
+    sourcePath = shellPath;
+  } catch {
+    await access(indexPath);
+    sourcePath = indexPath;
+  }
+
+  await copyFile(sourcePath, fallbackPath);
+  console.log(`GitHub Pages SPA fallback: ${fallbackPath} criado a partir de ${sourcePath}.`);
 } catch (error) {
   console.error("Falha ao criar o fallback 404 do GitHub Pages:", error);
   process.exit(1);
