@@ -103,16 +103,17 @@ function PlantaoControle() {
     return () => { void supabase.removeChannel(ch); };
   }, [qc]);
 
-  async function iniciar(form: { nome: string; supervisorId: string; integrantes: string[]; operadorRadioId: string }) {
+  async function iniciar(form: { nome: string; temEquipes: boolean; supervisorId: string; integrantes: string[]; operadorRadioId: string }) {
     if (!me) return;
     setSaving(true);
-    const selecionados = efetivo.filter((m) => form.integrantes.includes(m.id));
+    const integrantes = form.temEquipes ? form.integrantes : [];
+    const selecionados = efetivo.filter((m) => integrantes.includes(m.id));
     const supervisor = selecionados.find((m) => m.id === form.supervisorId);
     const operadorRadio = selecionados.find((m) => m.id === form.operadorRadioId);
     const { data, error } = await supabase.rpc("iniciar_plantao", {
       p_nome_plantao: form.nome,
-      p_supervisor_id: form.supervisorId,
-      p_integrantes: form.integrantes,
+      p_supervisor_id: form.temEquipes ? (form.supervisorId || null) : null,
+      p_integrantes: integrantes,
       p_operador_radio_id: form.operadorRadioId || null,
       p_data_inicio: atual.data,
       p_turno: atual.turno,
@@ -241,6 +242,7 @@ function PlantaoInicioDialog({
   onConfirm: (form: { nome: string; supervisorId: string; integrantes: string[]; operadorRadioId: string }) => Promise<void>;
 }) {
   const [nome, setNome] = useState<"ALPHA" | "BRAVO" | "CHARLIE" | "DELTA">("ALPHA");
+  const [temEquipes, setTemEquipes] = useState(true);
   const [integrantes, setIntegrantes] = useState<string[]>([]);
   const [supervisorId, setSupervisorId] = useState("");
   const [operadorRadioId, setOperadorRadioId] = useState("");
@@ -248,6 +250,7 @@ function PlantaoInicioDialog({
   useEffect(() => {
     if (!open) return;
     setNome("ALPHA");
+    setTemEquipes(true);
     setIntegrantes([]);
     setSupervisorId("");
     setOperadorRadioId("");
@@ -262,7 +265,7 @@ function PlantaoInicioDialog({
     });
   }
 
-  const podeSalvar = integrantes.length > 0 && integrantes.includes(supervisorId) && (!operadorRadioId || integrantes.includes(operadorRadioId));
+  const podeSalvar = !temEquipes || (integrantes.length > 0 && integrantes.includes(supervisorId) && (!operadorRadioId || integrantes.includes(operadorRadioId)));
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
@@ -272,7 +275,14 @@ function PlantaoInicioDialog({
         </DialogHeader>
         <div className="space-y-4">
           <div className="rounded-lg border border-primary/20 bg-primary/5 p-3 text-sm">
-            O plantão só pode ser iniciado com integrantes ativos cadastrados em <b>Equipe</b>. Nenhum nome pode ser digitado manualmente.
+            Informe se haverá equipe em serviço neste plantão. Quando houver, selecione os guardas municipais presentes. Novos integrantes poderão ser adicionados durante todo o plantão.
+          </div>
+          <div className="space-y-2">
+            <Label>Há equipes trabalhando neste plantão? *</Label>
+            <div className="flex gap-2">
+              <Button type="button" variant={temEquipes ? "default" : "outline"} onClick={() => setTemEquipes(true)}>Sim</Button>
+              <Button type="button" variant={!temEquipes ? "default" : "outline"} onClick={() => { setTemEquipes(false); setIntegrantes([]); setSupervisorId(""); setOperadorRadioId(""); }}>Não</Button>
+            </div>
           </div>
           <div className="grid gap-3 md:grid-cols-2">
             <div className="space-y-1">
@@ -301,8 +311,8 @@ function PlantaoInicioDialog({
             </div>
           </div>
           <div className="space-y-2">
-            <Label>Integrantes do plantão * ({integrantes.length} selecionado(s))</Label>
-            <div className="max-h-64 overflow-y-auto rounded-lg border p-2">
+            <Label>Guardas municipais presentes {temEquipes ? "*" : ""} ({integrantes.length} selecionado(s))</Label>
+            <div className={`max-h-64 overflow-y-auto rounded-lg border p-2 ${!temEquipes ? "pointer-events-none opacity-50" : ""}`}>
               <div className="grid gap-2 md:grid-cols-2">
                 {efetivo.map((m) => (
                   <label key={m.id} className="flex cursor-pointer items-center gap-2 rounded-md border p-2 text-sm hover:bg-accent">
@@ -318,7 +328,7 @@ function PlantaoInicioDialog({
           </div>
           <div className="flex justify-end gap-2">
             <Button type="button" variant="outline" onClick={onClose}>Cancelar</Button>
-            <Button type="button" disabled={!podeSalvar || saving} onClick={() => void onConfirm({ nome, supervisorId, integrantes, operadorRadioId })}>
+            <Button type="button" disabled={!podeSalvar || saving} onClick={() => void onConfirm({ nome, temEquipes, supervisorId, integrantes, operadorRadioId })}>
               {saving ? "Iniciando..." : "Confirmar início"}
             </Button>
           </div>
