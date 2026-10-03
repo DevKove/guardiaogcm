@@ -1,7 +1,7 @@
 import { createFileRoute, Link, Outlet, redirect, useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
-import { Shield, LogOut, LayoutList, PlusCircle, Users, Car, BarChart3, UserCircle, School, CalendarClock, History, PlayCircle, Palette } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Shield, LogOut, LayoutList, PlusCircle, Users, Car, BarChart3, UserCircle, School, CalendarClock, History, PlayCircle, Palette, Check, ChevronDown } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useMe } from "@/hooks/use-me";
 import { ROLE_LABEL } from "@/lib/cad";
@@ -41,6 +41,8 @@ function Layout() {
   const qc = useQueryClient();
   const navigate = useNavigate();
   const [theme, setTheme] = useState("escuro");
+  const [themeOpen, setThemeOpen] = useState(false);
+  const themeMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const saved = window.localStorage.getItem("cad-theme");
@@ -54,7 +56,29 @@ function Layout() {
     setTheme(value);
     document.documentElement.dataset["theme"] = value;
     window.localStorage.setItem("cad-theme", value);
+    setThemeOpen(false);
   }
+
+  useEffect(() => {
+    if (!themeOpen) return;
+    function handlePointerDown(event: PointerEvent) {
+      if (themeMenuRef.current && !themeMenuRef.current.contains(event.target as Node)) {
+        setThemeOpen(false);
+      }
+    }
+    document.addEventListener("pointerdown", handlePointerDown);
+    return () => document.removeEventListener("pointerdown", handlePointerDown);
+  }, [themeOpen]);
+
+  const themes = [
+    { value: "escuro", label: "Escuro", description: "Baixa luminosidade" },
+    { value: "claro", label: "Claro", description: "Alta luminosidade" },
+    { value: "cyberpunk", label: "Cyberpunk", description: "Neon e alto contraste" },
+    { value: "oceano", label: "Oceano", description: "Azul profundo" },
+    { value: "floresta", label: "Floresta", description: "Verde operacional" },
+  ] as const;
+
+  const selectedTheme = themes.find((item) => item.value === theme) ?? themes[0];
 
   async function signOut() {
     await qc.cancelQueries();
@@ -123,21 +147,63 @@ function Layout() {
           </nav>
 
           <div className="col-start-2 row-start-1 ml-auto flex shrink-0 items-center gap-2 sm:gap-3">
-            <label className="flex h-9 items-center gap-1.5 rounded-md border border-border px-2 text-muted-foreground" title="Personalizar aparência">
-              <Palette className="h-4 w-4 shrink-0" />
-              <select
+            <div ref={themeMenuRef} className="relative">
+              <button
+                type="button"
                 aria-label="Tema visual"
-                value={theme}
-                onChange={(e) => changeTheme(e.target.value)}
-                className="max-w-[100px] bg-transparent text-xs text-foreground outline-none sm:max-w-[120px]"
+                aria-haspopup="menu"
+                aria-expanded={themeOpen}
+                onClick={() => setThemeOpen((open) => !open)}
+                className="inline-flex h-9 min-w-[142px] items-center justify-between gap-2 rounded-md border border-border bg-background/80 px-2.5 text-left text-foreground shadow-sm transition-colors hover:border-primary/50 hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring"
+                title="Personalizar aparência"
               >
-                <option value="escuro">Escuro</option>
-                <option value="claro">Claro</option>
-                <option value="cyberpunk">Cyberpunk</option>
-                <option value="oceano">Oceano</option>
-                <option value="floresta">Floresta</option>
-              </select>
-            </label>
+                <span className="flex min-w-0 items-center gap-2">
+                  <Palette className="h-4 w-4 shrink-0 text-primary" />
+                  <span className="min-w-0">
+                    <span className="block truncate text-xs font-semibold">{selectedTheme.label}</span>
+                    <span className="hidden text-[9px] leading-none text-muted-foreground sm:block">{selectedTheme.description}</span>
+                  </span>
+                </span>
+                <ChevronDown className={`h-3.5 w-3.5 shrink-0 text-muted-foreground transition-transform ${themeOpen ? "rotate-180" : ""}`} />
+              </button>
+
+              {themeOpen && (
+                <div
+                  role="menu"
+                  aria-label="Selecionar tema"
+                  className="absolute right-0 top-[calc(100%+0.45rem)] z-50 w-64 overflow-hidden rounded-lg border border-border bg-popover p-1.5 text-popover-foreground shadow-xl ring-1 ring-black/10 animate-rise"
+                >
+                  <div className="border-b border-border px-2.5 py-2">
+                    <div className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">Tema visual</div>
+                    <div className="mt-0.5 text-[11px] text-muted-foreground">Escolha a aparência do CAD</div>
+                  </div>
+                  <div className="pt-1">
+                    {themes.map((item) => {
+                      const active = theme === item.value;
+                      return (
+                        <button
+                          key={item.value}
+                          type="button"
+                          role="menuitemradio"
+                          aria-checked={active}
+                          onClick={() => changeTheme(item.value)}
+                          className={`flex w-full items-center gap-3 rounded-md px-2.5 py-2 text-left transition-colors ${active ? "bg-primary/12 text-foreground" : "text-foreground hover:bg-accent"}`}
+                        >
+                          <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-md border ${active ? "border-primary/50 bg-primary/15 text-primary" : "border-border bg-muted text-muted-foreground"}`}>
+                            <Palette className="h-4 w-4" />
+                          </span>
+                          <span className="min-w-0 flex-1">
+                            <span className="block text-xs font-semibold">{item.label}</span>
+                            <span className="block truncate text-[10px] text-muted-foreground">{item.description}</span>
+                          </span>
+                          {active && <Check className="h-4 w-4 shrink-0 text-primary" aria-hidden="true" />}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
             <Relogio />
             <Link
               to="/perfil"
