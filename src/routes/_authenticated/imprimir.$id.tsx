@@ -4,6 +4,10 @@ import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { PRIORIDADES, STATUS, fmtData, fmtProtocolo, type Status } from "@/lib/cad";
 
+const DESCRICOES_TECNICAS = [
+  "Alteração registrada pelo banco.",
+];
+
 export const Route = createFileRoute("/_authenticated/imprimir/$id")({
   head: () => ({ meta: [{ title: "Boletim de ocorrência · CAD" }] }),
   component: Imprimir,
@@ -33,6 +37,16 @@ function Imprimir() {
   if (!data?.o) return <div className="text-muted-foreground">Carregando...</div>;
   const { o, env, hist, pm } = data;
   const autor = pm.get(o.criado_por);
+
+  // O histórico completo continua preservado no banco.
+  // No documento oficial, eventos técnicos gerados automaticamente pelo banco
+  // não são exibidos para evitar poluição e informações internas desnecessárias.
+  const historicoOficial = hist.filter(
+    (h) =>
+      !DESCRICOES_TECNICAS.some((tecnico) =>
+        h.descricao.trim().toLowerCase().startsWith(tecnico.toLowerCase()),
+      ),
+  );
 
   return (
     <div className="mx-auto max-w-3xl space-y-4 bg-card p-8 text-sm print:bg-transparent print:p-0">
@@ -77,12 +91,14 @@ function Imprimir() {
           </table>
         </div>
       )}
-      <div>
-        <h3 className="mb-1 border-b font-bold uppercase">Histórico</h3>
-        {hist.map((h) => (
-          <div key={h.id} className="py-0.5"><span className="font-mono text-xs">{fmtData(h.created_at)}</span> — {pm.get(h.usuario_id)?.nome}: <span className="whitespace-pre-wrap">{h.descricao}</span></div>
-        ))}
-      </div>
+      {historicoOficial.length > 0 && (
+        <div>
+          <h3 className="mb-1 border-b font-bold uppercase">Histórico</h3>
+          {historicoOficial.map((h) => (
+            <div key={h.id} className="py-0.5"><span className="font-mono text-xs">{fmtData(h.created_at)}</span> — {pm.get(h.usuario_id)?.nome}: <span className="whitespace-pre-wrap">{h.descricao}</span></div>
+          ))}
+        </div>
+      )}
       <div className="grid grid-cols-2 gap-8 pt-12 text-center text-xs">
         <div className="border-t pt-1">{autor?.nome}{autor?.matricula ? ` — Mat. ${autor.matricula}` : ""}<br />Operador responsável</div>
         <div className="border-t pt-1">Supervisor de turno</div>
