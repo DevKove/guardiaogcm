@@ -109,55 +109,26 @@ function Layout() {
       <div className="siren-bar print:hidden" />
 
       <header className="glass sticky top-0 z-40 border-b border-border/90 print:hidden">
-        <div className="relative mx-auto grid max-w-[1600px] grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-2 overflow-visible px-4 py-3 lg:px-6">
-          <div aria-hidden="true" className="pointer-events-none absolute right-[17rem] top-0 hidden h-[94px] w-[390px] opacity-80 xl:block">
-            <img src="/cad-header-art.svg" alt="" className="h-full w-full object-contain object-right" />
-          </div>
+        <div className="mx-auto flex max-w-[1600px] flex-wrap items-center gap-x-5 gap-y-3 px-3 py-3 sm:px-4 lg:px-6">
           <Link
             to="/painel"
-            className="relative z-10 col-start-1 row-start-1 mr-2 flex min-w-0 items-center gap-3.5 rounded-xl border border-border/60 bg-background/45 py-2 pl-2 pr-4 shadow-sm backdrop-blur-sm transition-all hover:border-primary/40 hover:bg-accent/50"
+            className="group flex min-w-0 flex-1 basis-[280px] items-center rounded-lg py-1.5 pr-2 transition-colors"
             aria-label="CAD Guarda Municipal"
           >
-            <span className="relative flex h-[54px] w-[48px] shrink-0 items-center justify-center">
-              <span className="absolute inset-0 rounded-full bg-amber-400/10 blur-md" />
-              <img src="/cad-emblema.svg" alt="Emblema ilustrativo da Guarda Civil Municipal" className="relative h-[54px] w-[48px] object-contain drop-shadow-[0_3px_5px_rgba(0,0,0,0.35)]" />
-            </span>
-            <span className="min-w-0 leading-tight">
-              <span className="flex flex-wrap items-center gap-2">
-                <span className="text-[15px] font-extrabold tracking-[0.01em] text-foreground sm:text-[17px]">CAD GUARDA MUNICIPAL</span>
-                <span className="hidden rounded-full border border-primary/30 bg-primary/10 px-2 py-0.5 text-[8px] font-bold uppercase tracking-[0.16em] text-primary lg:inline-flex">Central operacional</span>
+            <span className="min-w-0">
+              <span className="block truncate font-sans text-lg font-black leading-none tracking-[0.08em] text-foreground sm:text-xl lg:text-2xl">
+                CAD <span className="font-semibold tracking-[0.04em] text-primary">GUARDA MUNICIPAL</span>
               </span>
-              <span className="mt-1 block text-[9px] font-semibold uppercase tracking-[0.16em] text-muted-foreground sm:text-[10px]">
-                Atendimento • Despacho • Gestão de ocorrências
+              <span className="mt-2 block text-[9px] font-semibold uppercase tracking-[0.16em] text-muted-foreground sm:text-[10px] sm:tracking-[0.22em]">
+                Atendimento <span className="px-1 text-primary/70">/</span> Despacho <span className="px-1 text-primary/70">/</span> Gestão de ocorrências
               </span>
-              <span className="mt-1.5 flex items-center gap-1.5 text-[9px] font-medium text-muted-foreground">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_7px_rgba(52,211,153,.8)]" />
-                Araçoiaba da Serra · SP
+              <span className="mt-1.5 block text-[10px] font-medium tracking-wide text-muted-foreground">
+                ARAÇOIABA DA SERRA <span className="px-1 text-primary">·</span> SP
               </span>
             </span>
           </Link>
 
-          <nav className="col-span-2 row-start-2 flex w-full flex-wrap items-center gap-1 overflow-visible border-t border-border/70 pt-2" aria-label="Navegação principal">
-            {items.map((i) => (
-              <Link
-                key={i.to}
-                to={i.to}
-                className={linkCls}
-                activeProps={{ className: activeCls }}
-              >
-                <i.icon className="h-4 w-4 shrink-0" strokeWidth={1.9} />
-                <span className="whitespace-nowrap">{i.label}</span>
-              </Link>
-            ))}
-            {me?.isAdmin && (
-              <Link to="/usuarios" className={linkCls} activeProps={{ className: activeCls }}>
-                <Users className="h-4 w-4 shrink-0" strokeWidth={1.9} />
-                <span>Usuários</span>
-              </Link>
-            )}
-          </nav>
-
-          <div className="col-start-2 row-start-1 ml-auto flex shrink-0 items-center gap-2 sm:gap-3">
+          <div className="ml-auto flex min-w-0 flex-wrap items-center justify-end gap-2 sm:gap-3">
             <div ref={themeMenuRef} className="relative">
               <button
                 type="button"
@@ -243,6 +214,26 @@ function Layout() {
               <LogOut className="h-4 w-4" strokeWidth={1.9} />
             </button>
           </div>
+
+          <nav className="flex w-full basis-full flex-wrap items-center gap-1 border-t border-border/70 pt-2" aria-label="Navegação principal">
+            {items.map((i) => (
+              <Link
+                key={i.to}
+                to={i.to}
+                className={linkCls}
+                activeProps={{ className: activeCls }}
+              >
+                <i.icon className="h-4 w-4 shrink-0" strokeWidth={1.9} />
+                <span className="whitespace-nowrap">{i.label}</span>
+              </Link>
+            ))}
+            {me?.isAdmin && (
+              <Link to="/usuarios" className={linkCls} activeProps={{ className: activeCls }}>
+                <Users className="h-4 w-4 shrink-0" strokeWidth={1.9} />
+                <span>Usuários</span>
+              </Link>
+            )}
+          </nav>
         </div>
       </header>
 
