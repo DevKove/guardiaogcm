@@ -112,9 +112,9 @@ function PlantaoControle() {
     const operadorRadio = form.temEquipes ? selecionados.find((m) => m.id === form.operadorRadioId) : undefined;
     const { data, error } = await supabase.rpc("iniciar_plantao", {
       p_nome_plantao: form.nome,
-      p_supervisor_id: form.temEquipes ? (form.supervisorId || null) : null,
+      p_supervisor_id: (form.temEquipes ? (form.supervisorId || null) : null) as unknown as string,
       p_integrantes: integrantes,
-      p_operador_radio_id: form.temEquipes ? (form.operadorRadioId || null) : null,
+      p_operador_radio_id: (form.temEquipes ? (form.operadorRadioId || null) : null) as unknown as string,
       p_data_inicio: atual.data,
       p_turno: atual.turno,
       p_horario: atual.horario,
