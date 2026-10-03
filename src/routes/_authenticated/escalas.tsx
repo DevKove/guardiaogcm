@@ -234,7 +234,8 @@ function EscalaDialog({ f: init, onClose, postos, viaturas, efetivo }: { f: Form
       if (error) return void toast.error(error.message);
       escalaId = data.id;
     }
-    const { error: insError } = await supabase.from("escala_integrantes").insert(equipeIds.map((equipe_id) => ({ escala_id: escalaId, equipe_id })));
+    if (!escalaId) return void toast.error("Não foi possível identificar a escala salva.");
+    const { error: insError } = await supabase.from("escala_integrantes").insert(equipeIds.map((equipe_id) => ({ escala_id: escalaId as string, equipe_id })));
     if (insError) return void toast.error("Não foi possível vincular os integrantes: " + insError.message);
     toast.success(id ? "Escala atualizada" : "Escala lançada");
     onClose();
