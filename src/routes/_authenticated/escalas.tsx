@@ -18,7 +18,7 @@ export const Route = createFileRoute("/_authenticated/escalas")({
   component: Escalas,
 });
 
-type Form = { id?: string; data: string; turno: string; hora_inicio: string; hora_fim: string; agentes: string; funcao: string; posto_id: string; viatura_id: string; observacao: string };
+type Form = { id?: string; data: string; turno: string; hora_inicio: string; hora_fim: string; agentes: string; equipe_ids: string[]; funcao: string; posto_id: string; viatura_id: string; observacao: string };
 
 const iso = (d: Date) => new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
 function addDias(s: string, n: number) { const d = new Date(s + "T12:00:00"); d.setDate(d.getDate() + n); return iso(d); }
@@ -28,7 +28,7 @@ function Escalas() {
   const { data: me } = useMe();
   const [dia, setDia] = useState(iso(new Date()));
   const [edit, setEdit] = useState<Form | null>(null);
-  const vazio: Form = { data: dia, turno: "Diurno", hora_inicio: "07:00", hora_fim: "19:00", agentes: "", funcao: "Patrulhamento", posto_id: "", viatura_id: "", observacao: "" };
+  const vazio: Form = { data: dia, turno: "Diurno", hora_inicio: "07:00", hora_fim: "19:00", agentes: "", equipe_ids: [], funcao: "Patrulhamento", posto_id: "", viatura_id: "", observacao: "" };
 
   const { data = [] } = useQuery({
     queryKey: ["escalas", dia],
@@ -43,6 +43,14 @@ function Escalas() {
   const { data: postos = [] } = useQuery({
     queryKey: ["postos"],
     queryFn: async () => (await supabase.from("postos_fixos").select("*").order("nome")).data ?? [],
+  });
+  const { data: efetivo = [] } = useQuery({
+    queryKey: ["equipe-escalas"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("equipe").select("id, nome, matricula, tipo, funcao").eq("ativo", true).order("nome");
+      if (error) throw error;
+      return data as { id: string; nome: string; matricula: string | null; tipo: string; funcao: string }[];
+    },
   });
   const { data: viaturas = [] } = useQuery({
     queryKey: ["viaturas-lite"],
@@ -137,7 +145,7 @@ function Escalas() {
                     {e.observacao && <p className="mt-2 text-xs italic text-muted-foreground">{e.observacao}</p>}
                     {me?.isSupervisor && (
                       <div className="mt-3 flex gap-1 border-t pt-2 print:hidden">
-                        <Button size="sm" variant="ghost" onClick={() => setEdit({ id: e.id, data: e.data, turno: e.turno, hora_inicio: e.hora_inicio.slice(0, 5), hora_fim: e.hora_fim.slice(0, 5), agentes: e.agentes, funcao: e.funcao, posto_id: e.posto_id ?? "", viatura_id: e.viatura_id ?? "", observacao: e.observacao ?? "" })}>
+                        <Button size="sm" variant="ghost" onClick={() => setEdit({ id: e.id, data: e.data, turno: e.turno, hora_inicio: e.hora_inicio.slice(0, 5), hora_fim: e.hora_fim.slice(0, 5), agentes: e.agentes, equipe_ids: [], funcao: e.funcao, posto_id: e.posto_id ?? "", viatura_id: e.viatura_id ?? "", observacao: e.observacao ?? "" })}>
                           <Pencil className="h-3.5 w-3.5" /> Editar
                         </Button>
                         <Button size="sm" variant="ghost" className="ml-auto text-destructive" onClick={() => remover(e.id)}><Trash2 className="h-3.5 w-3.5" /></Button>
@@ -151,15 +159,22 @@ function Escalas() {
         );
       })}
 
-      <EscalaDialog f={edit} onClose={() => setEdit(null)} postos={postos} viaturas={viaturas} />
+      <EscalaDialog f={edit} onClose={() => setEdit(null)} postos={postos} viaturas={viaturas} efetivo={efetivo} />
     </div>
   );
 }
 
-function EscalaDialog({ f: init, onClose, postos, viaturas }: { f: Form | null; onClose: () => void; postos: { id: string; nome: string; ativo: boolean }[]; viaturas: { id: string; prefixo: string }[] }) {
+function EscalaDialog({ f: init, onClose, postos, viaturas, efetivo }: { f: Form | null; onClose: () => void; postos: { id: string; nome: string; ativo: boolean }[]; viaturas: { id: string; prefixo: string }[]; efetivo: { id: string; nome: string; matricula: string | null; tipo: string; funcao: string }[] }) {
   const qc = useQueryClient();
   const [f, setF] = useState<Form | null>(null);
-  useEffect(() => { if (init) setF(init); }, [init]);
+  const [equipeIds, setEquipeIds] = useState<string[]>([]);
+  useEffect(() => { if (init) { setF(init); setEquipeIds(init.equipe_ids); } }, [init]);
+  useEffect(() => {
+    if (!init?.id) return;
+    void supabase.from("escala_integrantes").select("equipe_id").eq("escala_id", init.id).then(({ data }) => {
+      setEquipeIds((data ?? []).map((x) => x.equipe_id));
+    });
+  }, [init?.id]);
   if (!f) return null;
   const set = (k: keyof Form) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const v = e.target.value;
@@ -173,12 +188,23 @@ function EscalaDialog({ f: init, onClose, postos, viaturas }: { f: Form | null; 
   async function salvar(e: React.FormEvent) {
     e.preventDefault();
     if (!f) return;
+    if (!equipeIds.length) return void toast.error("Selecione ao menos um integrante ativo da Equipe.");
+    const membros = efetivo.filter((m) => equipeIds.includes(m.id));
     const { id, ...r } = f;
-    const payload = { ...r, posto_id: r.posto_id || null, viatura_id: r.viatura_id || null, observacao: r.observacao || null };
-    const { error } = id
-      ? await supabase.from("escalas").update(payload as never).eq("id", id)
-      : await supabase.from("escalas").insert(payload as never);
-    if (error) return void toast.error(error.message);
+    const payload = { ...r, agentes: membros.map((m) => m.nome).join(", "), equipe_ids: undefined, posto_id: r.posto_id || null, viatura_id: r.viatura_id || null, observacao: r.observacao || null };
+    let escalaId = id;
+    if (id) {
+      const { error } = await supabase.from("escalas").update(payload as never).eq("id", id);
+      if (error) return void toast.error(error.message);
+      const { error: delError } = await supabase.from("escala_integrantes").delete().eq("escala_id", id);
+      if (delError) return void toast.error(delError.message);
+    } else {
+      const { data, error } = await supabase.from("escalas").insert(payload as never).select("id").single();
+      if (error) return void toast.error(error.message);
+      escalaId = data.id;
+    }
+    const { error: insError } = await supabase.from("escala_integrantes").insert(equipeIds.map((equipe_id) => ({ escala_id: escalaId, equipe_id })));
+    if (insError) return void toast.error("Não foi possível vincular os integrantes: " + insError.message);
     toast.success(id ? "Escala atualizada" : "Escala lançada");
     onClose();
     qc.invalidateQueries({ queryKey: ["escalas"] });
@@ -192,7 +218,19 @@ function EscalaDialog({ f: init, onClose, postos, viaturas }: { f: Form | null; 
           <div className="space-y-1"><Label>Turno</Label><select className={selectCls} value={f.turno} onChange={set("turno")}>{TURNOS.map((t) => <option key={t} className="bg-popover">{t}</option>)}</select></div>
           <div className="space-y-1"><Label>Início</Label><Input type="time" required value={f.hora_inicio} onChange={set("hora_inicio")} /></div>
           <div className="space-y-1"><Label>Fim</Label><Input type="time" required value={f.hora_fim} onChange={set("hora_fim")} /></div>
-          <div className="col-span-2 space-y-1"><Label>Agentes *</Label><Textarea required rows={2} placeholder="Separe por vírgula: GCM Silva, GCM Souza" value={f.agentes} onChange={set("agentes")} /></div>
+          <div className="col-span-2 space-y-1">
+            <Label>Integrantes *</Label>
+            <select
+              multiple
+              required
+              className="min-h-28 w-full rounded-md border border-input bg-background px-2 py-1 text-sm outline-none"
+              value={equipeIds}
+              onChange={(e) => setEquipeIds(Array.from(e.target.selectedOptions).map((o) => o.value))}
+            >
+              {efetivo.map((m) => <option key={m.id} value={m.id}>{m.nome} · {m.tipo}{m.matricula ? ` · ${m.matricula}` : ""}</option>)}
+            </select>
+            <p className="text-xs text-muted-foreground">Somente integrantes ativos cadastrados em Equipe. Não é permitido digitar nomes.</p>
+          </div>
           <div className="col-span-2 space-y-1"><Label>Função</Label><select className={selectCls} value={f.funcao} onChange={set("funcao")}>{FUNCOES_ESCALA.map((t) => <option key={t} className="bg-popover">{t}</option>)}</select></div>
           <div className="space-y-1"><Label>Posto fixo</Label>
             <select className={selectCls} value={f.posto_id} onChange={set("posto_id")}>
