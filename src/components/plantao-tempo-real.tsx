@@ -115,7 +115,7 @@ export function PlantaoResumoTempoReal({ plantao }: { plantao: Plantao }) {
     const generatedAt = new Date().toLocaleString("pt-BR");
 
     try {
-    janela.document.open();
+      janela.document.open();
     janela.document.write(`<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>Relatório de Plantão - ${cell(fmtDia(plantao.data_inicio))}</title>
       <style>
         @page { size: A4 landscape; margin: 12mm; }
@@ -135,7 +135,7 @@ export function PlantaoResumoTempoReal({ plantao }: { plantao: Plantao }) {
       Início: ${cell(dataHora(plantao.iniciado_em))} · Situação: ${cell(plantao.status === "aberto" ? "Em andamento" : "Encerrado")} · Emitido em: ${cell(generatedAt)}</div></header>
       <div class="stats"><div class="stat">Total de ocorrências<b>${ocorrencias.length}</b></div><div class="stat">Abertas<b>${abertas}</b></div><div class="stat">Em atendimento<b>${atendimento}</b></div><div class="stat">Viaturas ativas<b>${viaturasAtivas}</b></div></div>
       <h2>1. Ocorrências do plantão</h2><table><thead><tr><th>Hora</th><th>Protocolo</th><th>Natureza</th><th>Local</th><th>Prioridade</th><th>Viatura</th><th>Status</th></tr></thead><tbody>${occurrenceRows || '<tr><td colspan="7" class="empty">Nenhuma ocorrência vinculada a este plantão.</td></tr>'}</tbody></table>
-      <h2>2. Situação da frota</h2><table><thead><tr><th>Prefixo</th><th>Tipo / modelo</th><th>Guarnição</th><th>Odômetro</th><th>Situação</th></tr></thead><tbody>${fleetRows || '<tr><td colspan="5" class="empty">Nenhuma viatura cadastrada ou dados indisponíveis.</td></tr>'}</tbody></table>
+      <h2>2. Viaturas utilizadas ou alteradas neste plantão</h2><table><thead><tr><th>Prefixo</th><th>Tipo / modelo</th><th>Guarnição</th><th>Odômetro</th><th>Situação</th></tr></thead><tbody>${fleetRows || '<tr><td colspan="5" class="empty">Nenhuma viatura utilizada ou alterada neste plantão.</td></tr>'}</tbody></table>
       <h2>3. Equipes e escalas do turno</h2><table><thead><tr><th>Função</th><th>Horário</th><th>Equipe / agentes</th><th>Observação</th></tr></thead><tbody>${scaleRows || '<tr><td colspan="4" class="empty">Nenhuma escala cadastrada ou dados indisponíveis.</td></tr>'}</tbody></table>
       <h2>4. Próprios municipais ativos</h2><table><thead><tr><th>Local</th><th>Tipo</th><th>Endereço</th></tr></thead><tbody>${postRows || '<tr><td colspan="3" class="empty">Nenhum próprio municipal ativo cadastrado.</td></tr>'}</tbody></table>
       <h2>5. Lançamentos do plantão</h2><table><thead><tr><th>Data / hora</th><th>Registro</th><th>Responsável</th></tr></thead><tbody>${recordRows || '<tr><td colspan="3" class="empty">Nenhum lançamento registrado.</td></tr>'}</tbody></table>
