@@ -190,7 +190,10 @@ function EscalaDialog({ f: init, onClose, postos, viaturas, efetivo }: { f: Form
     if (!f) return;
     if (!equipeIds.length) return void toast.error("Selecione ao menos um integrante ativo da Equipe.");
     const membros = efetivo.filter((m) => equipeIds.includes(m.id));
-    const { id, equipe_ids: _equipeIds, ...r } = f;
+    const { id } = f;
+    const r = { ...f };
+    delete r.id;
+    delete r.equipe_ids;
     const payload = { ...r, agentes: membros.map((m) => m.nome).join(", "), posto_id: r.posto_id || null, viatura_id: r.viatura_id || null, observacao: r.observacao || null };
     let escalaId = id;
     if (id) {
