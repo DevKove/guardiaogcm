@@ -108,7 +108,7 @@ function PlantaoControle() {
 
       {plantao ? (
         <>
-        <PlantaoResumoTempoReal plantaoId={plantao.id} />
+        <PlantaoResumoTempoReal plantao={plantao} />
         <section className="card-3d animate-rise space-y-5 p-5">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
