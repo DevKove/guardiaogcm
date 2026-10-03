@@ -43,9 +43,7 @@ function descricaoHistorico(descricao: string) {
 
   const nomes = [...new Set(campos.map((campo) => CAMPOS_HISTORICO[campo] ?? campo))];
 
-  return nomes.length
-    ? `Atualização da ocorrência — ${nomes.join(", ")}.`
-    : "Atualização da ocorrência.";
+  return nomes.length ? nomes.join(", ") : "Alteração registrada";
 }
 
 function Imprimir() {
