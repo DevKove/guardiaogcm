@@ -4,14 +4,49 @@ import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { PRIORIDADES, STATUS, fmtData, fmtProtocolo, type Status } from "@/lib/cad";
 
-const DESCRICOES_TECNICAS = [
-  "Alteração registrada pelo banco.",
-];
+const CAMPOS_HISTORICO: Record<string, string> = {
+  natureza: "Natureza",
+  prioridade: "Prioridade",
+  status: "Situação",
+  origem: "Origem",
+  endereco: "Endereço",
+  numero: "Número",
+  bairro: "Bairro",
+  referencia: "Referência",
+  solicitante_nome: "Solicitante",
+  solicitante_telefone: "Telefone do solicitante",
+  relato: "Relato",
+  viatura: "Viatura",
+  viatura_id: "Vínculo da viatura",
+  despachada_em: "Despacho",
+  chegada_em: "Chegada",
+  encerrada_em: "Finalização",
+  desfecho: "Desfecho",
+  plantao_id: "Plantão",
+  updated_at: "Atualização",
+};
 
 export const Route = createFileRoute("/_authenticated/imprimir/$id")({
   head: () => ({ meta: [{ title: "Boletim de ocorrência · CAD" }] }),
   component: Imprimir,
 });
+
+function descricaoHistorico(descricao: string) {
+  const prefixo = "Alteração registrada pelo banco. Campos:";
+  if (!descricao.trim().toLowerCase().startsWith(prefixo.toLowerCase())) return descricao;
+
+  const campos = descricao
+    .slice(prefixo.length)
+    .split(",")
+    .map((campo) => campo.trim())
+    .filter(Boolean);
+
+  const nomes = [...new Set(campos.map((campo) => CAMPOS_HISTORICO[campo] ?? campo))];
+
+  return nomes.length
+    ? `Atualização da ocorrência — ${nomes.join(", ")}.`
+    : "Atualização da ocorrência.";
+}
 
 function Imprimir() {
   const { id } = Route.useParams();
@@ -37,16 +72,6 @@ function Imprimir() {
   if (!data?.o) return <div className="text-muted-foreground">Carregando...</div>;
   const { o, env, hist, pm } = data;
   const autor = pm.get(o.criado_por);
-
-  // O histórico completo continua preservado no banco.
-  // No documento oficial, eventos técnicos gerados automaticamente pelo banco
-  // não são exibidos para evitar poluição e informações internas desnecessárias.
-  const historicoOficial = hist.filter(
-    (h) =>
-      !DESCRICOES_TECNICAS.some((tecnico) =>
-        h.descricao.trim().toLowerCase().startsWith(tecnico.toLowerCase()),
-      ),
-  );
 
   return (
     <div className="mx-auto max-w-3xl space-y-4 bg-card p-8 text-sm print:bg-transparent print:p-0">
@@ -91,11 +116,13 @@ function Imprimir() {
           </table>
         </div>
       )}
-      {historicoOficial.length > 0 && (
+      {hist.length > 0 && (
         <div>
           <h3 className="mb-1 border-b font-bold uppercase">Histórico</h3>
-          {historicoOficial.map((h) => (
-            <div key={h.id} className="py-0.5"><span className="font-mono text-xs">{fmtData(h.created_at)}</span> — {pm.get(h.usuario_id)?.nome}: <span className="whitespace-pre-wrap">{h.descricao}</span></div>
+          {hist.map((h) => (
+            <div key={h.id} className="py-0.5">
+              <span className="font-mono text-xs">{fmtData(h.created_at)}</span> — {pm.get(h.usuario_id)?.nome ?? "Sistema"}: <span className="whitespace-pre-wrap">{descricaoHistorico(h.descricao)}</span>
+            </div>
           ))}
         </div>
       )}
