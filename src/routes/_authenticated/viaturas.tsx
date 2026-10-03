@@ -165,6 +165,16 @@ function ViaturaDialog({ f: init, onClose, podeTudo }: { f: Form | null; onClose
     },
     enabled: !!init,
   });
+  const { data: plantaoMembros = [] } = useQuery({
+    queryKey: ["plantao-membros-viatura-dialog", plantao?.id],
+    queryFn: async () => {
+      if (!plantao?.id) return [] as string[];
+      const { data, error } = await supabase.from("plantao_integrantes").select("equipe_id").eq("plantao_id", plantao.id);
+      if (error) throw error;
+      return (data ?? []).map((x) => x.equipe_id);
+    },
+    enabled: !!plantao?.id,
+  });
   const { data: efetivo = [] } = useQuery({
     queryKey: ["equipe-viatura-dialog"],
     queryFn: async () => {
@@ -190,7 +200,9 @@ function ViaturaDialog({ f: init, onClose, podeTudo }: { f: Form | null; onClose
   async function salvar(e: React.FormEvent) {
     e.preventDefault();
     if (equipeIds.length && !plantao?.id) return void toast.error("É necessário ter um plantão aberto para vincular integrantes à viatura.");
-    const membros = efetivo.filter((m) => equipeIds.includes(m.id));
+    const permitidos = equipeIds.filter((id) => plantaoMembros.includes(id));
+    if (permitidos.length !== equipeIds.length) return void toast.error("A guarnição só pode usar integrantes do plantão atual.");
+    const membros = efetivo.filter((m) => permitidos.includes(m.id));
     const payload = {
       prefixo: f.prefixo, placa: f.placa || null, modelo: f.modelo || null, tipo: f.tipo,
       guarnicao: membros.map((m) => m.nome).join(", ") || null,
@@ -239,7 +251,7 @@ function ViaturaDialog({ f: init, onClose, podeTudo }: { f: Form | null; onClose
               onChange={(e) => setEquipeIds(Array.from(e.target.selectedOptions).map((o) => o.value))}
               disabled={!podeTudo || !plantao?.id}
             >
-              {efetivo.map((m) => <option key={m.id} value={m.id}>{m.nome} · {m.tipo}{m.matricula ? ` · ${m.matricula}` : ""}</option>)}
+              {efetivo.filter((m) => plantaoMembros.includes(m.id)).map((m) => <option key={m.id} value={m.id}>{m.nome} · {m.tipo}{m.matricula ? ` · ${m.matricula}` : ""}</option>)}
             </select>
             {!plantao?.id && <p className="text-xs text-warning">Inicie um plantão para vincular integrantes à viatura.</p>}
             <p className="text-xs text-muted-foreground">Somente integrantes ativos cadastrados em Equipe. Para retirar um integrante, remova-o da seleção.</p>
