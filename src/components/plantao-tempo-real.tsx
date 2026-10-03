@@ -200,7 +200,7 @@ export function PlantaoResumoTempoReal({ plantao }: { plantao: Plantao }) {
         <section className="card-3d overflow-hidden">
           <div className="flex items-center gap-3 border-b p-4"><div className="rounded-lg bg-primary/10 p-2 text-primary"><ClipboardList className="h-4 w-4" /></div><div><h3 className="font-semibold">Lançamentos do plantão</h3><p className="text-xs text-muted-foreground">Registros inseridos pela equipe</p></div></div>
           <div className="space-y-3 p-4">
-            {registros.slice(0, 8).map((r) => <div key={r.id} className="border-b pb-3 last:border-0 last:pb-0"><div className="flex flex-wrap justify-between gap-2 text-[11px] text-muted-foreground"><span>{hora(r.hora)}</span><span>{data.usuarios[r.criado_por] ?? r.criado_por.slice(0, 8)}</span></div><p className="mt-1 whitespace-pre-wrap text-sm">{r.texto}</p></div>)}
+            {registros.slice(0, 8).map((r) => <div key={r.id} className="border-b pb-3 last:border-0 last:pb-0"><div className="flex flex-wrap justify-between gap-2 text-[11px] text-muted-foreground"><span>{hora(r.hora)}</span><span>{(data?.usuarios ?? {})[r.criado_por] ?? r.criado_por.slice(0, 8)}</span></div><p className="mt-1 whitespace-pre-wrap text-sm">{r.texto}</p></div>)}
             {!registros.length && <p className="text-sm text-muted-foreground">Nenhum lançamento registrado.</p>}
             {registros.length > 8 && <p className="text-xs text-muted-foreground">Exibindo os 8 mais recentes. O PDF inclui todos os registros carregados.</p>}
           </div>
@@ -209,7 +209,7 @@ export function PlantaoResumoTempoReal({ plantao }: { plantao: Plantao }) {
         <section className="card-3d overflow-hidden">
           <div className="flex items-center gap-3 border-b p-4"><div className="rounded-lg bg-primary/10 p-2 text-primary"><Clock3 className="h-4 w-4" /></div><div><h3 className="font-semibold">Histórico de ações</h3><p className="text-xs text-muted-foreground">Movimentações registradas nas ocorrências</p></div></div>
           <div className="space-y-3 p-4">
-            {acoes.slice(0, 8).map((a, i) => <div key={`${a.created_at}-${i}`} className="border-b pb-3 last:border-0 last:pb-0"><div className="flex flex-wrap items-center justify-between gap-2 text-[11px] text-muted-foreground"><span>{hora(a.created_at)}</span>{a.protocolo ? <span className="font-mono">{fmtProtocolo(a.protocolo, a.created_at)}</span> : null}</div><p className="mt-1 text-sm">{a.descricao}</p><p className="mt-1 text-[11px] text-muted-foreground">{data.usuarios[a.usuario_id] ?? a.usuario_id.slice(0, 8)}</p></div>)}
+            {acoes.slice(0, 8).map((a, i) => <div key={`${a.created_at}-${i}`} className="border-b pb-3 last:border-0 last:pb-0"><div className="flex flex-wrap items-center justify-between gap-2 text-[11px] text-muted-foreground"><span>{hora(a.created_at)}</span>{a.protocolo ? <span className="font-mono">{fmtProtocolo(a.protocolo, a.created_at)}</span> : null}</div><p className="mt-1 text-sm">{a.descricao}</p><p className="mt-1 text-[11px] text-muted-foreground">{(data?.usuarios ?? {})[a.usuario_id] ?? a.usuario_id.slice(0, 8)}</p></div>)}
             {!acoes.length && <p className="text-sm text-muted-foreground">Nenhuma ação registrada.</p>}
             {acoes.length > 8 && <p className="text-xs text-muted-foreground">Exibindo as 8 mais recentes. O PDF inclui todo o histórico carregado.</p>}
           </div>
