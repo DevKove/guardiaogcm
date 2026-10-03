@@ -395,6 +395,9 @@ export type Database = {
           observacoes: string | null
           operador_id: string
           operador_radio: string | null
+          operador_radio_id: string | null
+          nome_plantao: "ALPHA" | "BRAVO" | "CHARLIE" | "DELTA" | null
+          supervisor_id: string | null
           postos: Json
           resumo: Json | null
           status: string
@@ -418,6 +421,9 @@ export type Database = {
           observacoes?: string | null
           operador_id?: string
           operador_radio?: string | null
+          operador_radio_id?: string | null
+          nome_plantao?: "ALPHA" | "BRAVO" | "CHARLIE" | "DELTA" | null
+          supervisor_id?: string | null
           postos?: Json
           resumo?: Json | null
           status?: string
