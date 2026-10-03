@@ -79,12 +79,33 @@ function Escalas() {
   }
   async function copiarDiaAnterior() {
     const ant = addDias(dia, -1);
-    const { data: prev, error } = await supabase.from("escalas").select("turno, hora_inicio, hora_fim, agentes, funcao, posto_id, viatura_id, observacao").eq("data", ant);
+    const { data: prev, error } = await supabase
+      .from("escalas")
+      .select("id, turno, hora_inicio, hora_fim, agentes, funcao, posto_id, viatura_id, observacao")
+      .eq("data", ant);
     if (error) return void toast.error(error.message);
     if (!prev?.length) return void toast.info("Não há escala no dia anterior.");
-    const { error: e2 } = await supabase.from("escalas").insert(prev.map((p) => ({ ...p, data: dia })) as never);
-    if (e2) return void toast.error(e2.message);
-    toast.success(`${prev.length} escala(s) copiada(s)`);
+
+    let copiados = 0;
+    for (const p of prev) {
+      const { data: nova, error: e2 } = await supabase.from("escalas").insert({
+        data: dia, turno: p.turno, hora_inicio: p.hora_inicio, hora_fim: p.hora_fim,
+        agentes: p.agentes, funcao: p.funcao, posto_id: p.posto_id, viatura_id: p.viatura_id, observacao: p.observacao,
+      } as never).select("id").single();
+      if (e2 || !nova) return void toast.error(e2?.message ?? "Não foi possível copiar a escala.");
+
+      const { data: membros, error: meError } = await supabase
+        .from("escala_integrantes").select("equipe_id").eq("escala_id", p.id);
+      if (meError) return void toast.error(meError.message);
+      if (membros?.length) {
+        const { error: miError } = await supabase.from("escala_integrantes").insert(
+          membros.map((m) => ({ escala_id: nova.id, equipe_id: m.equipe_id })),
+        );
+        if (miError) return void toast.error(miError.message);
+      }
+      copiados += 1;
+    }
+    toast.success(`${copiados} escala(s) copiada(s)`);
     qc.invalidateQueries({ queryKey: ["escalas"] });
   }
 
