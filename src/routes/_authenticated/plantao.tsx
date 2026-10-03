@@ -5,6 +5,9 @@ import { toast } from "sonner";
 import { CheckCircle2, Clock3, FileText, LockKeyhole, PlayCircle, Square } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { selectCls } from "@/lib/cad";
 import { useMe } from "@/hooks/use-me";
 import { carregarAtividades, fmtDia, turnoAtual, type Plantao } from "@/lib/plantao";
 import { PlantaoResumoTempoReal } from "@/components/plantao-tempo-real";
@@ -21,7 +24,21 @@ function PlantaoControle() {
   const navigate = useNavigate();
   const qc = useQueryClient();
   const [saving, setSaving] = useState(false);
+  const [mostrarInicio, setMostrarInicio] = useState(false);
   const atual = turnoAtual();
+
+  const { data: efetivo = [] } = useQuery({
+    queryKey: ["equipe-plantao-inicio"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("equipe")
+        .select("id, nome, matricula, tipo, funcao")
+        .eq("ativo", true)
+        .order("nome");
+      if (error) throw error;
+      return data as { id: string; nome: string; matricula: string | null; tipo: string; funcao: string }[];
+    },
+  });
 
   const { data: plantao, isLoading } = useQuery({
     queryKey: ["plantao-atual"],
@@ -86,30 +103,39 @@ function PlantaoControle() {
     return () => { void supabase.removeChannel(ch); };
   }, [qc]);
 
-  async function iniciar() {
+  async function iniciar(form: { nome: string; supervisorId: string; integrantes: string[]; operadorRadioId: string }) {
     if (!me) return;
     setSaving(true);
-    const { data, error } = await supabase
-      .from("plantoes")
-      .insert({
-        operador_id: me.id,
-        data_inicio: atual.data,
-        turno: atual.turno,
-        horario: atual.horario,
-        status: "aberto",
-      })
-      .select("id")
-      .single();
-    setSaving(false);
+    const selecionados = efetivo.filter((m) => form.integrantes.includes(m.id));
+    const supervisor = selecionados.find((m) => m.id === form.supervisorId);
+    const operadorRadio = selecionados.find((m) => m.id === form.operadorRadioId);
+    const { data, error } = await supabase.rpc("iniciar_plantao", {
+      p_nome_plantao: form.nome,
+      p_supervisor_id: form.supervisorId,
+      p_integrantes: form.integrantes,
+      p_operador_radio_id: form.operadorRadioId || null,
+      p_data_inicio: atual.data,
+      p_turno: atual.turno,
+      p_horario: atual.horario,
+    });
     if (error) {
+      setSaving(false);
       toast.error(error.code === "23505" ? "Já existe um plantão aberto. Finalize-o antes de iniciar outro." : "Não foi possível iniciar o plantão: " + error.message);
       qc.invalidateQueries({ queryKey: ["plantao-atual"] });
       return;
     }
-    toast.success("Plantão iniciado. Os lançamentos agora ficarão vinculados a este plantão.");
+    const plantaoId = data as string;
+    await supabase.from("plantoes").update({
+      equipe: selecionados.map((m) => m.nome).join(", "),
+      supervisor: supervisor?.nome ?? "",
+      operador_radio: operadorRadio?.nome ?? null,
+    } as never).eq("id", plantaoId);
+    setSaving(false);
+    setMostrarInicio(false);
+    toast.success("Plantão iniciado com o efetivo selecionado.");
     qc.invalidateQueries({ queryKey: ["plantao-atual"] });
     qc.invalidateQueries({ queryKey: ["ocorrencias"] });
-    navigate({ to: "/plantao/$id", params: { id: data.id } });
+    navigate({ to: "/plantao/$id", params: { id: plantaoId } });
   }
 
   async function finalizar() {
@@ -185,9 +211,119 @@ function PlantaoControle() {
             <div className="font-semibold">Próximo plantão sugerido</div>
             <div className="mt-1 text-muted-foreground">{atual.turno} · {fmtDia(atual.data)} · {atual.horario}</div>
           </div>
-          <Button onClick={iniciar} disabled={saving}><PlayCircle className="h-4 w-4" /> {saving ? "Iniciando..." : "Iniciar plantão"}</Button>
+          <Button onClick={() => setMostrarInicio(true)} disabled={saving || efetivo.length === 0}><PlayCircle className="h-4 w-4" /> Iniciar plantão</Button>
+          {efetivo.length === 0 && <p className="text-xs text-warning">Cadastre integrantes ativos em Equipe antes de iniciar o plantão.</p>}
+          <PlantaoInicioDialog
+            open={mostrarInicio}
+            onClose={() => setMostrarInicio(false)}
+            efetivo={efetivo}
+            saving={saving}
+            onConfirm={iniciar}
+          />
         </section>
       )}
     </div>
+  );
+}
+
+
+function PlantaoInicioDialog({
+  open,
+  onClose,
+  efetivo,
+  saving,
+  onConfirm,
+}: {
+  open: boolean;
+  onClose: () => void;
+  efetivo: { id: string; nome: string; matricula: string | null; tipo: string; funcao: string }[];
+  saving: boolean;
+  onConfirm: (form: { nome: string; supervisorId: string; integrantes: string[]; operadorRadioId: string }) => Promise<void>;
+}) {
+  const [nome, setNome] = useState<"ALPHA" | "BRAVO" | "CHARLIE" | "DELTA">("ALPHA");
+  const [integrantes, setIntegrantes] = useState<string[]>([]);
+  const [supervisorId, setSupervisorId] = useState("");
+  const [operadorRadioId, setOperadorRadioId] = useState("");
+
+  useEffect(() => {
+    if (!open) return;
+    setNome("ALPHA");
+    setIntegrantes([]);
+    setSupervisorId("");
+    setOperadorRadioId("");
+  }, [open]);
+
+  function toggleIntegrante(id: string) {
+    setIntegrantes((prev) => {
+      const next = prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id];
+      if (!next.includes(supervisorId)) setSupervisorId("");
+      if (!next.includes(operadorRadioId)) setOperadorRadioId("");
+      return next;
+    });
+  }
+
+  const podeSalvar = integrantes.length > 0 && integrantes.includes(supervisorId) && (!operadorRadioId || integrantes.includes(operadorRadioId));
+
+  return (
+    <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
+      <DialogContent className="max-w-2xl">
+        <DialogHeader>
+          <DialogTitle>Iniciar plantão</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4">
+          <div className="rounded-lg border border-primary/20 bg-primary/5 p-3 text-sm">
+            O plantão só pode ser iniciado com integrantes ativos cadastrados em <b>Equipe</b>. Nenhum nome pode ser digitado manualmente.
+          </div>
+          <div className="grid gap-3 md:grid-cols-2">
+            <div className="space-y-1">
+              <Label>Nome do plantão *</Label>
+              <select className={selectCls} value={nome} onChange={(e) => setNome(e.target.value as typeof nome)}>
+                {["ALPHA", "BRAVO", "CHARLIE", "DELTA"].map((x) => <option key={x} value={x} className="bg-popover">{x}</option>)}
+              </select>
+            </div>
+            <div className="space-y-1">
+              <Label>Supervisor *</Label>
+              <select className={selectCls} value={supervisorId} onChange={(e) => setSupervisorId(e.target.value)} disabled={!integrantes.length}>
+                <option value="" className="bg-popover">Selecionar supervisor</option>
+                {efetivo.filter((m) => integrantes.includes(m.id)).map((m) => (
+                  <option key={m.id} value={m.id} className="bg-popover">{m.nome} · {m.funcao}{m.matricula ? ` · ${m.matricula}` : ""}</option>
+                ))}
+              </select>
+            </div>
+            <div className="space-y-1 md:col-span-2">
+              <Label>Operador(a) de rádio</Label>
+              <select className={selectCls} value={operadorRadioId} onChange={(e) => setOperadorRadioId(e.target.value)} disabled={!integrantes.length}>
+                <option value="" className="bg-popover">Não informado</option>
+                {efetivo.filter((m) => integrantes.includes(m.id)).map((m) => (
+                  <option key={m.id} value={m.id} className="bg-popover">{m.nome} · {m.funcao}{m.matricula ? ` · ${m.matricula}` : ""}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+          <div className="space-y-2">
+            <Label>Integrantes do plantão * ({integrantes.length} selecionado(s))</Label>
+            <div className="max-h-64 overflow-y-auto rounded-lg border p-2">
+              <div className="grid gap-2 md:grid-cols-2">
+                {efetivo.map((m) => (
+                  <label key={m.id} className="flex cursor-pointer items-center gap-2 rounded-md border p-2 text-sm hover:bg-accent">
+                    <input type="checkbox" checked={integrantes.includes(m.id)} onChange={() => toggleIntegrante(m.id)} />
+                    <span className="min-w-0">
+                      <span className="block truncate font-medium">{m.nome}</span>
+                      <span className="text-xs text-muted-foreground">{m.tipo} · {m.funcao}{m.matricula ? ` · ${m.matricula}` : ""}</span>
+                    </span>
+                  </label>
+                ))}
+              </div>
+            </div>
+          </div>
+          <div className="flex justify-end gap-2">
+            <Button type="button" variant="outline" onClick={onClose}>Cancelar</Button>
+            <Button type="button" disabled={!podeSalvar || saving} onClick={() => void onConfirm({ nome, supervisorId, integrantes, operadorRadioId })}>
+              {saving ? "Iniciando..." : "Confirmar início"}
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
