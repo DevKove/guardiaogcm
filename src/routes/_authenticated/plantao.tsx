@@ -10,12 +10,16 @@ import { carregarAtividades, fmtDia, turnoAtual, type Plantao } from "@/lib/plan
 import { PlantaoResumoTempoReal } from "@/components/plantao-tempo-real";
 
 export const Route = createFileRoute("/_authenticated/plantao")({
+  validateSearch: (search) => ({
+    historico: typeof search.historico === "string" ? search.historico : undefined,
+  }),
   head: () => ({ meta: [{ title: "Plantão · CAD" }] }),
   component: PlantaoControle,
 });
 
 function PlantaoControle() {
   const { data: me } = useMe();
+  const { historico } = Route.useSearch();
   const navigate = useNavigate();
   const qc = useQueryClient();
   const [saving, setSaving] = useState(false);
@@ -34,6 +38,48 @@ function PlantaoControle() {
     },
     refetchInterval: 15000,
   });
+
+  const { data: plantaoHistorico, isLoading: isLoadingHistorico, isError: isErrorHistorico, error: errorHistorico } = useQuery({
+    queryKey: ["plantao-historico-detalhe", historico],
+    enabled: Boolean(historico),
+    queryFn: async () => {
+      if (!historico) return null;
+      const { data, error } = await supabase.from("plantoes").select("*").eq("id", historico).maybeSingle();
+      if (error) throw error;
+      if (!data) throw new Error("Plantão finalizado não encontrado ou sua conta não possui permissão para visualizá-lo.");
+      const { data: perfil, error: perfilError } = await supabase.from("profiles").select("nome").eq("id", data.operador_id).maybeSingle();
+      if (perfilError) throw perfilError;
+      return { plantao: data as unknown as Plantao, operadorNome: perfil?.nome ?? "" };
+    },
+  });
+
+  if (historico) {
+    if (isLoadingHistorico || !me) return <div className="text-muted-foreground">Carregando plantão finalizado...</div>;
+    if (isErrorHistorico || !plantaoHistorico) return (
+      <div className="space-y-3 rounded-lg border border-destructive/40 p-5">
+        <div className="font-semibold text-destructive">Não foi possível abrir o plantão finalizado.</div>
+        <div className="text-sm text-muted-foreground">{errorHistorico instanceof Error ? errorHistorico.message : "Registro não encontrado."}</div>
+        <Button variant="outline" onClick={() => navigate({ to: "/historico" })}>Voltar ao histórico</Button>
+      </div>
+    );
+    const p = plantaoHistorico.plantao;
+    const editavel = Boolean(me.isAdmin);
+    return (
+      <div className="space-y-4">
+        <div className="flex flex-wrap items-center justify-between gap-3 print:hidden">
+          <div>
+            <button type="button" onClick={() => navigate({ to: "/historico" })} className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary">← Histórico</button>
+            <div className="mt-1 font-mono text-xs tracking-widest text-muted-foreground">ARQUIVO OPERACIONAL</div>
+            <h1 className="text-2xl font-bold">Plantão finalizado · {fmtDia(p.data_inicio)}</h1>
+            <div className="text-xs text-muted-foreground">Turno: {p.turno} · Operador: {plantaoHistorico.operadorNome || "não informado"}</div>
+          </div>
+        </div>
+        {!me.isAdmin && <div className="rounded border border-warning/50 p-3 text-sm text-warning print:hidden"><LockKeyhole className="mr-2 inline h-4 w-4" />Plantão finalizado. Somente o administrador pode editar este registro.</div>}
+        {me.isAdmin && <div className="rounded border border-primary/30 bg-primary/5 p-3 text-sm print:hidden">Modo administrador: este plantão foi carregado diretamente do histórico e pode ser revisado e salvo.</div>}
+        <FichaPlantao plantao={p} editavel={editavel} operadorNome={plantaoHistorico.operadorNome} />
+      </div>
+    );
+  }
 
   useEffect(() => {
     const ch = supabase.channel("plantao-controle-live")
