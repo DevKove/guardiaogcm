@@ -110,7 +110,7 @@ function UsuarioDialog({ f: init, onClose }: { f: Form | null; onClose: () => vo
           <div className="col-span-2 space-y-1"><Label>Nome completo *</Label><Input required value={f.nome} onChange={set("nome")} /></div>
           <div className="space-y-1"><Label>E-mail *</Label><Input type="email" required value={f.email} onChange={set("email")} /></div>
           <div className="space-y-1"><Label>Matrícula</Label><Input value={f.matricula} onChange={set("matricula")} /></div>
-          <div className="col-span-2 space-y-1"><Label>{f.id ? "Nova senha (deixe em branco para manter)" : "Senha *"}</Label><Input type="password" minLength={6} required={!f.id} value={f.senha} onChange={set("senha")} /></div>
+          <div className="col-span-2 space-y-1"><Label>{f.id ? "Nova senha (deixe em branco para manter)" : "Senha *"}</Label><Input type="password" minLength={12} maxLength={72} required={!f.id} value={f.senha} onChange={set("senha")} /></div>
           <div className="col-span-2 space-y-1">
             <Label>Perfil de acesso</Label>
             <select className={selectCls} value={f.role} onChange={set("role")}>
