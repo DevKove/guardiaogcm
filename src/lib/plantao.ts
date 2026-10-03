@@ -61,6 +61,9 @@ export type Plantao = {
   equipe: string | null;
   supervisor: string | null;
   operador_radio: string | null;
+  nome_plantao: "ALPHA" | "BRAVO" | "CHARLIE" | "DELTA" | null;
+  supervisor_id: string | null;
+  operador_radio_id: string | null;
   horario: string | null;
   guarnicoes: Guarnicao[];
   postos: PostoCheck[];
