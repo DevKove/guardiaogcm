@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { STATUS, fmtData, fmtProtocolo, type Status } from "@/lib/cad";
+import { STATUS, fmtData, fmtProtocolo, selectCls, type Status } from "@/lib/cad";
 import { carregarAtividades, fmtDia, type Guarnicao, type Plantao, type PostoCheck } from "@/lib/plantao";
 import { useMe } from "@/hooks/use-me";
 
@@ -19,6 +19,7 @@ export function FichaPlantao({ plantao, editavel, operadorNome }: { plantao: Pla
   const [f, setF] = useState(plantao);
   const [saving, setSaving] = useState(false);
   const [novo, setNovo] = useState("");
+  const [integranteIds, setIntegranteIds] = useState<string[]>([]);
   const { data: me } = useMe();
   const { data: efetivo = [] } = useQuery({
     queryKey: ["equipe-plantao"],
@@ -29,6 +30,22 @@ export function FichaPlantao({ plantao, editavel, operadorNome }: { plantao: Pla
     },
   });
   useEffect(() => setF(plantao), [plantao]);
+
+  const { data: plantaoIntegrantes = [] } = useQuery({
+    queryKey: ["plantao-integrantes", plantao.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("plantao_integrantes")
+        .select("equipe_id")
+        .eq("plantao_id", plantao.id);
+      if (error) throw error;
+      return (data ?? []) as { equipe_id: string }[];
+    },
+  });
+
+  useEffect(() => {
+    setIntegranteIds(plantaoIntegrantes.map((x) => x.equipe_id));
+  }, [plantaoIntegrantes]);
 
   const { data: atv } = useQuery({
     queryKey: ["plantao-atv", plantao.id],
@@ -62,15 +79,37 @@ export function FichaPlantao({ plantao, editavel, operadorNome }: { plantao: Pla
 
   async function salvar() {
     setSaving(true);
+    const membros = efetivo.filter((m) => integranteIds.includes(m.id));
+    const supervisor = membros.find((m) => m.id === f.supervisor_id);
+    const operadorRadio = membros.find((m) => m.id === f.operador_radio_id);
+    if (f.status === "aberto" && (!f.nome_plantao || !f.supervisor_id || !integranteIds.length || !integranteIds.includes(f.supervisor_id))) {
+      setSaving(false);
+      toast.error("Selecione nome do plantão, supervisor e integrantes ativos da Equipe.");
+      return;
+    }
     const { error } = await supabase.from("plantoes").update({
-      equipe: f.equipe, supervisor: f.supervisor, operador_radio: f.operador_radio, horario: f.horario,
+      nome_plantao: f.nome_plantao,
+      supervisor_id: f.supervisor_id,
+      operador_radio_id: f.operador_radio_id,
+      equipe: membros.map((m) => m.nome).join(", "),
+      supervisor: supervisor?.nome ?? "",
+      operador_radio: operadorRadio?.nome ?? null,
+      horario: f.horario,
       guarnicoes: f.guarnicoes, postos: f.postos, atividades: f.atividades, materiais: f.materiais,
       informativo: f.informativo, atividades_verso: f.atividades_verso, turno: f.turno, data_inicio: f.data_inicio,
     } as never).eq("id", f.id);
+    if (error) { setSaving(false); toast.error("Erro ao salvar: " + error.message); return; }
+
+    if (f.status === "aberto") {
+      const { error: delError } = await supabase.from("plantao_integrantes").delete().eq("plantao_id", f.id);
+      if (delError) { setSaving(false); toast.error("Não foi possível atualizar os integrantes: " + delError.message); return; }
+      const { error: insError } = await supabase.from("plantao_integrantes").insert(integranteIds.map((equipe_id) => ({ plantao_id: f.id, equipe_id })));
+      if (insError) { setSaving(false); toast.error("Não foi possível gravar os integrantes: " + insError.message); return; }
+    }
     setSaving(false);
-    if (error) { toast.error("Erro ao salvar: " + error.message); return; }
     toast.success("Relatório salvo");
     qc.invalidateQueries({ queryKey: ["plantao"] });
+    qc.invalidateQueries({ queryKey: ["plantao-integrantes", f.id] });
   }
 
   async function lancar() {
@@ -94,9 +133,10 @@ export function FichaPlantao({ plantao, editavel, operadorNome }: { plantao: Pla
         <Campo l="Data"><Input className={cell} type="date" disabled={dis || plantao.status === "aberto"} value={f.data_inicio} onChange={(e) => set("data_inicio", e.target.value)} /></Campo>
         <Campo l="Turno"><Input className={cell} disabled={dis || plantao.status === "aberto"} value={f.turno} onChange={(e) => set("turno", e.target.value)} /></Campo>
         <Campo l="Horário"><Input className={cell} disabled={dis} value={f.horario ?? ""} onChange={(e) => set("horario", e.target.value)} /></Campo>
-        <Campo l="Equipe"><Input className={cell} disabled={dis} value={f.equipe ?? ""} onChange={(e) => set("equipe", e.target.value)} placeholder="Ex.: Alfa" /></Campo>
-        <Campo l="Supervisor"><Input className={cell} disabled={dis} value={f.supervisor ?? ""} onChange={(e) => set("supervisor", e.target.value)} /></Campo>
-        <Campo l="Operador(a) de rádio"><Input className={cell} disabled={dis} value={f.operador_radio ?? ""} onChange={(e) => set("operador_radio", e.target.value)} /></Campo>
+        <Campo l="Nome do plantão"><select className={selectCls} disabled={dis} value={f.nome_plantao ?? ""} onChange={(e) => set("nome_plantao", e.target.value as Plantao["nome_plantao"])}><option value="" className="bg-popover">Selecionar</option>{["ALPHA","BRAVO","CHARLIE","DELTA"].map((x) => <option key={x} value={x} className="bg-popover">{x}</option>)}</select></Campo>
+        <Campo l="Supervisor"><select className={selectCls} disabled={dis} value={f.supervisor_id ?? ""} onChange={(e) => set("supervisor_id", e.target.value || null)}><option value="" className="bg-popover">Selecionar supervisor</option>{efetivo.filter((m) => integranteIds.includes(m.id)).map((m) => <option key={m.id} value={m.id} className="bg-popover">{m.nome} · {m.funcao}</option>)}</select></Campo>
+        <Campo l="Operador(a) de rádio"><select className={selectCls} disabled={dis} value={f.operador_radio_id ?? ""} onChange={(e) => set("operador_radio_id", e.target.value || null)}><option value="" className="bg-popover">Não informado</option>{efetivo.filter((m) => integranteIds.includes(m.id)).map((m) => <option key={m.id} value={m.id} className="bg-popover">{m.nome} · {m.funcao}</option>)}</select></Campo>
+        <div className="md:col-span-2 space-y-1"><Label className="text-[10px] uppercase text-muted-foreground">Integrantes do plantão</Label><select multiple className="min-h-24 w-full rounded-md border border-input bg-background px-2 py-1 text-xs outline-none" disabled={dis} value={integranteIds} onChange={(e) => { const ids = Array.from(e.target.selectedOptions).map((o) => o.value); setIntegranteIds(ids); if (f.supervisor_id && !ids.includes(f.supervisor_id)) set("supervisor_id", null); if (f.operador_radio_id && !ids.includes(f.operador_radio_id)) set("operador_radio_id", null); }}>{efetivo.map((m) => <option key={m.id} value={m.id}>{m.nome} · {m.tipo}{m.matricula ? ` · ${m.matricula}` : ""}</option>)}</select><p className="text-[10px] text-muted-foreground">Somente integrantes ativos cadastrados em Equipe.</p></div>
       </section>
 
       <section className="card-3d animate-rise overflow-x-auto p-4">
