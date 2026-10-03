@@ -77,7 +77,7 @@ export function PlantaoResumoTempoReal({ plantao }: { plantao: Plantao }) {
   const viaturasAtivas = viaturas.filter((v) => v.ativa).length;
 
   function gerarPdf() {
-    const janela = window.open("", "_blank", "noopener,noreferrer");
+    const janela = window.open("", "_blank");
     if (!janela) {
       window.alert("O navegador bloqueou a janela do relatório. Permita pop-ups para este site e tente novamente.");
       return;
@@ -91,8 +91,9 @@ export function PlantaoResumoTempoReal({ plantao }: { plantao: Plantao }) {
     const fleetRows = viaturas.map((v) => `<tr><td>${cell(v.prefixo)}</td><td>${cell(v.tipo + (v.modelo ? " · " + v.modelo : ""))}</td><td>${cell(v.guarnicao)}</td><td>${cell(v.km_atual == null ? "—" : v.km_atual.toLocaleString("pt-BR") + " km")}</td><td>${cell(v.ativa ? (situacaoViatura[v.status] ?? v.status) : "Inativa")}</td></tr>`).join("");
     const scaleRows = escalas.map((e) => `<tr><td>${cell(e.funcao)}</td><td>${cell(e.hora_inicio.slice(0, 5) + "–" + e.hora_fim.slice(0, 5))}</td><td>${cell(e.agentes)}</td><td>${cell(e.observacao)}</td></tr>`).join("");
     const postRows = postosAtivos.map((p) => `<tr><td>${cell(p.nome)}</td><td>${cell(p.tipo)}</td><td>${cell([p.endereco, p.bairro].filter(Boolean).join(" · "))}</td></tr>`).join("");
-    const recordRows = registros.map((r) => `<tr><td>${cell(dataHora(r.hora))}</td><td>${cell(r.texto)}</td><td>${cell(data.usuarios[r.criado_por] ?? r.criado_por.slice(0, 8))}</td></tr>`).join("");
-    const actionRows = acoes.map((a) => `<tr><td>${cell(dataHora(a.created_at))}</td><td>${cell(a.protocolo ? fmtProtocolo(a.protocolo, a.created_at) : "—")}</td><td>${cell(a.descricao)}</td><td>${cell(data.usuarios[a.usuario_id] ?? a.usuario_id.slice(0, 8))}</td></tr>`).join("");
+    const recordRows = registros.map((r) => `<tr><td>${cell(dataHora(r.hora))}</td><td>${cell(r.texto)}</td><td>${cell(usuarios[r.criado_por] ?? r.criado_por.slice(0, 8))}</td></tr>`).join("");
+    const actionRows = acoes.map((a) => `<tr><td>${cell(dataHora(a.created_at))}</td><td>${cell(a.protocolo ? fmtProtocolo(a.protocolo, a.created_at) : "—")}</td><td>${cell(a.descricao)}</td><td>${cell(usuarios[a.usuario_id] ?? a.usuario_id.slice(0, 8))}</td></tr>`).join("");
+    const usuarios = data?.usuarios ?? {};
     const generatedAt = new Date().toLocaleString("pt-BR");
 
     janela.document.write(`<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>Relatório de Plantão - ${cell(fmtDia(plantao.data_inicio))}</title>
