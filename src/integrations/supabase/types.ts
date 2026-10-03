@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      equipe: {
+        Row: {
+          id: string
+          nome: string
+          matricula: string | null
+          tipo: "GCM" | "Vigia"
+          funcao: string
+          ativo: boolean
+          observacao: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          nome: string
+          matricula?: string | null
+          tipo?: "GCM" | "Vigia"
+          funcao?: string
+          ativo?: boolean
+          observacao?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          nome?: string
+          matricula?: string | null
+          tipo?: "GCM" | "Vigia"
+          funcao?: string
+          ativo?: boolean
+          observacao?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       avisos: {
         Row: {
           autor_id: string
