@@ -8,6 +8,7 @@ Audit date: 2026-10-03. Scope: GitHub source tree, deployed Supabase database me
 - Changed the Auth user trigger so new accounts receive an application role only when the trusted, admin-managed `app_metadata.cad_provisioned=true` flag is present. Public self-signups can no longer automatically become CAD operators. Existing roles were intentionally left unchanged.
 - Updated the admin user creation function to set that trusted marker, validate UUIDs, use a corrected email validator, require 12-character passwords for password changes/new users, limit request size, restrict browser origins, avoid caching administrative responses, and avoid returning raw backend errors.
 - Pinned `search_path` for `public.touch_equipe_updated_at()` to `pg_catalog`.
+- Restricted `has_role`, `is_staff`, `plantao_editavel`, and `ocorrencia_bloqueada` helpers to the authenticated caller's own identity/context, and changed the service-role-only user-access function to validate the supplied admin directly.
 - Added a dependency update policy through Dependabot.
 
 ## Findings by requested control
@@ -19,7 +20,7 @@ Audit date: 2026-10-03. Scope: GitHub source tree, deployed Supabase database me
 | 3 | Backend validation | Partial. The admin Edge Function validates key inputs; database guards protect occurrence lifecycle fields. Comprehensive schema-level length/range validation and negative tests remain. |
 | 4 | SQL injection | No dynamic SQL construction was identified in the reviewed database functions. Supabase query-builder filters use parameterized API calls. This is not a substitute for a full code scan. |
 | 5 | Weak authentication | Supabase Auth is used. Public signup was removed from the UI and untrusted new users no longer receive a role automatically. Disable public signups in Supabase Auth settings as defense in depth. |
-| 6 | IDOR/BOLA | RLS is enabled on the reviewed public tables and role-specific policies exist. Several tables intentionally allow all authorized staff to read operational records; verify this matches municipal policy. Automated cross-user authorization tests are still needed. |
+| 6 | IDOR/BOLA | RLS is enabled on the reviewed public tables and role-specific policies exist. Several tables intentionally allow all authorized staff to read operational records; verify this matches municipal policy. Role/editability helper functions were constrained to the caller's own identity, but automated cross-user authorization tests are still needed. |
 | 7 | Plaintext passwords | Application tables do not store passwords; Supabase Auth manages credentials. Admin-managed password changes now require at least 12 characters in the UI/Edge Function. Configure the same minimum in Supabase Auth. |
 | 8 | Brute force | Supabase Auth has platform rate controls, but the live rate-limit configuration was not available through this audit. No custom per-account/application throttling was verified. |
 | 9 | Duplicate submission | Login and key operational forms disable submission while busy. A complete review of every form and server-side idempotency behavior remains. |
