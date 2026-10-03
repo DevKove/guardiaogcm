@@ -314,16 +314,22 @@
 
 @utility card-3d {
   background: var(--surface-1);
-  border: 1.5px solid var(--border);
+  border: 2px solid var(--border);
   border-radius: var(--radius-xl);
-  box-shadow: 0 8px 24px -18px oklch(0 0 0 / 0.9);
+  box-shadow:
+    0 10px 24px -16px oklch(0 0 0 / 0.95),
+    0 2px 5px -3px oklch(0 0 0 / 0.55),
+    inset 0 1px 0 color-mix(in oklab, var(--foreground) 7%, transparent);
   transition: border-color 160ms ease, background-color 160ms ease, box-shadow 160ms ease;
 }
 
 @utility lift {
   &:hover {
     border-color: color-mix(in oklab, var(--primary) 45%, var(--border));
-    box-shadow: 0 12px 30px -22px oklch(0 0 0 / 0.95);
+    box-shadow:
+    0 14px 32px -20px oklch(0 0 0 / 0.98),
+    0 3px 7px -3px oklch(0 0 0 / 0.6),
+    inset 0 1px 0 color-mix(in oklab, var(--foreground) 9%, transparent);
   }
 }
 
@@ -341,7 +347,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border: 1.5px solid color-mix(in oklab, var(--primary) 28%, var(--border));
+  border: 2px solid color-mix(in oklab, var(--primary) 28%, var(--border));
   border-radius: 0.65rem;
   background: color-mix(in oklab, var(--primary) 10%, var(--surface-2));
   color: var(--primary);
@@ -409,7 +415,15 @@
 /* Molduras com contorno ligeiramente mais definido, mantendo os temas existentes. */
 .card-3d,
 .icon-chip {
-  border-width: 1.5px;
+  border-width: 2px;
+}
+
+.card-3d {
+  transform: translateZ(0);
+}
+
+header.glass {
+  box-shadow: 0 3px 10px -7px oklch(0 0 0 / 0.8);
 }
 
 header.glass {
