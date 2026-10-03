@@ -72,6 +72,7 @@ function Layout() {
     { to: "/painel", icon: LayoutList, label: "Ocorrências" },
     { to: "/ocorrencias/nova", icon: PlusCircle, label: "Nova" },
     { to: "/viaturas", icon: Car, label: "Viaturas" },
+    { to: "/equipe", icon: Users, label: "Equipe" },
     { to: "/postos", icon: School, label: "Próprios públicos" },
     { to: "/escalas", icon: CalendarClock, label: "Posto fixo" },
     { to: "/relatorios", icon: BarChart3, label: "Relatórios" },
