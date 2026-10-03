@@ -79,8 +79,8 @@ function Historico() {
                   <div className="mt-1 text-xs text-success">Finalizado</div>
                 </div>
                 <div className="flex shrink-0 flex-col gap-1">
-                  <Button asChild size="sm" variant="outline"><Link to="/plantao/$id" params={{ id: p.id }}><FileText className="h-4 w-4" /> Visualizar</Link></Button>
-                  {me?.isAdmin && <Button asChild size="sm"><Link to="/plantao/$id" params={{ id: p.id }}><Pencil className="h-4 w-4" /> Editar</Link></Button>}
+                  <Button asChild size="sm" variant="outline"><Link to="/plantao" search={{ historico: p.id }}><FileText className="h-4 w-4" /> Visualizar</Link></Button>
+                  {me?.isAdmin && <Button asChild size="sm"><Link to="/plantao" search={{ historico: p.id }}><Pencil className="h-4 w-4" /> Editar</Link></Button>}
                 </div>
               </div>
             ))}
