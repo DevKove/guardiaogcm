@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 144" fill="none">
+<defs><linearGradient id="g" x1="18" y1="8" x2="110" y2="136" gradientUnits="userSpaceOnUse"><stop stop-color="#F8D477"/><stop offset="1" stop-color="#B8872D"/></linearGradient><linearGradient id="b" x1="28" y1="16" x2="100" y2="125" gradientUnits="userSpaceOnUse"><stop stop-color="#173A61"/><stop offset="1" stop-color="#07182D"/></linearGradient></defs>
+<path d="M64 5 113 23v43c0 30-20 54-49 70C35 120 15 96 15 66V23L64 5Z" fill="url(#g)"/>
+<path d="M64 12 106 28v38c0 26-17 47-42 61C39 113 22 92 22 66V28L64 12Z" fill="url(#b)" stroke="#FFF0B8" stroke-width="2"/>
+<path d="M28 73h72v8H28z" fill="#F5D16F" opacity=".95"/><path d="M34 68V48l12-10 12 10v20M58 68V39l12-12 12 12v29M82 68V49l9-8 9 8v19" stroke="#F8D477" stroke-width="3" stroke-linejoin="round"/>
+<path d="M43 91h42M49 98h30" stroke="#F8D477" stroke-width="2.5" stroke-linecap="round"/>
+<path d="M64 17 68 25l9 1-6.5 6 1.5 9-8-4.5-8 4.5 1.5-9-6.5-6 9-1 4-8Z" fill="#F8D477"/>
+<text x="64" y="116" fill="#FFF8E5" font-family="Arial,sans-serif" font-size="13" font-weight="700" text-anchor="middle">GCM</text>
+</svg>
