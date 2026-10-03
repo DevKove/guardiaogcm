@@ -136,6 +136,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/escalas': typeof AuthenticatedEscalasRoute
+  '/equipe': typeof AuthenticatedEquipeRoute
   '/historico': typeof AuthenticatedHistoricoRoute
   '/painel': typeof AuthenticatedPainelRoute
   '/perfil': typeof AuthenticatedPerfilRoute
@@ -192,6 +193,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/escalas'
+    | '/equipe'
     | '/historico'
     | '/painel'
     | '/perfil'
@@ -210,6 +212,7 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/_authenticated/escalas'
+    | '/_authenticated/equipe'
     | '/_authenticated/historico'
     | '/_authenticated/painel'
     | '/_authenticated/perfil'
