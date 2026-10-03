@@ -149,7 +149,8 @@ Deno.serve(async (req) => {
       if (!["admin", "supervisor", "operador"].includes(role)) return respond({ error: "Perfil inválido." }, 400);
       if (senha && (senha.length < 12 || senha.length > 72)) return respond({ error: "A senha deve ter entre 12 e 72 caracteres." }, 400);
 
-      let id = input.id ? String(input.id).trim() : "";\n      if (id && !isUuid(id)) return respond({ error: "Usuário inválido." }, 400);
+      let id = input.id ? String(input.id).trim() : "";
+      if (id && !isUuid(id)) return respond({ error: "Usuário inválido." }, 400);
       let created = false;
 
       if (id) {
@@ -200,8 +201,8 @@ Deno.serve(async (req) => {
     }
 
     if (action === "delete") {
-      const id = String(body?.id ?? "");
-      if (!id) return respond({ error: "Usuário inválido." }, 400);
+      const id = String(body?.id ?? "").trim();
+      if (!isUuid(id)) return respond({ error: "Usuário inválido." }, 400);
       if (id === actorId) throw new Error("Você não pode excluir a si mesmo.");
 
       const { error } = await admin.auth.admin.deleteUser(id);
