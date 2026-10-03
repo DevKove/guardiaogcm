@@ -1,16 +1,30 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 
-const cors = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-};
+const ALLOWED_ORIGINS = new Set([
+  "https://devkove.github.io",
+  "http://localhost:5173",
+  "http://127.0.0.1:5173",
+]);
 
-function response(body: unknown, status = 200) {
+function corsHeaders(origin: string | null): HeadersInit {
+  const headers: Record<string, string> = {
+    "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    "Vary": "Origin",
+  };
+  if (origin && ALLOWED_ORIGINS.has(origin)) headers["Access-Control-Allow-Origin"] = origin;
+  return headers;
+}
+
+function response(body: unknown, status = 200, origin: string | null = null) {
   return new Response(JSON.stringify(body), {
     status,
-    headers: { ...cors, "Content-Type": "application/json" },
+    headers: { ...corsHeaders(origin), "Content-Type": "application/json", "Cache-Control": "no-store" },
   });
+}
+
+function isUuid(value: string): boolean {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
 }
 
 function secretKey() {
@@ -75,10 +89,19 @@ async function authorize(req: Request) {
 }
 
 Deno.serve(async (req) => {
-  if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
+  const origin = req.headers.get("Origin");
+  const respond = (body: unknown, status = 200) => response(body, status, origin);
+
+  if (req.method === "OPTIONS") {
+    if (origin && !ALLOWED_ORIGINS.has(origin)) return new Response(null, { status: 403, headers: { "Vary": "Origin" } });
+    return new Response(null, { status: 204, headers: corsHeaders(origin) });
+  }
 
   try {
-    if (req.method !== "POST") return response({ error: "Método não permitido." }, 405);
+    if (origin && !ALLOWED_ORIGINS.has(origin)) return respond({ error: "Origem não permitida." }, 403);
+    if (req.method !== "POST") return respond({ error: "Método não permitido." }, 405);
+    const contentLength = Number(req.headers.get("Content-Length") ?? "0");
+    if (contentLength > 32768) return respond({ error: "Requisição muito grande." }, 413);
 
     const { admin, actorId } = await authorize(req);
     const body = await req.json();
@@ -107,12 +130,12 @@ Deno.serve(async (req) => {
         };
       }).sort((a, b) => a.nome.localeCompare(b.nome));
 
-      return response({ data: result });
+      return respond({ data: result });
     }
 
     if (action === "save") {
       const input = body?.data;
-      if (!input || typeof input !== "object") return response({ error: "Dados inválidos." }, 400);
+      if (!input || typeof input !== "object") return respond({ error: "Dados inválidos." }, 400);
 
       const email = String(input.email ?? "").trim().toLowerCase();
       const nome = String(input.nome ?? "").trim();
@@ -120,13 +143,13 @@ Deno.serve(async (req) => {
       const senha = String(input.senha ?? "");
       const role = String(input.role ?? "");
 
-      if (!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)) return response({ error: "E-mail inválido." }, 400);
-      if (!nome || nome.length > 120) return response({ error: "Nome inválido." }, 400);
-      if (matricula.length > 40) return response({ error: "Matrícula inválida." }, 400);
-      if (!["admin", "supervisor", "operador"].includes(role)) return response({ error: "Perfil inválido." }, 400);
-      if (senha && (senha.length < 6 || senha.length > 72)) return response({ error: "A senha deve ter entre 6 e 72 caracteres." }, 400);
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return respond({ error: "E-mail inválido." }, 400);
+      if (!nome || nome.length > 120) return respond({ error: "Nome inválido." }, 400);
+      if (matricula.length > 40) return respond({ error: "Matrícula inválida." }, 400);
+      if (!["admin", "supervisor", "operador"].includes(role)) return respond({ error: "Perfil inválido." }, 400);
+      if (senha && (senha.length < 12 || senha.length > 72)) return respond({ error: "A senha deve ter entre 12 e 72 caracteres." }, 400);
 
-      let id = input.id ? String(input.id) : "";
+      let id = input.id ? String(input.id).trim() : "";\n      if (id && !isUuid(id)) return respond({ error: "Usuário inválido." }, 400);
       let created = false;
 
       if (id) {
@@ -147,11 +170,12 @@ Deno.serve(async (req) => {
         });
         if (error) throw new Error(error.message);
       } else {
-        if (!senha) return response({ error: "Informe uma senha para o novo usuário." }, 400);
+        if (!senha) return respond({ error: "Informe uma senha para o novo usuário." }, 400);
         const { data, error } = await admin.auth.admin.createUser({
           email,
           password: senha,
           email_confirm: true,
+          app_metadata: { cad_provisioned: true },
           user_metadata: { nome, matricula },
         });
         if (error || !data.user) throw new Error(error?.message ?? "Não foi possível criar o usuário.");
@@ -172,12 +196,12 @@ Deno.serve(async (req) => {
         throw new Error("Não foi possível salvar perfil e permissões: " + accessError.message);
       }
 
-      return response({ ok: true, id });
+      return respond({ ok: true, id });
     }
 
     if (action === "delete") {
       const id = String(body?.id ?? "");
-      if (!id) return response({ error: "Usuário inválido." }, 400);
+      if (!id) return respond({ error: "Usuário inválido." }, 400);
       if (id === actorId) throw new Error("Você não pode excluir a si mesmo.");
 
       const { error } = await admin.auth.admin.deleteUser(id);
@@ -192,12 +216,26 @@ Deno.serve(async (req) => {
         throw new Error("A conta foi removida do Auth, mas houve falha na limpeza dos dados associados.");
       }
 
-      return response({ ok: true });
+      return respond({ ok: true });
     }
 
-    return response({ error: "Ação inválida." }, 400);
+    return respond({ error: "Ação inválida." }, 400);
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Erro interno.";
-    return response({ error: message }, message.includes("Acesso restrito") || message.includes("Não autenticado") || message.includes("Sessão inválida") ? 403 : 400);
+    const message = error instanceof Error ? error.message : "";
+    const safeMessages = [
+      "Não autenticado.",
+      "Sessão inválida.",
+      "Acesso restrito a administradores.",
+      "Você não pode remover seu próprio perfil de administrador.",
+      "Não é permitido remover o último administrador.",
+      "Não foi possível salvar perfil e permissões.",
+    ];
+    const safe = safeMessages.find((item) => message === item || message.startsWith(item));
+    console.error("admin-users request failed", { name: error instanceof Error ? error.name : "UnknownError" });
+    if (safe) {
+      const status = safe.startsWith("Não autenticado") || safe.startsWith("Sessão inválida") || safe.startsWith("Acesso restrito") ? 403 : 400;
+      return respond({ error: safe }, status);
+    }
+    return respond({ error: "Não foi possível concluir a solicitação. Verifique os dados e tente novamente." }, 500);
   }
 });
