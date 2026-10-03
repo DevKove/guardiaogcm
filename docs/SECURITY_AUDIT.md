@@ -8,7 +8,7 @@ Audit date: 2026-10-03. Scope: GitHub source tree, deployed Supabase database me
 - Changed the Auth user trigger so new accounts receive an application role only when the trusted, admin-managed `app_metadata.cad_provisioned=true` flag is present. Public self-signups can no longer automatically become CAD operators. Existing roles were intentionally left unchanged.
 - Updated the admin user creation function to set that trusted marker, validate UUIDs, use a corrected email validator, require 12-character passwords for password changes/new users, limit request size, restrict browser origins, avoid caching administrative responses, and avoid returning raw backend errors.
 - Pinned `search_path` for `public.touch_equipe_updated_at()` to `pg_catalog`.
-- Restricted `has_role`, `is_staff`, `plantao_editavel`, and `ocorrencia_bloqueada` helpers to the authenticated caller's own identity/context, and changed the service-role-only user-access function to validate the supplied admin directly.
+- Restricted `has_role`, `is_staff`, `plantao_editavel`, and `ocorrencia_bloqueada` helpers to the authenticated caller's own identity/context, required active staff membership for plantão writes, and changed the service-role-only user-access function to validate the supplied admin directly.
 - Added a dependency update policy through Dependabot.
 
 ## Findings by requested control
