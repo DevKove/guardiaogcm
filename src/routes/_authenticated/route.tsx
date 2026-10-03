@@ -171,11 +171,11 @@ function Layout() {
                 <div
                   role="menu"
                   aria-label="Selecionar tema"
-                  className="absolute right-0 top-[calc(100%+0.45rem)] z-50 w-64 overflow-hidden rounded-lg border border-border bg-popover p-1.5 text-popover-foreground shadow-xl ring-1 ring-black/10 animate-rise"
+                  className="absolute right-0 top-[calc(100%+0.45rem)] z-50 w-64 overflow-hidden rounded-lg border border-slate-600 bg-slate-950 p-1.5 text-white shadow-2xl ring-1 ring-black/30 animate-rise"
                 >
-                  <div className="border-b border-border px-2.5 py-2">
-                    <div className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">Tema visual</div>
-                    <div className="mt-0.5 text-[11px] text-muted-foreground">Escolha a aparência do CAD</div>
+                  <div className="border-b border-slate-700 px-2.5 py-2">
+                    <div className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-300">Tema visual</div>
+                    <div className="mt-0.5 text-[11px] text-slate-400">Escolha a aparência do CAD</div>
                   </div>
                   <div className="pt-1">
                     {themes.map((item) => {
@@ -187,14 +187,14 @@ function Layout() {
                           role="menuitemradio"
                           aria-checked={active}
                           onClick={() => changeTheme(item.value)}
-                          className={`flex w-full items-center gap-3 rounded-md px-2.5 py-2 text-left transition-colors ${active ? "bg-primary/12 text-foreground" : "text-foreground hover:bg-accent"}`}
+                          className={`flex w-full items-center gap-3 rounded-md px-2.5 py-2 text-left transition-colors ${active ? "bg-primary/25 text-white ring-1 ring-primary/40" : "text-white hover:bg-white/10"}`}
                         >
-                          <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-md border ${active ? "border-primary/50 bg-primary/15 text-primary" : "border-border bg-muted text-muted-foreground"}`}>
+                          <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-md border ${active ? "border-primary/60 bg-primary/20 text-primary" : "border-slate-600 bg-slate-900 text-slate-300"}`}>
                             <Palette className="h-4 w-4" />
                           </span>
                           <span className="min-w-0 flex-1">
-                            <span className="block text-xs font-semibold">{item.label}</span>
-                            <span className="block truncate text-[10px] text-muted-foreground">{item.description}</span>
+                            <span className="block text-xs font-semibold text-white">{item.label}</span>
+                            <span className="block truncate text-[10px] text-slate-400">{item.description}</span>
                           </span>
                           {active && <Check className="h-4 w-4 shrink-0 text-primary" aria-hidden="true" />}
                         </button>
