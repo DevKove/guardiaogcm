@@ -69,11 +69,29 @@ export function PlantaoResumoTempoReal({ plantao }: { plantao: Plantao }) {
   const abertas = ocorrencias.filter((o) => o.status === "aberta").length;
   const atendimento = ocorrencias.filter((o) => o.status === "em_atendimento").length;
   const encerradas = ocorrencias.filter((o) => o.status === "encerrada").length;
-  const viaturas = data?.viaturas ?? [];
+  const todasViaturas = data?.viaturas ?? [];
   const escalas = data?.escalas ?? [];
-  const postosAtivos = data?.postosAtivos ?? [];
   const registros = data?.registros ?? [];
   const acoes = data?.acoes ?? [];
+
+  // Exibe apenas viaturas que tiveram participação operacional neste plantão:
+  // vinculadas a ocorrência, a uma escala do turno ou alteradas após seu início.
+  const inicioPlantao = new Date(plantao.iniciado_em).getTime();
+  const viaturasUsadasEmOcorrencias = new Set(
+    ocorrencias.map((o) => (o.viatura ?? "").trim().toLocaleLowerCase("pt-BR")).filter(Boolean),
+  );
+  const idsViaturasEscaladas = new Set(escalas.map((e) => e.viatura_id).filter(Boolean));
+  const viaturas = todasViaturas.filter((v) => {
+    const prefixo = v.prefixo.trim().toLocaleLowerCase("pt-BR");
+    const usadaEmOcorrencia = viaturasUsadasEmOcorrencias.has(prefixo) ||
+      [...viaturasUsadasEmOcorrencias].some((identificacao) => identificacao.includes(prefixo));
+    const usadaEmEscala = idsViaturasEscaladas.has(v.id);
+    const alteradaDurantePlantao = v.updated_at ? new Date(v.updated_at).getTime() >= inicioPlantao : false;
+    return usadaEmOcorrencia || usadaEmEscala || alteradaDurantePlantao;
+  });
+  // Próprios municipais só aparecem quando foram associados a uma escala do turno.
+  const idsPostosEscalados = new Set(escalas.map((e) => e.posto_id).filter(Boolean));
+  const postosAtivos = (data?.postosAtivos ?? []).filter((p) => idsPostosEscalados.has(p.id));
   const viaturasAtivas = viaturas.filter((v) => v.ativa).length;
 
   function gerarPdf() {
@@ -83,6 +101,7 @@ export function PlantaoResumoTempoReal({ plantao }: { plantao: Plantao }) {
       return;
     }
 
+    const usuarios = data?.usuarios ?? {};
     const occurrenceRows = ocorrencias.map((o) => `<tr>
       <td>${cell(hora(o.created_at))}</td><td>${cell(fmtProtocolo(o.protocolo, o.created_at))}</td>
       <td>${cell(o.natureza)}</td><td>${cell([o.endereco, o.numero, o.bairro].filter(Boolean).join(", "))}</td>
@@ -93,9 +112,10 @@ export function PlantaoResumoTempoReal({ plantao }: { plantao: Plantao }) {
     const postRows = postosAtivos.map((p) => `<tr><td>${cell(p.nome)}</td><td>${cell(p.tipo)}</td><td>${cell([p.endereco, p.bairro].filter(Boolean).join(" · "))}</td></tr>`).join("");
     const recordRows = registros.map((r) => `<tr><td>${cell(dataHora(r.hora))}</td><td>${cell(r.texto)}</td><td>${cell(usuarios[r.criado_por] ?? r.criado_por.slice(0, 8))}</td></tr>`).join("");
     const actionRows = acoes.map((a) => `<tr><td>${cell(dataHora(a.created_at))}</td><td>${cell(a.protocolo ? fmtProtocolo(a.protocolo, a.created_at) : "—")}</td><td>${cell(a.descricao)}</td><td>${cell(usuarios[a.usuario_id] ?? a.usuario_id.slice(0, 8))}</td></tr>`).join("");
-    const usuarios = data?.usuarios ?? {};
     const generatedAt = new Date().toLocaleString("pt-BR");
 
+    try {
+    janela.document.open();
     janela.document.write(`<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>Relatório de Plantão - ${cell(fmtDia(plantao.data_inicio))}</title>
       <style>
         @page { size: A4 landscape; margin: 12mm; }
@@ -124,6 +144,12 @@ export function PlantaoResumoTempoReal({ plantao }: { plantao: Plantao }) {
       <script>window.addEventListener("load", () => setTimeout(() => window.print(), 300));</script>
       </body></html>`);
     janela.document.close();
+    janela.focus();
+    } catch (e) {
+      janela.document.open();
+      janela.document.write(`<!doctype html><html lang="pt-BR"><meta charset="utf-8"><title>Erro ao gerar relatório</title><body style="font:16px Arial;padding:24px;color:#172033"><h1>Não foi possível gerar o relatório</h1><p>${cell(e instanceof Error ? e.message : "Erro inesperado")}</p><p>Feche esta janela e tente novamente.</p></body></html>`);
+      janela.document.close();
+    }
   }
 
   return (
