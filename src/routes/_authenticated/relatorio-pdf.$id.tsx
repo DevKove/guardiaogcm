@@ -78,32 +78,32 @@ function RelatorioOficial({ p, operadorNome }: { p: Plantao; operadorNome: strin
       </div>
 
       <article className="report-paper mx-auto max-w-[900px] overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl">
-        <header className="report-cover relative overflow-hidden bg-gradient-to-r from-slate-50 via-white to-cyan-50 px-7 py-9 text-slate-900 sm:px-10 sm:py-11">
-          <div className="absolute inset-y-0 left-0 w-2 bg-cyan-600" />
-          <div className="absolute -right-12 -top-16 h-64 w-64 rounded-full border-[28px] border-cyan-900/5" />
-          <div className="absolute -right-2 top-5 h-40 w-40 rounded-full border border-cyan-700/10" />
+        <header className="report-cover relative overflow-hidden bg-white px-5 py-5 text-slate-900 sm:px-7 sm:py-6">
+          <div className="absolute inset-y-0 left-0 w-1 bg-cyan-600" />
+          <div className="absolute -right-12 -top-16 h-32 w-32 rounded-full border-[12px] border-cyan-900/5" />
+          <div className="absolute -right-2 top-5 h-20 w-20 rounded-full border border-cyan-700/10" />
           <div className="relative flex flex-wrap items-start justify-between gap-5">
             <div className="flex items-start gap-4">
-              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white/80"><ShieldCheck className="h-8 w-8 text-cyan-700" /></div>
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white/80"><ShieldCheck className="h-6 w-6 text-cyan-700" /></div>
               <div>
-                <div className="text-[11px] font-bold uppercase tracking-[0.24em] text-cyan-200">Guarda Civil Municipal</div>
-                <div className="mt-1 text-xs font-medium tracking-[0.16em] text-slate-600">ARAÇOIABA DA SERRA · SP</div>
-                <h1 className="mt-6 text-3xl font-black leading-tight tracking-tight sm:text-4xl">Relatório de<br className="hidden sm:block" /> Plantão</h1>
-                <p className="mt-3 max-w-md text-sm text-slate-300">Central de Atendimento e Despacho · Registro operacional oficial</p>
+                <div className="text-[9px] font-bold uppercase tracking-[0.2em] text-cyan-200">Guarda Civil Municipal</div>
+                <div className="mt-1 text-[10px] font-medium tracking-[0.12em] text-slate-600">ARAÇOIABA DA SERRA · SP</div>
+                <h1 className="mt-3 text-2xl font-black leading-tight tracking-tight sm:text-3xl">Relatório de<br className="hidden sm:block" /> Plantão</h1>
+                <p className="mt-1 max-w-md text-xs text-slate-300">Central de Atendimento e Despacho · Registro operacional oficial</p>
               </div>
             </div>
             <div className="relative rounded-lg border border-cyan-200/30 bg-white/10 px-4 py-3 text-right backdrop-blur-sm">
               <div className="text-[9px] font-bold uppercase tracking-[0.2em] text-cyan-200">Situação do plantão</div>
-              <div className="mt-1 text-sm font-extrabold uppercase tracking-wide">{statusLabel}</div>
+              <div className="mt-1 text-xs font-extrabold uppercase tracking-wide">{statusLabel}</div>
               <div className="mt-1 text-xs text-slate-300">{fmtDia(p.data_inicio)} · {p.turno || "Turno não informado"}</div>
             </div>
           </div>
-          <div className="relative mt-8 flex flex-wrap items-center justify-between gap-3 border-t border-slate-200 pt-4 text-[10px] text-slate-300">
+          <div className="relative mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-slate-200 pt-4 text-[10px] text-slate-300">
             <span>DOCUMENTO OPERACIONAL · USO INSTITUCIONAL</span><span>Referência: {String(p.id).slice(0, 12).toUpperCase()}</span>
           </div>
         </header>
 
-        <div className="space-y-7 px-5 py-6 sm:px-10 sm:py-9">
+        <div className="space-y-7 px-5 py-5 sm:px-8 sm:py-7">
           <section className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             <Kpi label="Data do plantão" value={fmtDia(p.data_inicio)} accent="cyan" />
             <Kpi label="Turno" value={p.turno || "—"} accent="blue" />
