@@ -11,7 +11,7 @@ import { useMe } from "@/hooks/use-me";
 import { carregarAtividades, fmtDia, turnoAtual } from "@/lib/plantao";
 
 export const Route = createFileRoute("/_authenticated/painel")({
-  head: () => ({ meta: [{ title: "Painel de ocorrências · CAD" }] }),
+  head: () => ({ meta: [{ title: "Painel operacional · CAD" }] }),
   component: Painel,
 });
 
