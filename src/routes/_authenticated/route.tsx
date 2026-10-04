@@ -107,11 +107,11 @@ function Layout() {
     <div className="min-h-screen bg-background">
       <div className="siren-bar print:hidden" />
 
-      <header className="glass sticky top-0 z-40 border-b border-border/90 print:hidden">
+      <header className="sticky top-0 z-40 border-b border-cyan-400/20 bg-[#05090e] print:hidden">
         <div className="mx-auto flex max-w-[1600px] flex-wrap items-center gap-x-5 gap-y-3 px-3 py-3 sm:px-4 lg:px-6">
           <Link
             to="/painel"
-            className="group flex min-w-0 flex-1 basis-[280px] items-center rounded-lg py-1.5 pr-2 transition-colors"
+            className="group flex min-w-0 flex-1 basis-[280px] items-center border-l-2 border-cyan-400/70 py-1.5 pl-3 pr-2 transition-colors"
             aria-label="CAD Guarda Municipal"
           >
             <span className="min-w-0">
@@ -214,7 +214,7 @@ function Layout() {
             </button>
           </div>
 
-          <nav className="flex w-full basis-full flex-wrap items-center gap-1 border-t border-border/70 pt-2" aria-label="Navegação principal">
+          <nav className="flex w-full basis-full flex-wrap items-center gap-1 border-t border-slate-800 pt-2" aria-label="Navegação principal">
             {items.map((i) => (
               <Link
                 key={i.to}
@@ -236,7 +236,7 @@ function Layout() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-[1600px] px-4 py-6 lg:px-6 lg:py-7">
+      <main className="mx-auto max-w-[1600px] px-4 py-5 lg:px-6 lg:py-6">
         <Outlet />
       </main>
     </div>
