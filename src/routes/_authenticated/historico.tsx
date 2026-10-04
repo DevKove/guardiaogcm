@@ -33,8 +33,10 @@ function Historico() {
         .order("iniciado_em", { ascending: false });
       if (mes) {
         const [y, m] = mes.split("-").map(Number);
-        const fim = new Date(y ?? 2026, m ?? 1, 0).getDate();
-        query = query.gte("data_inicio", `${mes}-01`).lte("data_inicio", `${mes}-${String(fim).padStart(2, "0")}`);
+        const inicio = `${mes}-01`;
+        const proximoMes = new Date(y ?? 2026, (m ?? 1), 1);
+        const fimExclusivo = `${proximoMes.getFullYear()}-${String(proximoMes.getMonth() + 1).padStart(2, "0")}-01`;
+        query = query.gte("data_inicio", inicio).lt("data_inicio", fimExclusivo);
       }
       const { data: plantoes, error: plantaoError } = await query;
       if (plantaoError) throw plantaoError;
