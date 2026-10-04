@@ -441,6 +441,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedItensRadiosRoute: typeof AuthenticatedItensRadiosRoute
   AuthenticatedItensCadRoute: typeof AuthenticatedItensCadRoute
   AuthenticatedPlantaoIdRoute: typeof AuthenticatedPlantaoIdRoute
+  AuthenticatedRelatorioPdfIdRoute: typeof AuthenticatedRelatorioPdfIdRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
