@@ -60,13 +60,29 @@ function RelatorioPdfPlantao({ p, operadorNome }: { p: Plantao; operadorNome: st
 
   useEffect(() => {
     if (!data) return;
-
     const blob = gerarPdfPlantao(p, operadorNome, data);
     const url = URL.createObjectURL(blob);
     setPdfUrl(url);
+    return () => URL.revokeObjectURL(url);
+  }, [p, operadorNome, data]);
 
-    const imprimir = () => {
-    if (!pdfUrl) return;
+  if (isLoading) {
+    return <div className="flex min-h-screen items-center justify-center text-muted-foreground">Gerando PDF do plantão...</div>;
+  }
+  if (isError || !data) {
+    return (
+      <div className="mx-auto max-w-3xl space-y-4 rounded-lg border border-destructive/40 p-5">
+        <div className="flex items-center gap-2 font-semibold text-destructive"><AlertCircle className="h-5 w-5" /> Não foi possível gerar o PDF</div>
+        <p className="text-sm text-muted-foreground">{error instanceof Error ? error.message : "Erro ao carregar os dados do plantão."}</p>
+        <Button asChild variant="outline"><Link to="/historico"><ArrowLeft className="h-4 w-4" /> Voltar ao histórico</Link></Button>
+      </div>
+    );
+  }
+  if (!pdfUrl) {
+    return <div className="flex min-h-screen items-center justify-center text-muted-foreground">Preparando o documento PDF...</div>;
+  }
+
+  const imprimir = () => {
     const win = window.open(pdfUrl, "_blank", "noopener,noreferrer");
     if (!win) window.location.assign(pdfUrl);
   };
@@ -86,7 +102,7 @@ function RelatorioPdfPlantao({ p, operadorNome }: { p: Plantao; operadorNome: st
         <embed src={pdfUrl} type="application/pdf" className="h-full w-full rounded-sm border border-slate-700 bg-white shadow-2xl" aria-label={`Relatório PDF do plantão ${p.id}`} />
       </div>
     </div>
-  )
+  );
 }
 
 type DadosRelatorioPlantao = Awaited<ReturnType<typeof carregarAtividades>>;
