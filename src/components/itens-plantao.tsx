@@ -99,6 +99,7 @@ export function ItensPlantao({ categoria }: { categoria: ItemCategoria }) {
     toast.success(form.id ? "Item atualizado." : "Item cadastrado.");
     setForm({ id: "", nome: "", identificacao: "", patrimonio: "", observacao: "" });
     qc.invalidateQueries({ queryKey: ["itens-catalogo", categoria] });
+    return null;
   }
 
   async function alternarAtivo(item: Item) {
@@ -125,6 +126,7 @@ export function ItensPlantao({ categoria }: { categoria: ItemCategoria }) {
     if (result.error) return toast.error(result.error.message);
     toast.success(tipo === "retirada" ? "Retirada registrada." : "Entrega/devolução registrada.");
     qc.invalidateQueries({ queryKey: ["itens-movimentos", plantao.id, categoria] });
+    return null;
   }
 
   async function conferir(item: Item, checked: boolean) {
@@ -141,6 +143,7 @@ export function ItensPlantao({ categoria }: { categoria: ItemCategoria }) {
     setBusy(null);
     if (result.error) return toast.error(result.error.message);
     qc.invalidateQueries({ queryKey: ["itens-movimentos", plantao.id, categoria] });
+    return null;
   }
 
   return (
