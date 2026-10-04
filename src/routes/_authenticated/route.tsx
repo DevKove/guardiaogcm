@@ -155,12 +155,11 @@ function Layout() {
                 <div
                   role="menu"
                   aria-label="Selecionar tema"
-                  className="absolute right-0 top-[calc(100%+0.45rem)] z-[100] w-64 overflow-hidden rounded-lg border p-1.5 shadow-2xl ring-1 ring-black/30 animate-rise"
-                  style={{ backgroundColor: "#020617", color: "#ffffff", borderColor: "#475569", boxShadow: "0 20px 40px rgba(0,0,0,.45)" }}
+                  className="absolute right-0 top-[calc(100%+0.45rem)] z-[100] w-64 overflow-hidden rounded-lg border p-1.5 shadow-2xl ring-1 ring-black/30 animate-rise bg-card text-card-foreground border-border"
                 >
-                  <div className="border-b px-2.5 py-2" style={{ borderColor: "#334155" }}>
-                    <div className="text-[10px] font-bold uppercase tracking-[0.12em]" style={{ color: "#cbd5e1" }}>Tema visual</div>
-                    <div className="mt-0.5 text-[11px]" style={{ color: "#94a3b8" }}>Escolha a aparência do CAD</div>
+                  <div className="border-b px-2.5 py-2" className="border-border">
+                    <div className="text-[10px] font-bold uppercase tracking-[0.12em]" className="text-muted-foreground">Tema visual</div>
+                    <div className="mt-0.5 text-[11px]" className="text-muted-foreground">Escolha a aparência do CAD</div>
                   </div>
                   <div className="pt-1">
                     {themes.map((item) => {
