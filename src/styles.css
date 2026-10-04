@@ -850,3 +850,162 @@ header.glass {
     animation: none !important;
   }
 }
+
+
+/* ==========================================================================
+   TEMA CLARO — correção global
+   O tema claro deve vencer estilos legados/hardcoded usados nas telas.
+   ========================================================================== */
+@layer components {
+  :root[data-theme="claro"] body,
+  :root[data-theme="claro"] #root {
+    background: var(--background) !important;
+    color: var(--foreground) !important;
+  }
+
+  :root[data-theme="claro"] .cad-app-shell,
+  :root[data-theme="claro"] .cad-auth-shell,
+  :root[data-theme="claro"] main,
+  :root[data-theme="claro"] .cad-page {
+    background-color: var(--background) !important;
+    color: var(--foreground) !important;
+  }
+
+  :root[data-theme="claro"] header,
+  :root[data-theme="claro"] header.glass,
+  :root[data-theme="claro"] .cad-app-shell > header,
+  :root[data-theme="claro"] .cad-auth-shell header,
+  :root[data-theme="claro"] main section,
+  :root[data-theme="claro"] main article,
+  :root[data-theme="claro"] .card-3d,
+  :root[data-theme="claro"] .cad-section,
+  :root[data-theme="claro"] [role="dialog"],
+  :root[data-theme="claro"] .bg-card {
+    background-color: var(--card) !important;
+    color: var(--card-foreground) !important;
+    border-color: var(--border) !important;
+  }
+
+  :root[data-theme="claro"] main section.border,
+  :root[data-theme="claro"] main article.border,
+  :root[data-theme="claro"] main [class*="card-3d"] {
+    background: var(--card) !important;
+  }
+
+  :root[data-theme="claro"] input,
+  :root[data-theme="claro"] textarea,
+  :root[data-theme="claro"] select,
+  :root[data-theme="claro"] [role="dialog"] input,
+  :root[data-theme="claro"] [role="dialog"] textarea,
+  :root[data-theme="claro"] [role="dialog"] select {
+    background: var(--input) !important;
+    color: var(--foreground) !important;
+    border-color: var(--border) !important;
+  }
+
+  :root[data-theme="claro"] input::placeholder,
+  :root[data-theme="claro"] textarea::placeholder {
+    color: var(--muted-foreground) !important;
+    opacity: 1;
+  }
+
+  :root[data-theme="claro"] table {
+    background: var(--card) !important;
+    color: var(--card-foreground) !important;
+  }
+
+  :root[data-theme="claro"] thead {
+    background: var(--surface-3) !important;
+  }
+
+  :root[data-theme="claro"] tbody tr:hover {
+    background: color-mix(in oklab, var(--accent) 70%, transparent) !important;
+  }
+
+  :root[data-theme="claro"] h1,
+  :root[data-theme="claro"] h2,
+  :root[data-theme="claro"] h3,
+  :root[data-theme="claro"] h4,
+  :root[data-theme="claro"] h5,
+  :root[data-theme="claro"] h6 {
+    color: var(--foreground) !important;
+  }
+
+  /* Classes utilitárias que estavam fixando texto escuro/claro. */
+  :root[data-theme="claro"] .text-white,
+  :root[data-theme="claro"] .text-slate-100,
+  :root[data-theme="claro"] .text-slate-200,
+  :root[data-theme="claro"] .text-slate-300 {
+    color: var(--foreground) !important;
+  }
+
+  :root[data-theme="claro"] .text-slate-400,
+  :root[data-theme="claro"] .text-slate-500,
+  :root[data-theme="claro"] .text-slate-600 {
+    color: var(--muted-foreground) !important;
+  }
+
+  :root[data-theme="claro"] .text-slate-700,
+  :root[data-theme="claro"] .text-slate-800,
+  :root[data-theme="claro"] .text-slate-900 {
+    color: var(--foreground) !important;
+  }
+
+  :root[data-theme="claro"] .bg-slate-950,
+  :root[data-theme="claro"] .bg-slate-900,
+  :root[data-theme="claro"] .bg-slate-800 {
+    background-color: var(--card) !important;
+  }
+
+  :root[data-theme="claro"] .border-slate-800,
+  :root[data-theme="claro"] .border-slate-700,
+  :root[data-theme="claro"] .border-slate-600 {
+    border-color: var(--border) !important;
+  }
+
+  :root[data-theme="claro"] .bg-[#05090e],
+  :root[data-theme="claro"] .bg-[#050a0f],
+  :root[data-theme="claro"] .bg-[#070d13],
+  :root[data-theme="claro"] .bg-[#020617] {
+    background-color: var(--card) !important;
+  }
+
+  :root[data-theme="claro"] .border-cyan-400/20,
+  :root[data-theme="claro"] .border-cyan-400/25,
+  :root[data-theme="claro"] .border-cyan-400/30 {
+    border-color: color-mix(in oklab, var(--primary) 30%, var(--border)) !important;
+  }
+
+  /* Select nativo: texto e opções legíveis no modo claro. */
+  :root[data-theme="claro"] option {
+    background: var(--card) !important;
+    color: var(--foreground) !important;
+  }
+
+  :root[data-theme="claro"] [role="menu"] {
+    background: var(--card) !important;
+    color: var(--foreground) !important;
+    border-color: var(--border) !important;
+    box-shadow: 0 20px 40px rgba(15, 23, 42, .16) !important;
+  }
+
+  /* Fundos decorativos permanecem discretos no modo claro. */
+  :root[data-theme="claro"] body::before,
+  :root[data-theme="claro"] body::after,
+  :root[data-theme="claro"] .cad-app-shell::before {
+    opacity: .10 !important;
+  }
+
+  :root[data-theme="claro"] .cad-auth-shell {
+    background-image:
+      linear-gradient(90deg, rgba(255,255,255,.92), rgba(248,250,252,.84)),
+      url("/guardiaogcm/cad-assets/siren-light.jpg") !important;
+  }
+
+  :root[data-theme="claro"] .cad-auth-shell form {
+    background: rgba(255,255,255,.96) !important;
+    border-color: var(--border) !important;
+    color: var(--foreground) !important;
+    box-shadow: 0 18px 60px rgba(15,23,42,.12) !important;
+  }
+}
