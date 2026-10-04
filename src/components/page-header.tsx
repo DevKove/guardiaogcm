@@ -3,12 +3,12 @@ import type { ReactNode } from "react";
 
 export function PageHeader({ icon: Icon, kicker, title, children }: { icon: LucideIcon; kicker: string; title: string; children?: ReactNode }) {
   return (
-    <div className="flex flex-wrap items-end justify-between gap-4 animate-rise">
+    <div className="flex flex-wrap items-end justify-between gap-4 border-b border-border pb-4 animate-rise">
       <div className="flex items-center gap-4">
-        <div className="icon-chip h-12 w-12"><Icon className="h-6 w-6" /></div>
+        <div className="icon-chip h-11 w-11"><Icon className="h-6 w-6" /></div>
         <div>
-          <div className="font-mono text-xs tracking-[0.3em] text-muted-foreground"><span className="mr-2 inline-block h-2 w-2 rounded-full bg-destructive live-dot" />{kicker}</div>
-          <h1 className="text-gradient text-3xl">{title}</h1>
+          <div className="font-mono text-[10px] tracking-[0.2em] text-muted-foreground uppercase"><span className="mr-2 inline-block h-2 w-2 rounded-full bg-destructive live-dot" />{kicker}</div>
+          <h1 className="text-gradient text-2xl font-bold tracking-tight md:text-3xl">{title}</h1>
         </div>
       </div>
       {children && <div className="flex gap-2">{children}</div>}
