@@ -76,6 +76,33 @@ function Postos() {
     const { error } = await supabase.from("postos_fixos").delete().eq("id", id);
     if (error) toast.error(error.message); else qc.invalidateQueries({ queryKey: ["postos"] });
   }
+  async function removerAgentePosto(escala: { posto_id: string | null; agentes: string | null; turno: string | null }) {
+    if (!confirm(`Remover ${escala.agentes ?? "o agente"} deste posto fixo?`)) return;
+    const { data: registros, error: buscaError } = await supabase
+      .from("escalas")
+      .select("id")
+      .eq("posto_id", escala.posto_id)
+      .eq("data", hoje)
+      .eq("turno", escala.turno);
+
+    if (buscaError) return void toast.error(buscaError.message);
+    if (!registros?.length) return void toast.error("Destinação não encontrada.");
+
+    const escalaId = registros[0].id;
+    const { error: integranteError } = await supabase
+      .from("escala_integrantes")
+      .delete()
+      .eq("escala_id", escalaId);
+
+    if (integranteError) return void toast.error("Não foi possível remover o agente: " + integranteError.message);
+
+    const { error: escalaError } = await supabase.from("escalas").delete().eq("id", escalaId);
+    if (escalaError) return void toast.error("Agente removido, mas não foi possível limpar o registro do plantão: " + escalaError.message);
+
+    toast.success(`${escala.agentes ?? "Agente"} removido do posto fixo.`);
+    qc.invalidateQueries({ queryKey: ["postos-agentes-hoje"] });
+  }
+
 
   const lista = data.filter((p) => (!tipo || p.tipo === tipo) && `${p.nome} ${p.bairro ?? ""} ${p.endereco ?? ""}`.toLowerCase().includes(q.toLowerCase()));
   const cobertos = new Set(alocacoesHoje.map((e) => e.posto_id).filter(Boolean));
@@ -128,7 +155,22 @@ function Postos() {
               </div>
               {esc.length > 0 && (
                 <div className="mt-3 rounded-md border border-success/40 bg-success/10 p-2 text-xs">
-                  {esc.map((e, j) => <div key={j}><b>{e.turno}:</b> {e.agentes}</div>)}
+                  {esc.map((e, j) => (
+                    <div key={j} className="flex items-center justify-between gap-2">
+                      <span><b>{e.turno}:</b> {e.agentes}</span>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="ghost"
+                        className="h-7 px-2 text-destructive hover:text-destructive"
+                        onClick={() => removerAgentePosto(e)}
+                        title="Remover agente do posto fixo"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                        <span className="sr-only">Remover agente do posto</span>
+                      </Button>
+                    </div>
+                  ))}
                 </div>
               )}
               {p.observacao && <p className="mt-2 text-xs italic text-muted-foreground">{p.observacao}</p>}
@@ -164,46 +206,6 @@ function PostoDialog({ f: init, onClose }: { f: Form | null; onClose: () => void
   const [f, setF] = useState<Form>(vazio);
   useEffect(() => { if (init) setF(init); }, [init]);
   const set = (k: keyof Form) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => setF({ ...f, [k]: e.target.value });
-  useEffect(() => {
-    let ativo = true;
-    async function verificarOutroPosto() {
-      setAvisoOutroPosto(null);
-      if (!posto || !equipeId || !data) return;
-
-      const { data: integrantes } = await supabase
-        .from("escala_integrantes")
-        .select("escala_id")
-        .eq("equipe_id", equipeId);
-
-      const ids = (integrantes ?? []).map((x) => x.escala_id).filter(Boolean);
-      if (!ids.length) return;
-
-      const { data: escalasExistentes } = await supabase
-        .from("escalas")
-        .select("posto_id")
-        .in("id", ids)
-        .eq("data", data)
-        .neq("posto_id", posto.id);
-
-      if (!ativo || !escalasExistentes?.length) return;
-
-      const outroPostoId = escalasExistentes[0].posto_id;
-      const outroPosto = outroPostoId
-        ? await supabase.from("postos_fixos").select("nome").eq("id", outroPostoId).maybeSingle()
-        : null;
-
-      if (ativo) {
-        setAvisoOutroPosto(
-          outroPosto?.data?.nome
-            ? `⚠️ AVISO: Este agente já está destinado ao posto fixo ${outroPosto.data.nome} neste dia.`
-            : "⚠️ AVISO: Este agente já está destinado a outro posto fixo neste dia.",
-        );
-      }
-    }
-    void verificarOutroPosto();
-    return () => { ativo = false; };
-  }, [posto?.id, equipeId, data]);
-
   async function salvar(e: React.FormEvent) {
     e.preventDefault();
     const { id, ...rest } = f;
