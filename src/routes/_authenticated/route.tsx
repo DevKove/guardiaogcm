@@ -168,7 +168,7 @@ function Layout() {
                 >
                   <div className="border-b border-border px-2.5 py-2">
                     <div className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">Tema visual</div>
-                    <div className="mt-0.5 text-[11px]" className="text-muted-foreground">Escolha a aparência do CAD</div>
+                    <div className="mt-0.5 text-[11px] text-muted-foreground">Escolha a aparência do CAD</div>
                   </div>
                   <div className="pt-1">
                     {themes.map((item) => {
