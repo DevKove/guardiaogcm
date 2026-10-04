@@ -145,7 +145,7 @@ function RelatorioOficial({ p, operadorNome }: { p: Plantao; operadorNome: strin
           </ReportSection>
 
           <ReportSection title="Histórico de ações" eyebrow="07 · Rastreabilidade" count={data.acoes.length}>
-            {data.acoes.length ? <div className="space-y-0">{data.acoes.map((a,i)=><div key={a.id ?? i} className="grid grid-cols-[minmax(110px,155px)_1fr] gap-3 border-b border-slate-100 py-3 text-xs"><div className="font-medium text-slate-500">{dataHora(a.created_at)}</div><div><div className="font-bold text-[#193752]">{data.usuarios[a.usuario_id] || "Operador"}{a.protocolo ? " · Protocolo #"+a.protocolo : ""}</div><p className="mt-1 whitespace-pre-wrap leading-relaxed text-slate-700">{a.descricao}</p></div></div>)}</div> : <Empty>Nenhuma ação registrada no histórico.</Empty>}
+            {data.acoes.length ? <div className="space-y-0">{data.acoes.map((a,i)=><div key={i} className="grid grid-cols-[minmax(110px,155px)_1fr] gap-3 border-b border-slate-100 py-3 text-xs"><div className="font-medium text-slate-500">{dataHora(a.created_at)}</div><div><div className="font-bold text-[#193752]">{data.usuarios[a.usuario_id] || "Operador"}{a.protocolo ? " · Protocolo #"+a.protocolo : ""}</div><p className="mt-1 whitespace-pre-wrap leading-relaxed text-slate-700">{a.descricao}</p></div></div>)}</div> : <Empty>Nenhuma ação registrada no histórico.</Empty>}
           </ReportSection>
 
           <ReportSection title="Informações complementares" eyebrow="08 · Observações do turno">
