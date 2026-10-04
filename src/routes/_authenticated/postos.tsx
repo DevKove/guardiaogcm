@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { School, HeartPulse, Hospital, Landmark, Trees, Bus, Cross, MapPin, Phone, User, Clock, Pencil, Plus, Trash2, Search, Building2, type LucideIcon } from "lucide-react";
+import { School, HeartPulse, Hospital, Landmark, Trees, Bus, Cross, MapPin, Phone, User, Clock, Pencil, Plus, Trash2, Search, Building2, CalendarClock, Users, type LucideIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useMe } from "@/hooks/use-me";
 import { PageHeader, StatCard } from "@/components/page-header";
-import { TIPOS_POSTO, selectCls } from "@/lib/cad";
+import { TIPOS_POSTO, FUNCOES_ESCALA, TURNOS, selectCls } from "@/lib/cad";
 
 export const Route = createFileRoute("/_authenticated/postos")({
   head: () => ({ meta: [{ title: "Postos fixos · CAD" }, { name: "description", content: "Escolas, unidades de saúde e prédios públicos com cobertura da Guarda." }] }),
@@ -30,6 +30,7 @@ function Postos() {
   const qc = useQueryClient();
   const { data: me } = useMe();
   const [edit, setEdit] = useState<Form | null>(null);
+  const [destinar, setDestinar] = useState<{ id: string; nome: string } | null>(null);
   const [q, setQ] = useState("");
   const [tipo, setTipo] = useState("");
   const hoje = new Date().toISOString().slice(0, 10);
@@ -40,6 +41,14 @@ function Postos() {
       const { data, error } = await supabase.from("postos_fixos").select("*").order("nome");
       if (error) throw error;
       return data;
+    },
+  });
+  const { data: efetivo = [] } = useQuery({
+    queryKey: ["equipe-escalas"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("equipe").select("id, nome, matricula, tipo, funcao").eq("ativo", true).order("nome");
+      if (error) throw error;
+      return data as { id: string; nome: string; matricula: string | null; tipo: string; funcao: string }[];
     },
   });
   const { data: escalasHoje = [] } = useQuery({
@@ -124,7 +133,10 @@ function Postos() {
               )}
               {p.observacao && <p className="mt-2 text-xs italic text-muted-foreground">{p.observacao}</p>}
               {me?.isSupervisor && (
-                <div className="mt-3 flex gap-1 border-t pt-3">
+                <div className="mt-3 flex flex-wrap gap-1 border-t pt-3">
+                  <Button size="sm" variant="outline" onClick={() => setDestinar({ id: p.id, nome: p.nome })} disabled={!p.ativo || efetivo.length === 0}>
+                    <CalendarClock className="h-3.5 w-3.5" /> Destinar agentes
+                  </Button>
                   <Button size="sm" variant="ghost" onClick={() => setEdit({ id: p.id, nome: p.nome, tipo: p.tipo, endereco: p.endereco ?? "", bairro: p.bairro ?? "", telefone: p.telefone ?? "", responsavel: p.responsavel ?? "", horario: p.horario ?? "", observacao: p.observacao ?? "" })}>
                     <Pencil className="h-3.5 w-3.5" /> Editar
                   </Button>
@@ -139,6 +151,7 @@ function Postos() {
       </div>
 
       <PostoDialog f={edit} onClose={() => setEdit(null)} />
+      <DestinarDialog posto={destinar} efetivo={efetivo} onClose={() => setDestinar(null)} onSaved={() => { qc.invalidateQueries({ queryKey: ["escalas"] }); qc.invalidateQueries({ queryKey: ["escalas", "hoje"] }); }} />
     </div>
   );
 }
@@ -177,6 +190,106 @@ function PostoDialog({ f: init, onClose }: { f: Form | null; onClose: () => void
           <div className="col-span-2 space-y-1"><Label>Horário de funcionamento</Label><Input placeholder="Ex: Seg–Sex 07h–18h" value={f.horario} onChange={set("horario")} /></div>
           <div className="col-span-2 space-y-1"><Label>Observações</Label><Textarea rows={2} value={f.observacao} onChange={set("observacao")} /></div>
           <Button type="submit" className="col-span-2">Salvar</Button>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+
+type IntegranteEscala = { id: string; nome: string; matricula: string | null; tipo: string; funcao: string };
+
+function DestinarDialog({ posto, efetivo, onClose, onSaved }: {
+  posto: { id: string; nome: string } | null;
+  efetivo: IntegranteEscala[];
+  onClose: () => void;
+  onSaved: () => void;
+}) {
+  const [data, setData] = useState(new Date().toLocaleDateString("en-CA"));
+  const [turno, setTurno] = useState("Diurno");
+  const [horaInicio, setHoraInicio] = useState("07:00");
+  const [horaFim, setHoraFim] = useState("19:00");
+  const [funcao, setFuncao] = useState("Posto fixo");
+  const [equipeIds, setEquipeIds] = useState<string[]>([]);
+  const [observacao, setObservacao] = useState("");
+  const [salvando, setSalvando] = useState(false);
+
+  useEffect(() => {
+    if (!posto) return;
+    setData(new Date().toLocaleDateString("en-CA"));
+    setTurno("Diurno");
+    setHoraInicio("07:00");
+    setHoraFim("19:00");
+    setFuncao("Posto fixo");
+    setEquipeIds([]);
+    setObservacao("");
+    setSalvando(false);
+  }, [posto?.id]);
+
+  function mudarTurno(v: string) {
+    setTurno(v);
+    if (v === "Diurno") { setHoraInicio("07:00"); setHoraFim("19:00"); }
+    else if (v === "Noturno") { setHoraInicio("19:00"); setHoraFim("07:00"); }
+    else if (v === "Madrugada") { setHoraInicio("00:00"); setHoraFim("07:00"); }
+    else { setHoraInicio("07:00"); setHoraFim("13:00"); }
+  }
+
+  async function salvar(e: React.FormEvent) {
+    e.preventDefault();
+    if (!posto) return;
+    if (equipeIds.length === 0) return void toast.error("Marque ao menos um agente para este posto.");
+    setSalvando(true);
+    const membros = efetivo.filter((m) => equipeIds.includes(m.id));
+    const { data: escala, error } = await supabase.from("escalas").insert({
+      data, turno, hora_inicio: horaInicio, hora_fim: horaFim,
+      agentes: membros.map((m) => m.nome).join(", "),
+      funcao, posto_id: posto.id, viatura_id: null,
+      observacao: observacao.trim() || null,
+    } as never).select("id").single();
+    if (error || !escala) {
+      setSalvando(false);
+      return void toast.error(error?.message ?? "Não foi possível criar a escala para este posto.");
+    }
+    const { error: integrantesError } = await supabase.from("escala_integrantes").insert(
+      equipeIds.map((equipe_id) => ({ escala_id: escala.id, equipe_id })),
+    );
+    if (integrantesError) {
+      await supabase.from("escalas").delete().eq("id", escala.id);
+      setSalvando(false);
+      return void toast.error("Não foi possível vincular os agentes: " + integrantesError.message);
+    }
+    toast.success(`Agentes destinados ao posto ${posto.nome}.`);
+    setSalvando(false);
+    onClose();
+    onSaved();
+  }
+
+  return (
+    <Dialog open={!!posto} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="max-h-[90vh] overflow-y-auto">
+        <DialogHeader><DialogTitle>Destinar agentes — {posto?.nome ?? "Posto fixo"}</DialogTitle></DialogHeader>
+        <form onSubmit={salvar} className="grid grid-cols-2 gap-3">
+          <div className="col-span-2 space-y-1"><Label>Data da escala</Label><Input type="date" required value={data} onChange={(e) => setData(e.target.value)} /></div>
+          <div className="space-y-1"><Label>Turno</Label><select className={selectCls} value={turno} onChange={(e) => mudarTurno(e.target.value)}>{TURNOS.map((t) => <option key={t} value={t} className="bg-popover">{t}</option>)}</select></div>
+          <div className="space-y-1"><Label>Função</Label><select className={selectCls} value={funcao} onChange={(e) => setFuncao(e.target.value)}>{[...new Set(["Posto fixo", ...FUNCOES_ESCALA])].map((t) => <option key={t} value={t} className="bg-popover">{t}</option>)}</select></div>
+          <div className="space-y-1"><Label>Início</Label><Input type="time" required value={horaInicio} onChange={(e) => setHoraInicio(e.target.value)} /></div>
+          <div className="space-y-1"><Label>Fim</Label><Input type="time" required value={horaFim} onChange={(e) => setHoraFim(e.target.value)} /></div>
+          <div className="col-span-2 space-y-2">
+            <Label>Selecione os agentes *</Label>
+            {efetivo.length === 0 ? <p className="rounded-md border p-3 text-sm text-destructive">Nenhum integrante ativo cadastrado. Cadastre os agentes no menu Equipe antes de fazer a destinação.</p> : (
+              <div className="max-h-56 space-y-2 overflow-y-auto rounded-md border p-3">
+                {efetivo.map((m) => (
+                  <label key={m.id} className="flex cursor-pointer items-center gap-3 rounded-md p-2 hover:bg-muted/60">
+                    <input type="checkbox" className="h-4 w-4 accent-primary" checked={equipeIds.includes(m.id)} onChange={(e) => setEquipeIds((old) => e.target.checked ? [...old, m.id] : old.filter((id) => id !== m.id))} />
+                    <span className="min-w-0 flex-1 text-sm font-medium">{m.nome}<span className="block text-xs text-muted-foreground">{m.tipo}{m.matricula ? ` · Matrícula ${m.matricula}` : ""} · {m.funcao}</span></span>
+                  </label>
+                ))}
+              </div>
+            )}
+            <p className="text-xs text-muted-foreground">Marque cada agente pelo quadrado ao lado do nome. Apenas integrantes ativos aparecem aqui.</p>
+          </div>
+          <div className="col-span-2 space-y-1"><Label>Observações</Label><Textarea rows={2} value={observacao} onChange={(e) => setObservacao(e.target.value)} /></div>
+          <Button type="submit" className="col-span-2" disabled={salvando || !efetivo.length}>{salvando ? "Salvando destinação..." : "Confirmar destinação"}</Button>
         </form>
       </DialogContent>
     </Dialog>
