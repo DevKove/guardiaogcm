@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
 import { AlertCircle, ArrowLeft, Lock, Printer, RefreshCw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -87,9 +88,9 @@ function RelatorioPdfPlantao({ p, operadorNome }: { p: Plantao; operadorNome: st
     queryKey: ["plantao", "pdf", p.id],
     queryFn: () => carregarAtividades(p),
   });
-  const [pdfUrl, setPdfUrl] = React.useState<string | null>(null);
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!data) return;
     const blob = gerarPdfPlantao(p, operadorNome, data);
     const url = URL.createObjectURL(blob);
@@ -240,8 +241,7 @@ function criarPdfTexto(linhas: string[]): Blob {
   const marginLeft = 42;
   const marginTop = 52;
   const marginBottom = 46;
-  const fontSize = 9;
-  const lineHeight = 13;
+    const lineHeight = 13;
   const maxChars = 92;
   const wrapped: string[] = [];
 
@@ -288,7 +288,7 @@ function criarPdfTexto(linhas: string[]): Blob {
       }),
       "ET",
     ].join("\n");
-    const stream = `<< /Length ${commands.length} >>\\nstream\\n${commands}\\nendstream`;
+    const stream = `<< /Length ${commands.length} >>\nstream\n${commands}\nendstream`;
     const contentId = addObject(stream);
     const pageId = addObject(
       `<< /Type /Page /Parent ${pagesId} 0 R /MediaBox [0 0 ${pageWidth} ${pageHeight}] /Resources << /Font << /F1 ${fontId} 0 R >> >> /Contents ${contentId} 0 R >>`,
@@ -299,16 +299,16 @@ function criarPdfTexto(linhas: string[]): Blob {
   objects[catalogId - 1] = `<< /Type /Catalog /Pages ${pagesId} 0 R >>`;
   objects[pagesId - 1] = `<< /Type /Pages /Kids [${pageIds.map((id) => `${id} 0 R`).join(" ")}] /Count ${pageIds.length} >>`;
 
-  let pdf = "%PDF-1.4\\n%\xE2\xE3\xCF\xD3\\n";
+  let pdf = "%PDF-1.4\n%\xE2\xE3\xCF\xD3\n";
   const offsets: number[] = [0];
   for (let i = 0; i < objects.length; i++) {
     offsets.push(pdf.length);
-    pdf += `${i + 1} 0 obj\\n${objects[i]}\\nendobj\\n`;
+    pdf += `${i + 1} 0 obj\n${objects[i]}\nendobj\n`;
   }
   const xref = pdf.length;
-  pdf += `xref\\n0 ${objects.length + 1}\\n0000000000 65535 f \\n`;
-  for (let i = 1; i < offsets.length; i++) pdf += `${String(offsets[i]).padStart(10, "0")} 00000 n \\n`;
-  pdf += `trailer\\n<< /Size ${objects.length + 1} /Root ${catalogId} 0 R >>\\nstartxref\\n${xref}\\n%%EOF`;
+  pdf += `xref\n0 ${objects.length + 1}\n0000000000 65535 f \n`;
+  for (let i = 1; i < offsets.length; i++) pdf += `${String(offsets[i]).padStart(10, "0")} 00000 n \n`;
+  pdf += `trailer\n<< /Size ${objects.length + 1} /Root ${catalogId} 0 R >>\nstartxref\n${xref}\n%%EOF`;
 
   const bytes = new Uint8Array(pdf.length);
   for (let i = 0; i < pdf.length; i++) bytes[i] = pdf.charCodeAt(i) & 0xff;
