@@ -49,13 +49,7 @@ function VerPlantao() {
   }
 
   const { p, nome } = data;
-  const params = new URLSearchParams(window.location.search);
-  const modoVisualizar = params.get("modo") === "visualizar";
-  const pdf = params.get("pdf") === "1";
-
-  if (modoVisualizar && pdf) {
-    return <RelatorioPdfPlantao p={p} operadorNome={nome} />;
-  }
+  return <RelatorioPdfPlantao p={p} operadorNome={nome} />;
 
   const editavel = me.isAdmin || (p.status === "aberto" && p.operador_id === me.id);
 
