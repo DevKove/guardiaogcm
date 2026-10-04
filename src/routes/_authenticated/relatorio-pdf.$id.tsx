@@ -91,7 +91,7 @@ function RelatorioPdfPlantao({ p, operadorNome }: { p: Plantao; operadorNome: st
     <div className="fixed inset-0 z-[9999] flex flex-col bg-slate-900">
       <header className="flex shrink-0 items-center justify-between gap-3 border-b border-slate-700 bg-slate-950 px-4 py-3 text-white shadow-lg">
         <div className="min-w-0">
-          <div className="text-xs font-semibold uppercase tracking-[0.18em] text-cyan-400">CAD GUARDA CIVIL MUNICIPAL <span className="ml-2 rounded border border-cyan-400/40 px-2 py-0.5 text-[10px] tracking-normal text-cyan-300">PDF V2</span></div>
+          <div className="text-xs font-semibold uppercase tracking-[0.18em] text-cyan-400">CAD GUARDA CIVIL MUNICIPAL <span className="ml-2 rounded border border-cyan-400/40 px-2 py-0.5 text-[10px] tracking-normal text-cyan-300">PDF V3</span></div>
           <div className="truncate text-sm font-semibold">Relatório de plantão · {fmtDia(p.data_inicio)}</div>
         </div>
         <Button type="button" onClick={imprimir} className="shrink-0 gap-2 bg-cyan-600 text-white hover:bg-cyan-500">
@@ -257,7 +257,7 @@ function gerarPdfPlantao(p: Plantao, operadorNome: string, data: DadosRelatorioP
   text("ARAÇOIABA DA SERRA  |  SP", M + 8, H - 52, 7.2, "#D8E6EF", false);
   text("RELATÓRIO DE PLANTÃO", M + 8, H - 88, 21, white, true);
   text("CENTRAL DE ATENDIMENTO E DESPACHO", M + 8, H - 107, 8, "#D8E6EF", true);
-  text("CONTROLE OPERACIONAL  •  EDIÇÃO VISUAL 2.0", M + 8, H - 125, 6.8, "#7DE4ED", true);
+  text("NOVO LAYOUT INSTITUCIONAL  •  VERSÃO 3.0", M + 8, H - 125, 6.8, "#7DE4ED", true);
   const status = p.status || "Não informado";
   rect(W - M - 116, H - 88, 108, 24, statusColor(status));
   text(status.toLocaleUpperCase("pt-BR"), W - M - 108, H - 79, 7, white, true);
