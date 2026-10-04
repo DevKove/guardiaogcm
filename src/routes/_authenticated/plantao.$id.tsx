@@ -95,12 +95,16 @@ function RelatorioPdfPlantao({ p, operadorNome }: { p: Plantao; operadorNome: st
     const blob = gerarPdfPlantao(p, operadorNome, data);
     const url = URL.createObjectURL(blob);
 
-    // O modo "Visualizar" deve sair da aplicação e entregar o arquivo
-    // diretamente ao visualizador nativo de PDF do navegador.
-    window.location.replace(url);
+    // Entrega o Blob diretamente ao visualizador PDF do navegador.
+    // Primeiro tentamos uma nova guia; se o navegador bloquear a abertura
+    // por não haver mais ativação do usuário após a consulta assíncrona,
+    // fazemos a navegação na própria guia.
+    const pdfWindow = window.open(url, "_blank", "noopener,noreferrer");
+    if (!pdfWindow) {
+      window.location.assign(url);
+    }
 
-    // Mantemos o blob disponível durante o carregamento do leitor PDF.
-    // Revogar no cleanup imediato podia invalidar o documento antes da abertura.
+    // O leitor PDF pode precisar de alguns segundos para consumir o Blob.
     const revokeTimer = window.setTimeout(() => URL.revokeObjectURL(url), 60_000);
     return () => window.clearTimeout(revokeTimer);
   }, [p, operadorNome, data]);
