@@ -58,11 +58,26 @@ function RelatorioOficial({ p, operadorNome }: { p: Plantao; operadorNome: strin
   return (
     <main className="report-screen min-h-screen bg-white px-3 py-5 text-slate-800 sm:px-6">
       <style>{`
-        @page { size: A4; margin: 12mm; }
+        @page { size: A4 portrait; margin: 9mm 10mm 10mm; }
         @media print {
           html, body { background: #fff !important; color-scheme: light !important; }
           body { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-          .report-screen { min-height: 0 !important; padding: 0 !important; background: #fff !important; }\n          .report-paper, .report-paper * { background: #fff !important; background-color: #fff !important; background-image: none !important; color-scheme: light !important; }\n          .report-paper { color: #111827 !important; }\n          .report-paper .report-cover { color: #111827 !important; }\n          .report-paper * { border-color: #d1d5db !important; color: inherit; }
+          .report-screen { min-height: 0 !important; padding: 0 !important; background: #fff !important; }\n          .report-paper { background: #fff !important; color: #111827 !important; color-scheme: light !important; }
+          .report-paper .report-cover { background: #fff !important; color: #111827 !important; }
+          .report-paper { box-shadow: none !important; }
+          .report-section { break-inside: auto; }
+          .report-card, .report-occurrence, .report-signature { break-inside: avoid; }
+          .report-table { width: 100% !important; font-size: 9px !important; }
+          .report-table thead { display: table-header-group; }
+          .report-table th, .report-table td { padding: 5px 6px !important; }
+          .report-kpi { padding: 8px !important; }
+          .report-kpi-value { font-size: 11px !important; margin-top: 3px !important; }
+          .report-cover { padding: 12px 16px !important; }
+          .report-cover h1 { font-size: 22px !important; margin-top: 6px !important; }
+          .report-body { padding: 14px 16px !important; gap: 16px !important; }
+          .report-section > div:first-child { padding-bottom: 6px !important; }
+          .report-section h2 { font-size: 13px !important; }
+          .report-section .space-y-3 > * + * { margin-top: 6px !important; }
           .report-toolbar { display: none !important; }
           .report-paper { max-width: none !important; margin: 0 !important; border: 0 !important; box-shadow: none !important; overflow: visible !important; }
           .report-section { break-inside: avoid; }
@@ -103,8 +118,8 @@ function RelatorioOficial({ p, operadorNome }: { p: Plantao; operadorNome: strin
           </div>
         </header>
 
-        <div className="space-y-7 px-5 py-5 sm:px-8 sm:py-7">
-          <section className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <div className="report-body space-y-7 px-5 py-5 sm:px-8 sm:py-7">
+          <section className="report-kpis grid grid-cols-2 gap-2 sm:grid-cols-4">
             <Kpi label="Data do plantão" value={fmtDia(p.data_inicio)} accent="cyan" />
             <Kpi label="Turno" value={p.turno || "—"} accent="blue" />
             <Kpi label="Equipe" value={p.equipe || "Não informada"} accent="green" />
@@ -125,15 +140,15 @@ function RelatorioOficial({ p, operadorNome }: { p: Plantao; operadorNome: strin
           </ReportSection>
 
           <ReportSection title="Composição das guarnições" eyebrow="02 · Efetivo e viaturas" count={p.guarnicoes?.length ?? 0}>
-            {p.guarnicoes?.length ? <div className="overflow-x-auto rounded-lg border border-slate-200"><table className="report-table w-full border-collapse text-left text-xs"><thead><tr>{["Viatura","Encarregado","Condutor","Auxiliar 1","Auxiliar 2"].map(x=><th key={x} className="bg-[#164e63] px-3 py-3 font-bold uppercase tracking-wide text-white">{x}</th>)}</tr></thead><tbody>{p.guarnicoes.map((g,i)=><tr key={i} className="border-b border-slate-100 even:bg-slate-50"><td className="px-3 py-3 font-bold text-slate-800">{g.viatura || "—"}</td><td className="px-3 py-3">{g.encarregado || "—"}</td><td className="px-3 py-3">{g.condutor || "—"}</td><td className="px-3 py-3">{g.aux1 || "—"}</td><td className="px-3 py-3">{g.aux2 || "—"}</td></tr>)}</tbody></table></div> : <Empty>Nenhuma guarnição informada neste plantão.</Empty>}
+            {p.guarnicoes?.length ? <div className="overflow-x-auto rounded-lg border border-slate-200 report-card"><table className="report-table w-full border-collapse text-left text-xs"><thead><tr>{["Viatura","Encarregado","Condutor","Auxiliar 1","Auxiliar 2"].map(x=><th key={x} className="bg-slate-100 px-3 py-2 font-bold uppercase tracking-wide text-[#164e63]">{x}</th>)}</tr></thead><tbody>{p.guarnicoes.map((g,i)=><tr key={i} className="border-b border-slate-100 even:bg-slate-50"><td className="px-3 py-3 font-bold text-slate-800">{g.viatura || "—"}</td><td className="px-3 py-3">{g.encarregado || "—"}</td><td className="px-3 py-3">{g.condutor || "—"}</td><td className="px-3 py-3">{g.aux1 || "—"}</td><td className="px-3 py-3">{g.aux2 || "—"}</td></tr>)}</tbody></table></div> : <Empty>Nenhuma guarnição informada neste plantão.</Empty>}
           </ReportSection>
 
           <ReportSection title="Ocorrências atendidas" eyebrow="03 · Atendimento e despacho" count={data.ocorrencias.length}>
-            {data.ocorrencias.length ? <div className="space-y-3">{data.ocorrencias.map((o,i)=><div key={o.id ?? i} className="overflow-hidden rounded-lg border border-slate-200"><div className="flex flex-wrap items-center justify-between gap-2 bg-slate-50 px-4 py-3"><div className="flex items-center gap-3"><span className="flex h-8 min-w-8 items-center justify-center rounded-md bg-[#193752] px-2 text-xs font-black text-white">#{o.protocolo || "—"}</span><span className="font-bold text-slate-800">{o.natureza || "Natureza não informada"}</span></div><span className="rounded-full border border-cyan-200 bg-cyan-50 px-3 py-1 text-[10px] font-bold uppercase tracking-wide text-cyan-800">{o.status || "Sem status"}</span></div><div className="grid grid-cols-1 gap-3 px-4 py-4 sm:grid-cols-2"><Info label="Local da ocorrência" value={endereco(o)} compact /><Info label="Prioridade" value={String(o.prioridade ?? "—")} compact />{o.relato ? <div className="sm:col-span-2"><Info label="Relato" value={o.relato} compact /></div> : null}{o.desfecho ? <div className="sm:col-span-2"><Info label="Desfecho / providências" value={o.desfecho} compact /></div> : null}</div></div>)}</div> : <Empty>Nenhuma ocorrência vinculada ao plantão.</Empty>}
+            {data.ocorrencias.length ? <div className="space-y-3">{data.ocorrencias.map((o,i)=><div key={o.id ?? i} className="report-occurrence overflow-hidden rounded-lg border border-slate-200"><div className="flex flex-wrap items-center justify-between gap-2 bg-slate-50 px-4 py-3"><div className="flex items-center gap-3"><span className="flex h-8 min-w-8 items-center justify-center rounded-md bg-slate-100 px-2 text-xs font-black text-[#193752]">#{o.protocolo || "—"}</span><span className="font-bold text-slate-800">{o.natureza || "Natureza não informada"}</span></div><span className="rounded-full border border-cyan-200 bg-cyan-50 px-3 py-1 text-[10px] font-bold uppercase tracking-wide text-cyan-800">{o.status || "Sem status"}</span></div><div className="grid grid-cols-1 gap-3 px-4 py-4 sm:grid-cols-2"><Info label="Local da ocorrência" value={endereco(o)} compact /><Info label="Prioridade" value={String(o.prioridade ?? "—")} compact />{o.relato ? <div className="sm:col-span-2"><Info label="Relato" value={o.relato} compact /></div> : null}{o.desfecho ? <div className="sm:col-span-2"><Info label="Desfecho / providências" value={o.desfecho} compact /></div> : null}</div></div>)}</div> : <Empty>Nenhuma ocorrência vinculada ao plantão.</Empty>}
           </ReportSection>
 
           <ReportSection title="Escala operacional" eyebrow="04 · Distribuição do efetivo" count={data.escalas.length}>
-            {data.escalas.length ? <div className="overflow-x-auto rounded-lg border border-slate-200"><table className="report-table w-full border-collapse text-left text-xs"><thead><tr>{["Agentes","Função","Horário","Observações"].map(x=><th key={x} className="bg-[#193752] px-3 py-3 font-bold uppercase tracking-wide text-white">{x}</th>)}</tr></thead><tbody>{data.escalas.map((e,i)=><tr key={i} className="border-b border-slate-100 even:bg-slate-50"><td className="px-3 py-3 font-semibold">{e.agentes || "—"}</td><td className="px-3 py-3">{e.funcao || "—"}</td><td className="px-3 py-3 whitespace-nowrap">{e.hora_inicio || "—"} – {e.hora_fim || "—"}</td><td className="px-3 py-3">{e.observacao || "—"}</td></tr>)}</tbody></table></div> : <Empty>Nenhuma escala operacional registrada.</Empty>}
+            {data.escalas.length ? <div className="overflow-x-auto rounded-lg border border-slate-200"><table className="report-table w-full border-collapse text-left text-xs"><thead><tr>{["Agentes","Função","Horário","Observações"].map(x=><th key={x} className="bg-slate-100 px-3 py-2 font-bold uppercase tracking-wide text-[#193752]">{x}</th>)}</tr></thead><tbody>{data.escalas.map((e,i)=><tr key={i} className="border-b border-slate-100 even:bg-slate-50"><td className="px-3 py-3 font-semibold">{e.agentes || "—"}</td><td className="px-3 py-3">{e.funcao || "—"}</td><td className="px-3 py-3 whitespace-nowrap">{e.hora_inicio || "—"} – {e.hora_fim || "—"}</td><td className="px-3 py-3">{e.observacao || "—"}</td></tr>)}</tbody></table></div> : <Empty>Nenhuma escala operacional registrada.</Empty>}
           </ReportSection>
 
           <ReportSection title="Postos e conferências" eyebrow="05 · Checklist do turno" count={p.postos?.length ?? 0}>
@@ -153,7 +168,7 @@ function RelatorioOficial({ p, operadorNome }: { p: Plantao; operadorNome: strin
             {![p.atividades,p.materiais,p.informativo,p.atividades_verso,p.observacoes].some(Boolean) ? <Empty>Nenhuma informação complementar registrada.</Empty> : null}
           </ReportSection>
 
-          <section className="report-section rounded-xl border border-slate-200 bg-slate-50 p-5 sm:p-6">
+          <section className="report-section report-signature rounded-xl border border-slate-200 bg-slate-50 p-5 sm:p-6">
             <div className="text-xs font-black uppercase tracking-[0.18em] text-[#193752]">Conferência e responsabilidade</div>
             <p className="mt-2 text-xs leading-relaxed text-slate-600">Confirmo que as informações deste documento correspondem aos registros lançados no sistema durante o plantão.</p>
             <div className="mt-12 grid grid-cols-1 gap-10 sm:grid-cols-2"><div className="border-t border-slate-400 pt-2"><div className="text-sm font-bold">{operadorNome || " "}</div><div className="mt-1 text-xs text-slate-500">Operador responsável</div></div><div className="border-t border-slate-400 pt-2"><div className="text-sm font-bold">{p.supervisor || " "}</div><div className="mt-1 text-xs text-slate-500">Supervisor do turno</div></div></div>
@@ -167,7 +182,7 @@ function RelatorioOficial({ p, operadorNome }: { p: Plantao; operadorNome: strin
 
 function Kpi({ label, value, accent }: { label: string; value: string; accent: "cyan" | "blue" | "green" | "amber" }) {
   const accents = { cyan: "border-t-cyan-500", blue: "border-t-blue-600", green: "border-t-emerald-600", amber: "border-t-amber-500" };
-  return <div className={`rounded-lg border border-slate-200 border-t-[3px] ${accents[accent]} bg-white p-3 shadow-sm sm:p-4`}><div className="text-[9px] font-bold uppercase tracking-[0.12em] text-slate-500">{label}</div><div className="mt-2 break-words text-base font-extrabold text-[#193752] sm:text-lg">{value}</div></div>;
+  return <div className={`report-kpi rounded-lg border border-slate-200 border-t-[3px] ${accents[accent]} bg-white p-3 shadow-sm sm:p-4`}><div className="text-[9px] font-bold uppercase tracking-[0.12em] text-slate-500">{label}</div><div className="report-kpi-value mt-2 break-words text-base font-extrabold text-[#193752] sm:text-lg">{value}</div></div>;
 }
 
 function ReportSection({ title, eyebrow, count, children }: { title: string; eyebrow: string; count?: number; children: React.ReactNode }) {
