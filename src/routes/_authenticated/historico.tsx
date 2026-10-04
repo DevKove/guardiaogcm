@@ -52,7 +52,7 @@ function Historico() {
 
   return (
     <div className="space-y-6">
-      <PageHeader icon={History} kicker="ARQUIVO" title="Histórico de plantões">
+      <PageHeader icon={History} asset="caderno.gif" kicker="ARQUIVO" title="Histórico de plantões">
         <div className="flex flex-wrap items-center gap-2">
           <Input aria-label="Filtrar histórico por mês (vazio mostra todos)" type="month" value={mes} onChange={(e) => setMes(e.target.value)} className="w-44" />
           <Button variant="outline" onClick={() => setMes("")} disabled={!mes}>Todos os meses</Button>
