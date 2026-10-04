@@ -801,6 +801,15 @@ header.glass {
 }
 
 
+
+/* Escala visual dos ativos gráficos do CAD: imagens e GIFs 20% maiores em todo o sistema. */
+@layer components {
+  img[src*="cad-assets/"] {
+    transform: scale(1.2);
+    transform-origin: center center;
+  }
+}
+
 /* Ativos visuais locais do repositório: não dependem de serviços externos de imagens. */
 @layer components {
   .cad-app-shell {
