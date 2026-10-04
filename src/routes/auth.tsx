@@ -48,7 +48,7 @@ function AuthPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#050a0f] text-slate-100">
+    <div className="cad-auth-shell min-h-screen text-slate-100">
       <div className="h-0.5 bg-cyan-400" />
       <header className="border-b border-cyan-400/20 bg-[#05090e] px-4 py-5">
         <div className="mx-auto max-w-5xl border-l-2 border-cyan-400/70 pl-3">
@@ -61,9 +61,15 @@ function AuthPage() {
       </header>
       <div className="flex min-h-[calc(100vh-105px)] items-center justify-center px-4 py-8">
         <form onSubmit={submit} className="w-full max-w-sm space-y-4 border border-slate-800 bg-[#070d13] p-6 shadow-none">
-          <div className="flex items-center gap-2 text-cyan-300">
-            <Shield className="h-6 w-6" />
-            <span className="text-[10px] font-semibold uppercase tracking-[0.18em]">Acesso operacional</span>
+          <div className="mb-4 flex items-center gap-3 border-b border-cyan-400/20 pb-4">
+            <img src={`${import.meta.env.BASE_URL}cad-assets/distintivo-de-policia.gif`} alt="Distintivo animado da Guarda Municipal" className="h-14 w-14 shrink-0 object-contain" />
+            <div>
+              <div className="flex items-center gap-2 text-cyan-300">
+                <Shield className="h-4 w-4" />
+                <span className="text-[10px] font-semibold uppercase tracking-[0.18em]">Acesso operacional</span>
+              </div>
+              <div className="mt-1 text-[10px] uppercase tracking-wider text-slate-500">Central de Atendimento e Despacho</div>
+            </div>
           </div>
           <h1 className="text-2xl font-bold text-white">Entrar</h1>
           <p className="text-sm text-muted-foreground">Acesso exclusivo a usuários autorizados pela administração.</p>

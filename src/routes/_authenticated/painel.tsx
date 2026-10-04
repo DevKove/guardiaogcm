@@ -114,13 +114,16 @@ function Painel() {
       <QuadroAvisos />
       <section className="card-3d animate-rise border-primary/30 p-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
+          <div className="flex min-w-0 items-center gap-3">
+            <img src={`${import.meta.env.BASE_URL}cad-assets/walkie-talkie.gif`} alt="" aria-hidden="true" className="h-12 w-12 shrink-0 object-contain" />
+            <div>
             <div className="flex items-center gap-2 text-sm font-semibold">
               {plantaoAtual ? <CheckCircle2 className="h-4 w-4 text-success" /> : <PlayCircle className="h-4 w-4 text-warning" />}
               {plantaoAtual ? "Plantão em andamento" : "Nenhum plantão aberto"}
             </div>
             <div className="mt-1 text-xs text-muted-foreground">
               {plantaoAtual ? `${plantaoAtual.turno} · iniciado em ${new Date(plantaoAtual.iniciado_em).toLocaleString("pt-BR")}` : `${atual.turno} · ${fmtDia(atual.data)} · ${atual.horario}`}
+            </div>
             </div>
           </div>
           <div>
@@ -164,7 +167,7 @@ function Painel() {
       )}
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <div className="font-mono text-xs tracking-widest text-muted-foreground">PAINEL OPERACIONAL</div>
+          <div className="flex items-center gap-2"><img src={`${import.meta.env.BASE_URL}cad-assets/alerta.png`} alt="" aria-hidden="true" className="h-7 w-7 object-contain" /><div className="font-mono text-xs tracking-widest text-muted-foreground">PAINEL OPERACIONAL</div></div>
           <h1 className="text-2xl font-bold">Ocorrências</h1>
         </div>
         <div className="flex gap-2">

@@ -114,6 +114,9 @@ function Layout() {
             className="group flex min-w-0 flex-1 basis-[280px] items-center border-l-2 border-cyan-400/70 py-1.5 pl-3 pr-2 transition-colors"
             aria-label="CAD Guarda Municipal"
           >
+            <span className="mr-3 hidden h-10 w-10 shrink-0 items-center justify-center border border-cyan-400/25 bg-cyan-400/5 sm:flex">
+              <img src={`${import.meta.env.BASE_URL}cad-assets/distintivo-de-policia.gif`} alt="" aria-hidden="true" className="h-9 w-9 object-contain" />
+            </span>
             <span className="min-w-0">
               <span className="block truncate font-sans text-lg font-black leading-none tracking-[0.08em] text-foreground sm:text-xl lg:text-2xl">
                 CAD <span className="font-semibold tracking-[0.04em] text-primary">GUARDA MUNICIPAL</span>

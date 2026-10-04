@@ -21,7 +21,8 @@ function Index() {
       <div className="stripe-top h-2" />
       <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col justify-center px-6 py-16">
         <div className="flex items-center gap-3 text-primary">
-          <Shield className="h-10 w-10" />
+          <img src={`${import.meta.env.BASE_URL}cad-assets/distintivo-de-policia.gif`} alt="" aria-hidden="true" className="h-12 w-12 object-contain" />
+          <Shield className="hidden h-10 w-10" aria-hidden="true" />
           <span className="font-mono text-sm tracking-widest">GUARDA CIVIL MUNICIPAL</span>
         </div>
         <h1 className="mt-6 text-5xl font-bold leading-tight md:text-6xl">
@@ -39,7 +40,11 @@ function Index() {
             Acessar sistema
           </Link>
         </div>
-        <div className="mt-16 grid gap-4 md:grid-cols-3">
+        <div className="mt-10 flex items-center gap-4 border-y border-cyan-400/15 py-3 text-xs text-slate-400">
+          <img src={`${import.meta.env.BASE_URL}cad-assets/walkie-talkie.gif`} alt="" aria-hidden="true" className="h-12 w-12 shrink-0 object-contain" />
+          <div><div className="font-semibold uppercase tracking-wider text-cyan-300">Comunicação operacional</div><div className="mt-1">Atendimento, despacho e acompanhamento em um só ambiente.</div></div>
+        </div>
+        <div className="mt-10 grid gap-4 md:grid-cols-3">
           {[
             { icon: FileText, t: "Registro padronizado", d: "Natureza, prioridade, local e relato." },
             { icon: Radio, t: "Tempo real", d: "Painel atualiza sozinho a cada nova ocorrência." },
