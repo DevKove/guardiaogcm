@@ -164,6 +164,46 @@ function PostoDialog({ f: init, onClose }: { f: Form | null; onClose: () => void
   const [f, setF] = useState<Form>(vazio);
   useEffect(() => { if (init) setF(init); }, [init]);
   const set = (k: keyof Form) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => setF({ ...f, [k]: e.target.value });
+  useEffect(() => {
+    let ativo = true;
+    async function verificarOutroPosto() {
+      setAvisoOutroPosto(null);
+      if (!posto || !equipeId || !data) return;
+
+      const { data: integrantes } = await supabase
+        .from("escala_integrantes")
+        .select("escala_id")
+        .eq("equipe_id", equipeId);
+
+      const ids = (integrantes ?? []).map((x) => x.escala_id).filter(Boolean);
+      if (!ids.length) return;
+
+      const { data: escalasExistentes } = await supabase
+        .from("escalas")
+        .select("posto_id")
+        .in("id", ids)
+        .eq("data", data)
+        .neq("posto_id", posto.id);
+
+      if (!ativo || !escalasExistentes?.length) return;
+
+      const outroPostoId = escalasExistentes[0].posto_id;
+      const outroPosto = outroPostoId
+        ? await supabase.from("postos_fixos").select("nome").eq("id", outroPostoId).maybeSingle()
+        : null;
+
+      if (ativo) {
+        setAvisoOutroPosto(
+          outroPosto?.data?.nome
+            ? `⚠️ AVISO: Este agente já está destinado ao posto fixo ${outroPosto.data.nome} neste dia.`
+            : "⚠️ AVISO: Este agente já está destinado a outro posto fixo neste dia.",
+        );
+      }
+    }
+    void verificarOutroPosto();
+    return () => { ativo = false; };
+  }, [posto?.id, equipeId, data]);
+
   async function salvar(e: React.FormEvent) {
     e.preventDefault();
     const { id, ...rest } = f;
@@ -216,6 +256,7 @@ function DestinarDialog({ posto, efetivo, onClose, onSaved }: {
   const [equipeId, setEquipeId] = useState("");
   const [observacao, setObservacao] = useState("");
   const [salvando, setSalvando] = useState(false);
+  const [avisoOutroPosto, setAvisoOutroPosto] = useState<string | null>(null);
 
   useEffect(() => {
     if (!posto) return;
@@ -227,6 +268,7 @@ function DestinarDialog({ posto, efetivo, onClose, onSaved }: {
     setEquipeId("");
     setObservacao("");
     setSalvando(false);
+    setAvisoOutroPosto(null);
   }, [posto?.id]);
 
   function mudarTurno(v: string) {
@@ -271,7 +313,14 @@ function DestinarDialog({ posto, efetivo, onClose, onSaved }: {
   return (
     <Dialog open={!!posto} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="max-h-[90vh] overflow-y-auto">
-        <DialogHeader><DialogTitle>Agentes em serviço — {posto?.nome ?? "Posto fixo"}</DialogTitle></DialogHeader>
+        <DialogHeader>
+          <DialogTitle>Agentes em serviço — {posto?.nome ?? "Posto fixo"}</DialogTitle>
+          {avisoOutroPosto && (
+            <div className="rounded-md border border-warning/50 bg-warning/10 px-3 py-2 text-sm font-semibold text-warning" role="alert">
+              {avisoOutroPosto}
+            </div>
+          )}
+        </DialogHeader>
         <form onSubmit={salvar} className="grid grid-cols-2 gap-3">
           <div className="col-span-2 space-y-1"><Label>Data de atuação</Label><Input type="date" required value={data} onChange={(e) => setData(e.target.value)} /></div>
           <div className="space-y-1"><Label>Turno</Label><select className={selectCls} value={turno} onChange={(e) => mudarTurno(e.target.value)}>{TURNOS.map((t) => <option key={t} value={t} className="bg-popover">{t}</option>)}</select></div>
