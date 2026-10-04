@@ -88,9 +88,9 @@ function Layout() {
   }
 
   const linkCls =
-    "inline-flex items-center gap-2 rounded-md border border-transparent px-3 py-2 text-[13px] font-medium text-muted-foreground transition-colors hover:border-border hover:bg-accent hover:text-foreground";
+    "inline-flex items-center gap-2 border border-transparent px-3 py-2 text-[12px] font-semibold uppercase tracking-wide text-muted-foreground transition-colors hover:border-cyan-400/30 hover:bg-cyan-400/5 hover:text-cyan-300";
   const activeCls =
-    "!border-primary/25 !bg-primary/10 !text-primary";
+    "!border-cyan-400/35 !bg-cyan-400/10 !text-cyan-300";
 
   const items = [
     { to: "/painel", icon: LayoutList, label: "Ocorrências" },
@@ -104,14 +104,14 @@ function Layout() {
   ] as const;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-[#050a0f] text-slate-100">
       <div className="siren-bar print:hidden" />
 
-      <header className="glass sticky top-0 z-40 border-b border-border/90 print:hidden">
+      <header className="sticky top-0 z-40 border-b border-cyan-400/20 bg-[#05090e] print:hidden">
         <div className="mx-auto flex max-w-[1600px] flex-wrap items-center gap-x-5 gap-y-3 px-3 py-3 sm:px-4 lg:px-6">
           <Link
             to="/painel"
-            className="group flex min-w-0 flex-1 basis-[280px] items-center rounded-lg py-1.5 pr-2 transition-colors"
+            className="group flex min-w-0 flex-1 basis-[280px] items-center border-l-2 border-cyan-400/70 py-1.5 pl-3 pr-2 transition-colors"
             aria-label="CAD Guarda Municipal"
           >
             <span className="min-w-0">
@@ -214,7 +214,7 @@ function Layout() {
             </button>
           </div>
 
-          <nav className="flex w-full basis-full flex-wrap items-center gap-1 border-t border-border/70 pt-2" aria-label="Navegação principal">
+          <nav className="flex w-full basis-full flex-wrap items-center gap-1 border-t border-slate-800 pt-2" aria-label="Navegação principal">
             {items.map((i) => (
               <Link
                 key={i.to}
@@ -236,7 +236,7 @@ function Layout() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-[1600px] px-4 py-6 lg:px-6 lg:py-7">
+      <main className="mx-auto max-w-[1600px] px-4 py-5 lg:px-6 lg:py-6">
         <Outlet />
       </main>
     </div>

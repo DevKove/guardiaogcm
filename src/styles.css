@@ -1,3 +1,47 @@
+/* CAD SIREN BACKGROUND */
+@keyframes cad-siren-rotate {
+  0% { transform: rotate(0deg) scale(1.08); }
+  50% { transform: rotate(180deg) scale(1.12); }
+  100% { transform: rotate(360deg) scale(1.08); }
+}
+@keyframes cad-siren-pulse {
+  0%, 100% { opacity: 0.035; }
+  50% { opacity: 0.075; }
+}
+@layer components {
+  body { position: relative; isolation: isolate; overflow-x: hidden; }
+  body::before {
+    content: "";
+    position: fixed;
+    inset: -35%;
+    z-index: -2;
+    pointer-events: none;
+    background: conic-gradient(from 0deg at 50% 50%, transparent 0deg, rgba(255,35,35,.42) 38deg, transparent 78deg, transparent 150deg, rgba(35,105,255,.48) 188deg, transparent 228deg, transparent 300deg, rgba(255,255,255,.20) 322deg, transparent 350deg);
+    filter: blur(58px);
+    opacity: .055;
+    animation: cad-siren-rotate 14s linear infinite;
+    transform-origin: center;
+    will-change: transform;
+  }
+  body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background:
+      radial-gradient(ellipse 42% 34% at 14% 52%, rgba(255,30,30,.10), transparent 72%),
+      radial-gradient(ellipse 42% 34% at 86% 52%, rgba(35,105,255,.11), transparent 72%),
+      radial-gradient(ellipse 24% 20% at 50% 50%, rgba(255,255,255,.035), transparent 75%);
+    opacity: .55;
+    animation: cad-siren-pulse 4.5s ease-in-out infinite;
+  }
+  #root { position: relative; z-index: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  body::before, body::after { animation: none !important; }
+}
+
 @import "tailwindcss" source(none);
 @source "../src";
 @import "tw-animate-css";
@@ -485,4 +529,232 @@ header.glass {
   ::-webkit-scrollbar-thumb:hover {
     background: #2c4858;
   }
+}
+
+
+/* Design System global baseado na referência visual de /postos. */
+@layer components {
+  .cad-section {
+    border: 1px solid #1c2b36;
+    background: #070d13;
+  }
+
+  .cad-page {
+    min-height: 100%;
+    background: #050a0f;
+  }
+
+  .card-3d {
+    border-radius: 0;
+    border-color: #1c2b36;
+    background: #070d13;
+    box-shadow: none;
+  }
+
+  .card-3d:hover {
+    border-color: rgba(54,185,239,.45);
+    background: #091119;
+    box-shadow: none;
+  }
+
+  .icon-chip {
+    border-radius: 0;
+    border-color: rgba(54,185,239,.25);
+    background: rgba(54,185,239,.05);
+  }
+
+  table {
+    background: #070d13;
+  }
+
+  thead {
+    background: #081019;
+  }
+
+  input,
+  textarea,
+  select {
+    border-radius: 0.2rem;
+  }
+
+  [role="dialog"] {
+    border-radius: 0;
+  }
+
+  .cad-nav-link {
+    border-radius: 0;
+  }
+}
+
+@media (max-width: 640px) {
+  .cad-page {
+    width: 100%;
+    overflow-x: hidden;
+  }
+}
+
+
+/* ==========================================================================
+   Layout global — referência visual oficial: /postos
+   Todas as telas autenticadas devem compartilhar esta mesma linguagem.
+   ========================================================================== */
+@layer components {
+  body {
+    background: #050a0f;
+  }
+
+  main {
+    background: #050a0f;
+  }
+
+  /* Superfícies de conteúdo: sem o aspecto "dashboard genérico" arredondado. */
+  main .rounded-lg,
+  main .rounded-md,
+  main .rounded-xl {
+    border-radius: 0 !important;
+  }
+
+  /* Cards, painéis, tabelas e blocos operacionais. */
+  main .border {
+    border-color: #1c2b36;
+  }
+
+  main section.border,
+  main article.border,
+  main [class*="card-3d"] {
+    background: #070d13;
+  }
+
+  /* Cabeçalhos de seção no padrão da página Postos. */
+  main section > h2,
+  main section > div > h2 {
+    color: #fff;
+  }
+
+  /* Controles de formulário no mesmo acabamento quadrado. */
+  main input,
+  main textarea,
+  main select {
+    border-radius: 0.2rem !important;
+    background: #050a0f;
+    border-color: #213440;
+  }
+
+  main input:focus,
+  main textarea:focus,
+  main select:focus {
+    border-color: rgba(54,185,239,.55);
+  }
+
+  /* Botões principais seguem o tratamento operacional da /postos. */
+  main button:not([aria-label="Sair"]) {
+    border-radius: 0.2rem;
+  }
+
+  /* Evita sombras 3D e gradientes que destoam da referência. */
+  main .shadow,
+  main .shadow-sm,
+  main .shadow-md,
+  main .shadow-lg,
+  main .shadow-xl,
+  main .shadow-2xl {
+    box-shadow: none !important;
+  }
+
+  /* Badges operacionais retangulares, como na /postos. */
+  main [class*="border"][class*="bg-emerald"],
+  main [class*="border"][class*="bg-cyan"],
+  main [class*="border"][class*="bg-amber"] {
+    box-shadow: none;
+  }
+
+  /* Separadores e áreas de ferramentas. */
+  main .border-b,
+  main .border-t {
+    border-color: #1c2b36;
+  }
+
+  /* Diálogos e menus. */
+  [role="dialog"] {
+    border-radius: 0 !important;
+    background: #070d13 !important;
+    border-color: #223744 !important;
+  }
+}
+
+@media (max-width: 768px) {
+  main {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+}
+
+
+/* POLICE CAD BACKGROUND */
+@keyframes cad-police-light-left {
+  0%, 100% { opacity: .10; transform: translateX(-4%) scale(1); }
+  50% { opacity: .34; transform: translateX(5%) scale(1.08); }
+}
+@keyframes cad-police-light-right {
+  0%, 100% { opacity: .34; transform: translateX(4%) scale(1.08); }
+  50% { opacity: .10; transform: translateX(-5%) scale(1); }
+}
+@layer components {
+  body {
+    background-color: #050a0f !important;
+    background-image:
+      linear-gradient(rgba(5,10,15,.72), rgba(5,10,15,.78)),
+      url("https://images.unsplash.com/photo-1608095476825-d4e0f916372f?auto=format&fit=crop&fm=jpg&q=90&w=1920") !important;
+    background-size: cover !important;
+    background-position: center !important;
+    background-attachment: fixed !important;
+    background-repeat: no-repeat !important;
+  }
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(ellipse 46% 80% at -5% 50%, rgba(235,20,35,.30), transparent 68%),
+      radial-gradient(ellipse 46% 80% at 105% 50%, rgba(20,95,255,.34), transparent 68%),
+      linear-gradient(90deg, transparent 0%, rgba(255,255,255,.025) 50%, transparent 100%);
+    animation: cad-police-light-left 5.5s ease-in-out infinite;
+    mix-blend-mode: screen;
+  }
+  body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(ellipse 46% 80% at 105% 50%, rgba(20,95,255,.30), transparent 68%),
+      radial-gradient(ellipse 46% 80% at -5% 50%, rgba(235,20,35,.25), transparent 68%);
+    animation: cad-police-light-right 5.5s ease-in-out infinite;
+    mix-blend-mode: screen;
+  }
+  #root {
+    position: relative;
+    z-index: 1;
+    min-height: 100vh;
+    background: transparent !important;
+  }
+  main,
+  main .cad-page {
+    background: rgba(5,10,15,.64) !important;
+  }
+  main section.border,
+  main article.border,
+  main [class*="card-3d"] {
+    background: rgba(7,13,19,.88) !important;
+  }
+  header.glass {
+    background: rgba(3,8,13,.88) !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body::before { animation: none !important; }
 }
