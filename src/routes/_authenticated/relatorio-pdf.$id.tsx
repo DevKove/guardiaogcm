@@ -302,7 +302,7 @@ function gerarPdfPlantao(p: Plantao, operadorNome: string, data: DadosRelatorioP
     ], { header: true, height: 24 });
     p.guarnicoes.forEach((g) => tableRow([
       { value: g.viatura }, { value: g.encarregado }, { value: g.condutor }, { value: g.aux1 }, { value: g.aux2 },
-    ].map((c, i) => ({ ...c, width: widths[i] })));
+    ].map((c, i) => ({ ...c, width: widths[i] }))));
   } else empty("Nenhuma guarnição foi informada para este plantão.");
 
   section("Ocorrências atendidas", String(data.ocorrencias.length) + " registro(s)");
