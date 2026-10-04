@@ -135,7 +135,7 @@ function Postos() {
               {me?.isSupervisor && (
                 <div className="mt-3 flex flex-wrap gap-1 border-t pt-3">
                   <Button size="sm" variant="outline" onClick={() => setDestinar({ id: p.id, nome: p.nome })} disabled={!p.ativo}>
-                    <CalendarClock className="h-3.5 w-3.5" /> Definir agentes do posto
+                    <CalendarClock className="h-3.5 w-3.5" /> Adicionar agente ao plantão
                   </Button>
                   <Button size="sm" variant="ghost" onClick={() => setEdit({ id: p.id, nome: p.nome, tipo: p.tipo, endereco: p.endereco ?? "", bairro: p.bairro ?? "", telefone: p.telefone ?? "", responsavel: p.responsavel ?? "", horario: p.horario ?? "", observacao: p.observacao ?? "" })}>
                     <Pencil className="h-3.5 w-3.5" /> Editar
@@ -210,7 +210,7 @@ function DestinarDialog({ posto, efetivo, onClose, onSaved }: {
   const [horaInicio, setHoraInicio] = useState("07:00");
   const [horaFim, setHoraFim] = useState("19:00");
   const [funcao, setFuncao] = useState("Posto fixo");
-  const [equipeIds, setEquipeIds] = useState<string[]>([]);
+  const [equipeId, setEquipeId] = useState("");
   const [observacao, setObservacao] = useState("");
   const [salvando, setSalvando] = useState(false);
 
@@ -221,7 +221,7 @@ function DestinarDialog({ posto, efetivo, onClose, onSaved }: {
     setHoraInicio("07:00");
     setHoraFim("19:00");
     setFuncao("Posto fixo");
-    setEquipeIds([]);
+    setEquipeId("");
     setObservacao("");
     setSalvando(false);
   }, [posto?.id]);
@@ -237,12 +237,13 @@ function DestinarDialog({ posto, efetivo, onClose, onSaved }: {
   async function salvar(e: React.FormEvent) {
     e.preventDefault();
     if (!posto) return;
-    if (equipeIds.length === 0) return void toast.error("Marque ao menos um agente para este posto.");
+    if (!equipeId) return void toast.error("Selecione um agente para este plantão.");
     setSalvando(true);
-    const membros = efetivo.filter((m) => equipeIds.includes(m.id));
+    const membro = efetivo.find((m) => m.id === equipeId);
+    if (!membro) { setSalvando(false); return void toast.error("Agente selecionado não encontrado. Atualize a lista e tente novamente."); }
     const { data: escala, error } = await supabase.from("escalas").insert({
       data, turno, hora_inicio: horaInicio, hora_fim: horaFim,
-      agentes: membros.map((m) => m.nome).join(", "),
+      agentes: membro.nome,
       funcao, posto_id: posto.id, viatura_id: null,
       observacao: observacao.trim() || null,
     } as never).select("id").single();
@@ -251,14 +252,14 @@ function DestinarDialog({ posto, efetivo, onClose, onSaved }: {
       return void toast.error(error?.message ?? "Não foi possível registrar os agentes deste posto.");
     }
     const { error: integrantesError } = await supabase.from("escala_integrantes").insert(
-      equipeIds.map((equipe_id) => ({ escala_id: escala.id, equipe_id })),
+      [{ escala_id: escala.id, equipe_id: equipeId }],
     );
     if (integrantesError) {
       await supabase.from("escalas").delete().eq("id", escala.id);
       setSalvando(false);
       return void toast.error("Não foi possível registrar os agentes: " + integrantesError.message);
     }
-    toast.success(`Equipe do posto ${posto.nome} atualizada.`);
+    toast.success(`${membro.nome} adicionado ao plantão de ${posto.nome}.`);
     setSalvando(false);
     onClose();
     onSaved();
@@ -275,21 +276,21 @@ function DestinarDialog({ posto, efetivo, onClose, onSaved }: {
           <div className="space-y-1"><Label>Início</Label><Input type="time" required value={horaInicio} onChange={(e) => setHoraInicio(e.target.value)} /></div>
           <div className="space-y-1"><Label>Fim</Label><Input type="time" required value={horaFim} onChange={(e) => setHoraFim(e.target.value)} /></div>
           <div className="col-span-2 space-y-2">
-            <Label>Selecione os agentes *</Label>
+            <Label>Selecione o agente para este plantão *</Label>
             {efetivo.length === 0 ? <p className="rounded-md border p-3 text-sm text-destructive">Nenhum integrante ativo cadastrado. Cadastre os agentes no menu Equipe antes de fazer a destinação.</p> : (
               <div className="max-h-56 space-y-2 overflow-y-auto rounded-md border p-3">
                 {efetivo.map((m) => (
                   <label key={m.id} className="flex cursor-pointer items-center gap-3 rounded-md p-2 hover:bg-muted/60">
-                    <input type="checkbox" className="h-4 w-4 accent-primary" checked={equipeIds.includes(m.id)} onChange={(e) => setEquipeIds((old) => e.target.checked ? [...old, m.id] : old.filter((id) => id !== m.id))} />
+                    <input type="radio" name="agente-plantao" className="h-4 w-4 accent-primary" checked={equipeId === m.id} onChange={() => setEquipeId(m.id)} />
                     <span className="min-w-0 flex-1 text-sm font-medium">{m.nome}<span className="block text-xs text-muted-foreground">{m.tipo}{m.matricula ? ` · Matrícula ${m.matricula}` : ""} · {m.funcao}</span></span>
                   </label>
                 ))}
               </div>
             )}
-            <p className="text-xs text-muted-foreground">Marque cada agente pelo quadrado ao lado do nome. Apenas integrantes ativos aparecem aqui.</p>
+            <p className="text-xs text-muted-foreground">Selecione um agente por vez. Para adicionar outro integrante ao mesmo plantão, use novamente este botão. Apenas integrantes ativos aparecem aqui.</p>
           </div>
           <div className="col-span-2 space-y-1"><Label>Observações</Label><Textarea rows={2} value={observacao} onChange={(e) => setObservacao(e.target.value)} /></div>
-          <Button type="submit" className="col-span-2" disabled={salvando || !efetivo.length}>{salvando ? "Salvando destinação..." : "Confirmar destinação"}</Button>
+          <Button type="submit" className="col-span-2" disabled={salvando || !efetivo.length || !equipeId}>{salvando ? "Adicionando agente..." : "Adicionar agente ao plantão"}</Button>
         </form>
       </DialogContent>
     </Dialog>
