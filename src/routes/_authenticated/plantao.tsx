@@ -21,7 +21,7 @@ export const Route = createFileRoute("/_authenticated/plantao")({
 function PlantaoControle() {
   const { data: me } = useMe();
   const [historico] = useState(() => new URLSearchParams(window.location.search).get("historico") ?? "");
-  const [modoHistorico] = useState(() => new URLSearchParams(window.location.search).get("modo") ?? "");
+  const modoSomenteLeitura = Boolean(historico) && new URLSearchParams(window.location.search).get("modo") === "visualizar";
   const navigate = useNavigate();
   const qc = useQueryClient();
   const [saving, setSaving] = useState(false);
@@ -79,7 +79,7 @@ function PlantaoControle() {
       </div>
     );
     const p = plantaoHistorico.plantao;
-    const editavel = Boolean(me.isAdmin && modoHistorico !== "visualizar");
+    const editavel = Boolean(me.isAdmin && !modoSomenteLeitura);
     return (
       <div className="space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3 print:hidden">
@@ -92,7 +92,7 @@ function PlantaoControle() {
         </div>
         {!me.isAdmin && <div className="rounded border border-warning/50 p-3 text-sm text-warning print:hidden"><LockKeyhole className="mr-2 inline h-4 w-4" />Plantão finalizado. Somente o administrador pode editar este registro.</div>}
         {me.isAdmin && editavel && <div className="rounded border border-primary/30 bg-primary/5 p-3 text-sm print:hidden">Modo administrador: este plantão foi carregado diretamente do histórico e pode ser revisado e salvo.</div>}
-        {me.isAdmin && !editavel && <div className="rounded border border-primary/30 bg-primary/5 p-3 text-sm print:hidden">Modo visualização: este relatório está somente para consulta. Para alterar, volte ao histórico e selecione “Editar”.</div>}
+        {me.isAdmin && !editavel && <div className="rounded border border-primary/30 bg-primary/5 p-3 text-sm print:hidden">Modo visualização: este relatório está SOMENTE PARA CONSULTA. Os campos e lançamentos estão bloqueados. Para alterar, volte ao histórico e selecione “Editar”.</div>}
         <FichaPlantao plantao={p} editavel={editavel} operadorNome={plantaoHistorico.operadorNome} />
       </div>
     );
