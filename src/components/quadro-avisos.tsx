@@ -42,7 +42,7 @@ export function QuadroAvisos() {
   return (
     <div className="card-3d animate-rise p-4">
       <div className="mb-2 flex items-center justify-between">
-        <h2 className="flex items-center gap-2 font-mono text-xs tracking-widest text-primary"><img src={`${import.meta.env.BASE_URL}cad-assets/alerta.gif`} alt="" aria-hidden="true" className="h-7 w-7 object-contain" /> QUADRO DE AVISOS DO PLANTÃO</h2>
+        <h2 className="flex items-center gap-2 font-mono text-xs tracking-widest text-primary"><img src={`${import.meta.env.BASE_URL}cad-assets/alerta.png`} alt="" aria-hidden="true" className="h-7 w-7 object-contain" /> QUADRO DE AVISOS DO PLANTÃO</h2>
         {me?.isSupervisor && <Button size="sm" variant="ghost" onClick={() => setNovo(!novo)}><Plus className="h-3.5 w-3.5" /> Aviso</Button>}
       </div>
       {novo && (
