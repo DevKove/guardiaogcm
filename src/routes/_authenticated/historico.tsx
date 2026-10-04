@@ -83,7 +83,7 @@ function Historico() {
                 <div className="flex shrink-0 flex-col gap-1">
                   <Button asChild size="sm" variant="outline">
                     <a
-                      href={`/guardiaogcm/relatorio-pdf/${encodeURIComponent(p.id)}`}
+                      href={`/guardiaogcm/relatorio-pdf/${encodeURIComponent(p.id)}?layout=20261004-v2`}
                       target="_blank"
                       rel="noopener noreferrer"
                       aria-label={`Visualizar PDF do plantão ${p.turno} em nova guia`}
