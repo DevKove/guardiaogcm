@@ -1,11 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { AlertCircle, ArrowLeft, Lock, Printer, RefreshCw } from "lucide-react";
+import { AlertCircle, ArrowLeft, RefreshCw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { useMe } from "@/hooks/use-me";
-import { FichaPlantao } from "@/components/ficha-plantao";
 import { carregarAtividades, fmtDia, type Plantao } from "@/lib/plantao";
 
 export const Route = createFileRoute("/_authenticated/relatorio-pdf/$id")({
@@ -50,31 +49,6 @@ function VerPlantao() {
 
   const { p, nome } = data;
   return <RelatorioPdfPlantao p={p} operadorNome={nome} />;
-
-  const editavel = me.isAdmin || (p.status === "aberto" && p.operador_id === me.id);
-
-  return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-3 print:hidden">
-        <div>
-          <Link to="/historico" className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary"><ArrowLeft className="h-3 w-3" /> Histórico</Link>
-          <h1 className="text-gradient text-2xl">Plantão {p.turno} · {fmtDia(p.data_inicio)}</h1>
-          <div className="text-xs text-muted-foreground">Operador: {nome} · {p.status === "aberto" ? "em andamento" : "encerrado"}</div>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={() => window.print()}><Printer className="h-4 w-4" /> Imprimir relatório</Button>
-        </div>
-      </div>
-      {p.status !== "aberto" && !me.isAdmin && (
-        <div className="flex items-center gap-2 rounded border border-warning/50 p-3 text-sm text-warning print:hidden"><Lock className="h-4 w-4" /> Plantão encerrado — somente o administrador pode alterar.</div>
-      )}
-      {p.status !== "aberto" && me.isAdmin && (
-        <div className="rounded border border-primary/30 bg-primary/5 p-3 text-sm print:hidden">Modo administrador: você pode revisar e editar este plantão finalizado. Clique em <strong>Salvar relatório</strong> para registrar as alterações.</div>
-      )}
-      <FichaPlantao plantao={p} editavel={editavel} operadorNome={nome} />
-    </div>
-  );
-}
 
 
 function RelatorioPdfPlantao({ p, operadorNome }: { p: Plantao; operadorNome: string }) {
