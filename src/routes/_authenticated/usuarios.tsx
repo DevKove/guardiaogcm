@@ -43,7 +43,7 @@ function Usuarios() {
 
   return (
     <div className="space-y-6">
-      <PageHeader icon={Users} kicker="ADMINISTRAÇÃO" title="Usuários e perfis">
+      <PageHeader icon={Users} asset="escaneamento-de-rosto.gif" kicker="ADMINISTRAÇÃO" title="Usuários e perfis">
         <Button onClick={() => setEdit({ ...vazio })}><img src={`${import.meta.env.BASE_URL}cad-assets/adicionar.gif`} alt="" aria-hidden="true" className="h-5 w-5 object-contain" /> Novo usuário</Button>
       </PageHeader>
 
