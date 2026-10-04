@@ -270,24 +270,35 @@ function DestinarDialog({ posto, efetivo, onClose, onSaved }: {
       setAvisoOutroPosto(null);
       if (!posto || !equipeId || !data) return;
 
+      // Primeiro busca todas as escalas do dia em outros postos.
+      // Depois verifica quais delas pertencem ao agente selecionado.
+      // Isso evita depender de uma consulta .in() com IDs de escala.
+      const { data: escalasDoDia, error: escalasError } = await supabase
+        .from("escalas")
+        .select("id, posto_id")
+        .eq("data", data)
+        .neq("posto_id", posto.id);
+
+      if (escalasError || !escalasDoDia?.length) return;
+
+      const idsEscalas = escalasDoDia.map((escala) => escala.id);
+
       const { data: integrantes, error: integrantesError } = await supabase
         .from("escala_integrantes")
         .select("escala_id")
-        .eq("equipe_id", equipeId);
+        .eq("equipe_id", equipeId)
+        .in("escala_id", idsEscalas);
 
       if (integrantesError || !integrantes?.length) return;
 
-      const escalaIds = integrantes.map((item) => item.escala_id);
-      const { data: escalas, error: escalasError } = await supabase
-        .from("escalas")
-        .select("posto_id")
-        .eq("data", data)
-        .in("id", escalaIds)
-        .neq("posto_id", posto.id);
+      const escalasDoAgente = escalasDoDia.filter((escala) =>
+        integrantes.some((integrante) => integrante.escala_id === escala.id),
+      );
 
-      if (escalasError || !escalas?.length) return;
+      const postoIds = [...new Set(
+        escalasDoAgente.map((escala) => escala.posto_id).filter(Boolean),
+      )] as string[];
 
-      const postoIds = [...new Set(escalas.map((item) => item.posto_id).filter(Boolean))] as string[];
       if (!postoIds.length) return;
 
       const { data: postos, error: postosError } = await supabase
@@ -306,6 +317,7 @@ function DestinarDialog({ posto, efetivo, onClose, onSaved }: {
     }
 
     void verificarOutroPosto();
+
     return () => {
       ativo = false;
     };
