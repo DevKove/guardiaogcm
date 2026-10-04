@@ -74,20 +74,20 @@ function RelatorioOficial({ p, operadorNome }: { p: Plantao; operadorNome: strin
       `}</style>
       <div className="report-toolbar mx-auto mb-4 flex max-w-[900px] flex-wrap items-center justify-between gap-3">
         <Button asChild variant="outline" className="border-slate-300 bg-white text-slate-700 hover:bg-slate-50"><Link to="/historico"><ArrowLeft className="mr-2 h-4 w-4" /> Voltar ao histórico</Link></Button>
-        <div className="flex items-center gap-2"><span className="hidden text-xs text-slate-500 sm:inline">Para gerar o PDF, selecione “Salvar como PDF” na impressão.</span><Button onClick={imprimir} className="bg-cyan-700 text-white shadow-md hover:bg-cyan-800"><Printer className="mr-2 h-4 w-4" /> Imprimir / Salvar PDF</Button></div>
+        <div className="flex items-center gap-2"><span className="hidden text-xs text-slate-500 sm:inline">Para gerar o PDF, selecione “Salvar como PDF” na impressão.</span><Button onClick={imprimir} className="bg-cyan-700 bg-cyan-700 text-white shadow-md hover:bg-cyan-800"><Printer className="mr-2 h-4 w-4" /> Imprimir / Salvar PDF</Button></div>
       </div>
 
       <article className="report-paper mx-auto max-w-[900px] overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl">
-        <header className="report-cover relative overflow-hidden bg-[#10243a] px-7 py-9 text-white sm:px-10 sm:py-11">
-          <div className="absolute inset-y-0 left-0 w-2 bg-[#16b8c8]" />
-          <div className="absolute -right-12 -top-16 h-64 w-64 rounded-full border-[28px] border-white/5" />
-          <div className="absolute -right-2 top-5 h-40 w-40 rounded-full border border-cyan-300/20" />
+        <header className="report-cover relative overflow-hidden bg-gradient-to-r from-slate-50 via-white to-cyan-50 px-7 py-9 text-slate-900 sm:px-10 sm:py-11">
+          <div className="absolute inset-y-0 left-0 w-2 bg-cyan-600" />
+          <div className="absolute -right-12 -top-16 h-64 w-64 rounded-full border-[28px] border-cyan-900/5" />
+          <div className="absolute -right-2 top-5 h-40 w-40 rounded-full border border-cyan-700/10" />
           <div className="relative flex flex-wrap items-start justify-between gap-5">
             <div className="flex items-start gap-4">
-              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl border border-cyan-200/30 bg-white/10"><ShieldCheck className="h-8 w-8 text-cyan-200" /></div>
+              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white/80"><ShieldCheck className="h-8 w-8 text-cyan-700" /></div>
               <div>
                 <div className="text-[11px] font-bold uppercase tracking-[0.24em] text-cyan-200">Guarda Civil Municipal</div>
-                <div className="mt-1 text-xs font-medium tracking-[0.16em] text-slate-300">ARAÇOIABA DA SERRA · SP</div>
+                <div className="mt-1 text-xs font-medium tracking-[0.16em] text-slate-600">ARAÇOIABA DA SERRA · SP</div>
                 <h1 className="mt-6 text-3xl font-black leading-tight tracking-tight sm:text-4xl">Relatório de<br className="hidden sm:block" /> Plantão</h1>
                 <p className="mt-3 max-w-md text-sm text-slate-300">Central de Atendimento e Despacho · Registro operacional oficial</p>
               </div>
@@ -98,7 +98,7 @@ function RelatorioOficial({ p, operadorNome }: { p: Plantao; operadorNome: strin
               <div className="mt-1 text-xs text-slate-300">{fmtDia(p.data_inicio)} · {p.turno || "Turno não informado"}</div>
             </div>
           </div>
-          <div className="relative mt-8 flex flex-wrap items-center justify-between gap-3 border-t border-white/15 pt-4 text-[10px] text-slate-300">
+          <div className="relative mt-8 flex flex-wrap items-center justify-between gap-3 border-t border-slate-200 pt-4 text-[10px] text-slate-300">
             <span>DOCUMENTO OPERACIONAL · USO INSTITUCIONAL</span><span>Referência: {String(p.id).slice(0, 12).toUpperCase()}</span>
           </div>
         </header>
@@ -125,7 +125,7 @@ function RelatorioOficial({ p, operadorNome }: { p: Plantao; operadorNome: strin
           </ReportSection>
 
           <ReportSection title="Composição das guarnições" eyebrow="02 · Efetivo e viaturas" count={p.guarnicoes?.length ?? 0}>
-            {p.guarnicoes?.length ? <div className="overflow-x-auto rounded-lg border border-slate-200"><table className="report-table w-full border-collapse text-left text-xs"><thead><tr>{["Viatura","Encarregado","Condutor","Auxiliar 1","Auxiliar 2"].map(x=><th key={x} className="bg-[#193752] px-3 py-3 font-bold uppercase tracking-wide text-white">{x}</th>)}</tr></thead><tbody>{p.guarnicoes.map((g,i)=><tr key={i} className="border-b border-slate-100 even:bg-slate-50"><td className="px-3 py-3 font-bold text-slate-800">{g.viatura || "—"}</td><td className="px-3 py-3">{g.encarregado || "—"}</td><td className="px-3 py-3">{g.condutor || "—"}</td><td className="px-3 py-3">{g.aux1 || "—"}</td><td className="px-3 py-3">{g.aux2 || "—"}</td></tr>)}</tbody></table></div> : <Empty>Nenhuma guarnição informada neste plantão.</Empty>}
+            {p.guarnicoes?.length ? <div className="overflow-x-auto rounded-lg border border-slate-200"><table className="report-table w-full border-collapse text-left text-xs"><thead><tr>{["Viatura","Encarregado","Condutor","Auxiliar 1","Auxiliar 2"].map(x=><th key={x} className="bg-[#164e63] px-3 py-3 font-bold uppercase tracking-wide text-white">{x}</th>)}</tr></thead><tbody>{p.guarnicoes.map((g,i)=><tr key={i} className="border-b border-slate-100 even:bg-slate-50"><td className="px-3 py-3 font-bold text-slate-800">{g.viatura || "—"}</td><td className="px-3 py-3">{g.encarregado || "—"}</td><td className="px-3 py-3">{g.condutor || "—"}</td><td className="px-3 py-3">{g.aux1 || "—"}</td><td className="px-3 py-3">{g.aux2 || "—"}</td></tr>)}</tbody></table></div> : <Empty>Nenhuma guarnição informada neste plantão.</Empty>}
           </ReportSection>
 
           <ReportSection title="Ocorrências atendidas" eyebrow="03 · Atendimento e despacho" count={data.ocorrencias.length}>
@@ -141,7 +141,7 @@ function RelatorioOficial({ p, operadorNome }: { p: Plantao; operadorNome: strin
           </ReportSection>
 
           <ReportSection title="Registros operacionais" eyebrow="06 · Livro de serviço" count={data.registros.length}>
-            {data.registros.length ? <div className="space-y-3">{data.registros.map((r,i)=><div key={r.id ?? i} className="border-l-[3px] border-cyan-600 bg-slate-50 px-4 py-3"><div className="flex flex-wrap justify-between gap-2 text-[10px] font-bold uppercase tracking-wide text-slate-500"><span>{dataHora(r.hora)}</span><span className="text-[#193752]">{data.usuarios[r.criado_por] || "Operador"}</span></div><p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-slate-700">{r.texto}</p></div>)}</div> : <Empty>Nenhum registro operacional lançado.</Empty>}
+            {data.registros.length ? <div className="space-y-3">{data.registros.map((r,i)=><div key={r.id ?? i} className="border-l-[3px] border-cyan-600 bg-slate-50 px-4 py-3"><div className="flex flex-wrap justify-between gap-2 text-[10px] font-bold uppercase tracking-wide text-slate-500"><span>{dataHora(r.hora)}</span><span className="text-[#164e63]">{data.usuarios[r.criado_por] || "Operador"}</span></div><p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-slate-700">{r.texto}</p></div>)}</div> : <Empty>Nenhum registro operacional lançado.</Empty>}
           </ReportSection>
 
           <ReportSection title="Histórico de ações" eyebrow="07 · Rastreabilidade" count={data.acoes.length}>
