@@ -15,6 +15,14 @@ export const Route = createFileRoute("/_authenticated/plantao/$id")({
 
 function VerPlantao() {
   const { id } = Route.useParams();
+  // URLs antigas de visualização ainda chegavam ao gerador legado, de layout textual.
+  // Redireciona essas URLs para o gerador visual único usado pelo Histórico.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("modo") === "visualizar" && params.get("pdf") === "1") {
+      window.location.replace(`/guardiaogcm/relatorio-pdf/${encodeURIComponent(id)}?layout=20261004-v3`);
+    }
+  }, [id]);
   const { data: me, isLoading: carregandoPerfil } = useMe();
   const { data, isLoading, isError, error, refetch } = useQuery({
     queryKey: ["plantao", id],
@@ -54,7 +62,7 @@ function VerPlantao() {
   const pdf = params.get("pdf") === "1";
 
   if (modoVisualizar && pdf) {
-    return <RelatorioPdfPlantao p={p} operadorNome={nome} />;
+    return <div className="flex min-h-screen items-center justify-center bg-slate-950 text-white"><div className="text-center"><div className="text-lg font-semibold">Abrindo o relatório atualizado…</div><div className="mt-2 text-sm text-slate-400">Redirecionando para o gerador visual oficial.</div></div></div>;
   }
 
   const editavel = me.isAdmin || (p.status === "aberto" && p.operador_id === me.id);
