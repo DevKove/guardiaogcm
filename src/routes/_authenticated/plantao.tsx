@@ -198,7 +198,9 @@ function PlantaoControle() {
             </div>
           </div>
           {plantao.operador_id !== me.id && (
-            <div className="flex items-center gap-2 rounded-lg border border-warning/40 bg-warning/5 p-3 text-sm text-warning"><LockKeyhole className="h-4 w-4" /> Este plantão foi iniciado por outro usuário. Você pode consultar o andamento, mas o encerramento pertence ao operador que o iniciou.</div>
+            <div className={`flex items-center gap-2 rounded-lg border p-3 text-sm ${me.isAdmin ? "border-primary/30 bg-primary/5 text-primary" : "border-warning/40 bg-warning/5 text-warning"}`}>
+              <LockKeyhole className="h-4 w-4" /> {me.isAdmin ? "Acesso administrativo: você pode acompanhar este plantão em tempo real e encerrá-lo a qualquer momento." : "Este plantão foi iniciado por outro usuário. Você pode consultar o andamento, mas o encerramento pertence ao operador que o iniciou."}
+            </div>
           )}
         </section>
         </>
