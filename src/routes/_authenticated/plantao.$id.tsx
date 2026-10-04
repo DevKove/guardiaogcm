@@ -88,65 +88,47 @@ function RelatorioPdfPlantao({ p, operadorNome }: { p: Plantao; operadorNome: st
     queryKey: ["plantao", "pdf", p.id],
     queryFn: () => carregarAtividades(p),
   });
-  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
 
   useEffect(() => {
     if (!data) return;
+
     const blob = gerarPdfPlantao(p, operadorNome, data);
     const url = URL.createObjectURL(blob);
-    setPdfUrl(url);
+
+    // O modo "Visualizar" deve sair da aplicação e entregar o arquivo
+    // diretamente ao visualizador nativo de PDF do navegador.
+    window.location.replace(url);
+
     return () => URL.revokeObjectURL(url);
   }, [p, operadorNome, data]);
 
   if (isLoading) {
-    return <div className="mx-auto max-w-4xl p-8 text-sm text-muted-foreground">Gerando PDF do plantão...</div>;
-  }
-
-  if (isError || !data) {
     return (
-      <div className="mx-auto max-w-4xl space-y-3 p-8">
-        <div className="font-semibold text-destructive">Não foi possível gerar o PDF.</div>
-        <div className="text-sm text-muted-foreground">
-          {error instanceof Error ? error.message : "Erro ao consolidar os dados do plantão."}
+      <div className="flex min-h-screen items-center justify-center bg-slate-950 text-white">
+        <div className="text-center">
+          <div className="text-sm font-semibold">Gerando PDF do plantão...</div>
+          <div className="mt-1 text-xs text-slate-400">O arquivo será aberto no visualizador PDF do navegador.</div>
         </div>
       </div>
     );
   }
 
-  if (!pdfUrl) {
-    return <div className="mx-auto max-w-4xl p-8 text-sm text-muted-foreground">Preparando visualização PDF...</div>;
+  if (isError || !data) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-slate-950 p-6 text-white">
+        <div className="max-w-lg rounded-lg border border-red-400/30 bg-slate-900 p-6">
+          <div className="font-semibold text-red-300">Não foi possível gerar o PDF.</div>
+          <div className="mt-2 text-sm text-slate-400">
+            {error instanceof Error ? error.message : "Erro ao consolidar os dados do plantão."}
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex min-h-screen flex-col bg-slate-950">
-      <div className="flex shrink-0 items-center justify-between gap-3 border-b border-white/10 bg-slate-900 px-4 py-3 text-white">
-        <div className="min-w-0">
-          <div className="text-xs font-bold uppercase tracking-[0.18em] text-primary">Guarda Civil Municipal</div>
-          <div className="truncate text-sm font-semibold">Relatório de plantão · {fmtDia(p.data_inicio)} · {p.turno}</div>
-          <div className="text-[11px] text-slate-400">Documento PDF real · somente leitura</div>
-        </div>
-        <div className="flex shrink-0 items-center gap-2">
-          <a
-            href={pdfUrl}
-            target="_blank"
-            rel="noreferrer"
-            className="rounded-md border border-white/15 bg-white/5 px-3 py-2 text-xs font-semibold hover:bg-white/10"
-          >
-            Abrir PDF em nova guia
-          </a>
-          <a
-            href={`${import.meta.env.BASE_URL}historico`}
-            className="rounded-md border border-white/15 bg-white/5 px-3 py-2 text-xs font-semibold hover:bg-white/10"
-          >
-            Voltar ao histórico
-          </a>
-        </div>
-      </div>
-      <iframe
-        title={`PDF do plantão ${p.turno} ${fmtDia(p.data_inicio)}`}
-        src={pdfUrl}
-        className="min-h-0 w-full flex-1 border-0 bg-white"
-      />
+    <div className="flex min-h-screen items-center justify-center bg-slate-950 text-white">
+      <div className="text-sm text-slate-300">Abrindo o PDF...</div>
     </div>
   );
 }
