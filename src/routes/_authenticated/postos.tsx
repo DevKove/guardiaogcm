@@ -98,10 +98,29 @@ function Postos() {
   const cobertos = new Set(alocacoesHoje.map((e) => e.posto_id).filter(Boolean));
 
   return (
-    <div className="space-y-6">
-      <PageHeader icon={School} kicker="PATRIMÔNIO PROTEGIDO" title="Postos fixos">
-        {me?.isSupervisor && <Button onClick={() => setEdit({ ...vazio })}><Plus className="h-4 w-4" /> Novo posto</Button>}
-      </PageHeader>
+    <div className="min-h-full space-y-6 pb-8">
+      <div className="relative overflow-hidden rounded-2xl border border-border/60 bg-gradient-to-br from-primary/10 via-card to-card p-5 shadow-sm md:p-6">
+        <div className="absolute -right-12 -top-12 h-36 w-36 rounded-full bg-primary/10 blur-2xl" />
+        <div className="relative flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
+          <div className="flex items-start gap-4">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-lg">
+              <School className="h-6 w-6" />
+            </div>
+            <div>
+              <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-primary">Central de Operações</div>
+              <h1 className="mt-1 text-2xl font-bold tracking-tight">Postos fixos</h1>
+              <p className="mt-1 max-w-2xl text-sm text-muted-foreground">Acompanhe a cobertura dos pontos estratégicos e destine agentes diretamente para o plantão.</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3 rounded-xl border border-border/60 bg-background/70 px-4 py-3 backdrop-blur">
+            <span className="live-dot h-2.5 w-2.5 rounded-full bg-success" />
+            <div>
+              <div className="text-xs font-semibold">Operação ativa</div>
+              <div className="text-[11px] text-muted-foreground">{new Date(hoje + "T12:00:00").toLocaleDateString("pt-BR", { weekday: "long", day: "2-digit", month: "long" })}</div>
+            </div>
+          </div>
+        </div>
+      </div>
 
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
         <StatCard icon={Building2} label="Postos ativos" value={data.filter((p) => p.ativo).length} />
@@ -110,25 +129,25 @@ function Postos() {
         <StatCard icon={User} label="Com agentes hoje" value={`${cobertos.size}/${data.filter((p) => p.ativo).length}`} tone="text-warning" delay={180} />
       </div>
 
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-col gap-3 rounded-2xl border border-border/60 bg-card/80 p-3 shadow-sm md:flex-row md:items-center">
         <div className="relative w-full max-w-sm">
           <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input className="pl-9" placeholder="Buscar nome, bairro, endereço..." value={q} onChange={(e) => setQ(e.target.value)} />
         </div>
-        <select className={`${selectCls} w-auto`} value={tipo} onChange={(e) => setTipo(e.target.value)}>
+        <select className={`${selectCls} w-full md:w-auto`} value={tipo} onChange={(e) => setTipo(e.target.value)}>
           <option value="" className="bg-popover">Todos os tipos</option>
           {TIPOS_POSTO.map((t) => <option key={t} className="bg-popover">{t}</option>)}
         </select>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+      <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
         {lista.map((p, i) => {
           const Icon = ICONES[p.tipo] ?? Building2;
           const esc = alocacoesHoje.filter((e) => e.posto_id === p.id);
           return (
             <div key={p.id} className={`card-3d lift animate-rise p-4 ${!p.ativo ? "opacity-50" : ""}`} style={{ animationDelay: `${i * 40}ms` }}>
               <div className="flex items-start gap-3">
-                <div className="icon-chip h-11 w-11 shrink-0"><Icon className="h-5 w-5" /></div>
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary ring-1 ring-primary/10"><Icon className="h-5 w-5" /></div>
                 <div className="min-w-0 flex-1">
                   <div className="font-semibold leading-tight">{p.nome}</div>
                   <div className="text-xs text-muted-foreground">{p.tipo}</div>
@@ -144,7 +163,7 @@ function Postos() {
                 <div className="flex gap-1.5"><Clock className="h-3.5 w-3.5" />{p.horario || "—"}</div>
               </div>
               {esc.length > 0 && (
-                <div className="mt-3 rounded-md border border-success/40 bg-success/10 p-2 text-xs">
+                <div className="mt-4 rounded-xl border border-success/30 bg-success/5 p-3 text-xs">
                   {esc.map((e, j) => (
                     <div key={j} className="flex items-center justify-between gap-2">
                       <span><b>{e.turno}:</b> {e.agentes}</span>
@@ -164,8 +183,8 @@ function Postos() {
                 </div>
               )}
               {p.observacao && <p className="mt-2 text-xs italic text-muted-foreground">{p.observacao}</p>}
-              <div className="mt-3 border-t pt-3">
-                <Button className="w-full justify-center gap-2" onClick={() => setDestinar({ id: p.id, nome: p.nome })} disabled={!p.ativo} aria-label={`Adicionar agente ao plantão de ${p.nome}`}>
+              <div className="mt-4 border-t border-border/60 pt-4">
+                <Button className="h-11 w-full justify-center gap-2 rounded-xl shadow-sm transition-transform hover:scale-[1.01]" onClick={() => setDestinar({ id: p.id, nome: p.nome })} disabled={!p.ativo} aria-label={`Adicionar agente ao plantão de ${p.nome}`}>
                   <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary-foreground/20"><Plus className="h-4 w-4" /></span>
                   Adicionar agente ao plantão
                 </Button>
