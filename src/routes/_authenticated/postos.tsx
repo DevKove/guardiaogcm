@@ -263,65 +263,62 @@ function DestinarDialog({ posto, efetivo, onClose, onSaved }: {
     setAvisoOutroPosto(null);
   }, [posto?.id]);
 
-  useEffect(() => {
-    let ativo = true;
+  async function verificarOutroPosto(idAgente: string, dataAtuacao = data) {
+    setAvisoOutroPosto(null);
+    if (!posto || !idAgente || !dataAtuacao) return;
 
-    async function verificarOutroPosto() {
-      setAvisoOutroPosto(null);
-      if (!posto || !equipeId || !data) return;
+    const { data: integrantes, error: integrantesError } = await supabase
+      .from("escala_integrantes")
+      .select("escala_id")
+      .eq("equipe_id", idAgente);
 
-      // Primeiro busca todas as escalas do dia em outros postos.
-      // Depois verifica quais delas pertencem ao agente selecionado.
-      // Isso evita depender de uma consulta .in() com IDs de escala.
-      const { data: escalasDoDia, error: escalasError } = await supabase
-        .from("escalas")
-        .select("id, posto_id")
-        .eq("data", data)
-        .neq("posto_id", posto.id);
-
-      if (escalasError || !escalasDoDia?.length) return;
-
-      const idsEscalas = escalasDoDia.map((escala) => escala.id);
-
-      const { data: integrantes, error: integrantesError } = await supabase
-        .from("escala_integrantes")
-        .select("escala_id")
-        .eq("equipe_id", equipeId)
-        .in("escala_id", idsEscalas);
-
-      if (integrantesError || !integrantes?.length) return;
-
-      const escalasDoAgente = escalasDoDia.filter((escala) =>
-        integrantes.some((integrante) => integrante.escala_id === escala.id),
-      );
-
-      const postoIds = [...new Set(
-        escalasDoAgente.map((escala) => escala.posto_id).filter(Boolean),
-      )] as string[];
-
-      if (!postoIds.length) return;
-
-      const { data: postos, error: postosError } = await supabase
-        .from("postos_fixos")
-        .select("id, nome")
-        .in("id", postoIds);
-
-      if (postosError || !postos?.length || !ativo) return;
-
-      const nomes = postos.map((p) => p.nome).filter(Boolean);
-      if (nomes.length) {
-        setAvisoOutroPosto(
-          `⚠️ AVISO: Este agente já está destinado ao posto fixo ${nomes.join(", ")} neste dia.`,
-        );
-      }
+    if (integrantesError) {
+      console.error("Erro ao verificar outros postos:", integrantesError);
+      return;
     }
 
-    void verificarOutroPosto();
+    if (!integrantes?.length) return;
 
-    return () => {
-      ativo = false;
-    };
-  }, [equipeId, data, posto?.id]);
+    const escalaIds = integrantes.map((item) => item.escala_id);
+    const { data: escalas, error: escalasError } = await supabase
+      .from("escalas")
+      .select("id, posto_id")
+      .eq("data", dataAtuacao)
+      .in("id", escalaIds)
+      .neq("posto_id", posto.id);
+
+    if (escalasError) {
+      console.error("Erro ao verificar escalas do agente:", escalasError);
+      return;
+    }
+
+    const postoIds = [...new Set(
+      (escalas ?? []).map((escala) => escala.posto_id).filter(Boolean),
+    )] as string[];
+
+    if (!postoIds.length) return;
+
+    const { data: postos, error: postosError } = await supabase
+      .from("postos_fixos")
+      .select("id, nome")
+      .in("id", postoIds);
+
+    if (postosError) {
+      console.error("Erro ao buscar postos do agente:", postosError);
+      return;
+    }
+
+    const nomes = (postos ?? []).map((p) => p.nome).filter(Boolean);
+    if (!nomes.length) return;
+
+    const mensagem = `⚠️ AVISO: Este agente já está destinado ao posto fixo ${nomes.join(", ")} neste dia.`;
+    setAvisoOutroPosto(mensagem);
+    toast.warning(mensagem, { duration: 7000 });
+  }
+
+  useEffect(() => {
+    if (equipeId) void verificarOutroPosto(equipeId, data);
+  }, [data, posto?.id]);
 
   function mudarTurno(v: string) {
     setTurno(v);
@@ -368,7 +365,7 @@ function DestinarDialog({ posto, efetivo, onClose, onSaved }: {
         <DialogHeader>
           <DialogTitle>Agentes em serviço — {posto?.nome ?? "Posto fixo"}</DialogTitle>
           {avisoOutroPosto && (
-            <div className="rounded-md border border-warning/50 bg-warning/10 px-3 py-2 text-sm font-semibold text-warning" role="alert">
+            <div className="mt-2 rounded-md border-2 border-destructive bg-destructive/10 px-3 py-3 text-sm font-bold text-destructive" role="alert">
               {avisoOutroPosto}
             </div>
           )}
@@ -385,7 +382,10 @@ function DestinarDialog({ posto, efetivo, onClose, onSaved }: {
               <div className="max-h-56 space-y-2 overflow-y-auto rounded-md border p-3">
                 {efetivo.map((m) => (
                   <label key={m.id} className="flex cursor-pointer items-center gap-3 rounded-md p-2 hover:bg-muted/60">
-                    <input type="radio" name="agente-plantao" className="h-4 w-4 accent-primary" checked={equipeId === m.id} onChange={() => setEquipeId(m.id)} />
+                    <input type="radio" name="agente-plantao" className="h-4 w-4 accent-primary" checked={equipeId === m.id} onChange={() => {
+                      setEquipeId(m.id);
+                      void verificarOutroPosto(m.id, data);
+                    }} />
                     <span className="min-w-0 flex-1 text-sm font-medium">{m.nome}<span className="block text-xs text-muted-foreground">{m.tipo}{m.matricula ? ` · Matrícula ${m.matricula}` : ""} · {m.funcao}</span></span>
                   </label>
                 ))}
