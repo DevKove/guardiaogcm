@@ -88,7 +88,7 @@ function Nova() {
     <form onSubmit={submit} className="mx-auto max-w-3xl space-y-6">
       <div>
         <div className="font-mono text-xs tracking-widest text-muted-foreground">REGISTRO</div>
-        <h1 className="text-2xl font-bold">Nova ocorrência</h1>
+        <div className="flex items-center gap-3"><img src={`${import.meta.env.BASE_URL}cad-assets/adicionar.gif`} alt="" aria-hidden="true" className="h-10 w-10 shrink-0 object-contain" /><h1 className="text-2xl font-bold">Nova ocorrência</h1></div>
         {carregandoPlantao ? (
           <p className="mt-1 text-sm text-muted-foreground">Verificando plantão operacional...</p>
         ) : plantao ? (

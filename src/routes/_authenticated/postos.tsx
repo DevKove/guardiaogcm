@@ -109,7 +109,7 @@ function Postos() {
                 <span className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-300">CAD GUARDA MUNICIPAL</span>
               </div>
               <div className="mt-1 text-[10px] font-medium uppercase tracking-[0.24em] text-slate-500">Atendimento / Despacho / Gestão de postos fixos</div>
-              <h1 className="mt-5 text-2xl font-bold tracking-tight text-white md:text-3xl">Postos fixos</h1>
+              <div className="mt-5 flex items-center gap-3"><img src={`${import.meta.env.BASE_URL}cad-assets/delegacia-de-policia.gif`} alt="" aria-hidden="true" className="h-12 w-12 shrink-0 object-contain" /><h1 className="text-2xl font-bold tracking-tight text-white md:text-3xl">Postos fixos</h1></div>
               <p className="mt-1 max-w-2xl text-sm text-slate-400">Controle operacional dos pontos estratégicos e da destinação de agentes por plantão.</p>
             </div>
             <div className="flex flex-wrap items-center gap-2">

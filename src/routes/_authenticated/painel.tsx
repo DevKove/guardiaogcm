@@ -168,7 +168,7 @@ function Painel() {
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <div className="flex items-center gap-2"><img src={`${import.meta.env.BASE_URL}cad-assets/alerta.png`} alt="" aria-hidden="true" className="h-7 w-7 object-contain" /><div className="font-mono text-xs tracking-widest text-muted-foreground">PAINEL OPERACIONAL</div></div>
-          <h1 className="text-2xl font-bold">Ocorrências</h1>
+          <div className="flex items-center gap-3"><img src={`${import.meta.env.BASE_URL}cad-assets/capacidade-analitica.gif`} alt="" aria-hidden="true" className="h-10 w-10 shrink-0 object-contain" /><h1 className="text-2xl font-bold">Ocorrências</h1></div>
         </div>
         <div className="flex gap-2">
           <Input

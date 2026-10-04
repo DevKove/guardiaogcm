@@ -173,7 +173,7 @@ function PlantaoControle() {
     <div className="mx-auto max-w-5xl space-y-6">
       <div>
         <div className="font-mono text-xs tracking-widest text-muted-foreground">CONTROLE OPERACIONAL</div>
-        <h1 className="text-2xl font-bold">Plantão</h1>
+        <div className="flex items-center gap-3"><img src={`${import.meta.env.BASE_URL}cad-assets/calendario.gif`} alt="" aria-hidden="true" className="h-10 w-10 shrink-0 object-contain" /><h1 className="text-2xl font-bold">Plantão</h1></div>
         <p className="text-sm text-muted-foreground">Todo registro operacional fica vinculado a um plantão aberto e identifica o usuário responsável pelo lançamento.</p>
       </div>
 

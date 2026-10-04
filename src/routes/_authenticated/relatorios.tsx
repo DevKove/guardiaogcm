@@ -92,7 +92,7 @@ function Relatorios() {
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <div className="font-mono text-xs tracking-widest text-muted-foreground">ESTATÍSTICA</div>
-          <h1 className="text-2xl font-bold">Relatórios</h1>
+          <div className="flex items-center gap-3"><img src={`${import.meta.env.BASE_URL}cad-assets/caderno.gif`} alt="" aria-hidden="true" className="h-10 w-10 shrink-0 object-contain" /><h1 className="text-2xl font-bold">Relatórios</h1></div>
         </div>
         <div className="flex flex-wrap items-end gap-2">
           <div className="space-y-1"><Label className="text-xs">De</Label><Input type="date" value={de} onChange={(e) => setDe(e.target.value)} /></div>
