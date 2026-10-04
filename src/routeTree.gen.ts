@@ -162,6 +162,9 @@ export interface FileRoutesByTo {
   '/imprimir/$id': typeof AuthenticatedImprimirIdRoute
   '/ocorrencias/$id': typeof AuthenticatedOcorrenciasIdRoute
   '/ocorrencias/nova': typeof AuthenticatedOcorrenciasNovaRoute
+  '/itens-armas': typeof AuthenticatedItensArmasRoute
+  '/itens-radios': typeof AuthenticatedItensRadiosRoute
+  '/itens-cad': typeof AuthenticatedItensCadRoute
   '/plantao/$id': typeof AuthenticatedPlantaoIdRoute
 }
 export interface FileRoutesById {
@@ -225,6 +228,9 @@ export interface FileRouteTypes {
     | '/imprimir/$id'
     | '/ocorrencias/$id'
     | '/ocorrencias/nova'
+    | '/itens-armas'
+    | '/itens-radios'
+    | '/itens-cad'
     | '/plantao'
     | '/plantao/$id'
   id:
@@ -408,6 +414,9 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedOcorrenciasIdRoute: AuthenticatedOcorrenciasIdRoute,
   AuthenticatedOcorrenciasNovaRoute: AuthenticatedOcorrenciasNovaRoute,
   AuthenticatedPlantaoRoute: AuthenticatedPlantaoRoute,
+  AuthenticatedItensArmasRoute: AuthenticatedItensArmasRoute,
+  AuthenticatedItensRadiosRoute: AuthenticatedItensRadiosRoute,
+  AuthenticatedItensCadRoute: AuthenticatedItensCadRoute,
   AuthenticatedPlantaoIdRoute: AuthenticatedPlantaoIdRoute,
 }
 
