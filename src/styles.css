@@ -486,3 +486,65 @@ header.glass {
     background: #2c4858;
   }
 }
+
+
+/* Design System global baseado na referência visual de /postos. */
+@layer components {
+  .cad-section {
+    border: 1px solid #1c2b36;
+    background: #070d13;
+  }
+
+  .cad-page {
+    min-height: 100%;
+    background: #050a0f;
+  }
+
+  .card-3d {
+    border-radius: 0;
+    border-color: #1c2b36;
+    background: #070d13;
+    box-shadow: none;
+  }
+
+  .card-3d:hover {
+    border-color: rgba(54,185,239,.45);
+    background: #091119;
+    box-shadow: none;
+  }
+
+  .icon-chip {
+    border-radius: 0;
+    border-color: rgba(54,185,239,.25);
+    background: rgba(54,185,239,.05);
+  }
+
+  table {
+    background: #070d13;
+  }
+
+  thead {
+    background: #081019;
+  }
+
+  input,
+  textarea,
+  select {
+    border-radius: 0.2rem;
+  }
+
+  [role="dialog"] {
+    border-radius: 0;
+  }
+
+  .cad-nav-link {
+    border-radius: 0;
+  }
+}
+
+@media (max-width: 640px) {
+  .cad-page {
+    width: 100%;
+    overflow-x: hidden;
+  }
+}
