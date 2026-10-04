@@ -149,6 +149,122 @@ export type Database = {
           { foreignKeyName: "escala_integrantes_equipe_id_fkey"; columns: ["equipe_id"]; isOneToOne: false; referencedRelation: "equipe"; referencedColumns: ["id"] },
         ]
       }
+      itens: {
+        Row: {
+          id: string
+          categoria: Database["public"]["Enums"]["item_categoria"]
+          nome: string
+          identificacao: string | null
+          patrimonio: string | null
+          ativo: boolean
+          observacao: string | null
+          criado_por: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          categoria: Database["public"]["Enums"]["item_categoria"]
+          nome: string
+          identificacao?: string | null
+          patrimonio?: string | null
+          ativo?: boolean
+          observacao?: string | null
+          criado_por?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          categoria?: Database["public"]["Enums"]["item_categoria"]
+          nome?: string
+          identificacao?: string | null
+          patrimonio?: string | null
+          ativo?: boolean
+          observacao?: string | null
+          criado_por?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      plantao_itens: {
+        Row: {
+          id: string
+          plantao_id: string
+          item_id: string
+          status: Database["public"]["Enums"]["item_mov_status"]
+          retirado_por: string | null
+          retirado_em: string | null
+          entregue_por: string | null
+          entregue_em: string | null
+          conferido_por: string | null
+          conferido_em: string | null
+          observacao: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          plantao_id: string
+          item_id: string
+          status?: Database["public"]["Enums"]["item_mov_status"]
+          retirado_por?: string | null
+          retirado_em?: string | null
+          entregue_por?: string | null
+          entregue_em?: string | null
+          conferido_por?: string | null
+          conferido_em?: string | null
+          observacao?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          plantao_id?: string
+          item_id?: string
+          status?: Database["public"]["Enums"]["item_mov_status"]
+          retirado_por?: string | null
+          retirado_em?: string | null
+          entregue_por?: string | null
+          entregue_em?: string | null
+          conferido_por?: string | null
+          conferido_em?: string | null
+          observacao?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plantao_itens_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "itens"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "plantao_itens_plantao_id_fkey"
+            columns: ["plantao_id"]
+            isOneToOne: false
+            referencedRelation: "plantoes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "plantao_itens_retirado_por_fkey"
+            columns: ["retirado_por"]
+            isOneToOne: false
+            referencedRelation: "equipe"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "plantao_itens_entregue_por_fkey"
+            columns: ["entregue_por"]
+            isOneToOne: false
+            referencedRelation: "equipe"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ocorrencia_envolvidos: {
         Row: {
           created_at: string
@@ -785,6 +901,8 @@ export const Constants = {
     Enums: {
       app_role: ["admin", "supervisor", "operador"],
       ocorrencia_status: ["aberta", "em_atendimento", "encerrada", "cancelada"],
+      item_categoria: ["arma", "radio", "cad"],
+      item_mov_status: ["pendente", "retirado", "devolvido", "conferido"],
       viatura_status: [
         "disponivel",
         "em_deslocamento",
