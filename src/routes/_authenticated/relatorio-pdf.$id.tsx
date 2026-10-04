@@ -59,35 +59,80 @@ function RelatorioOficial({ p, operadorNome }: { p: Plantao; operadorNome: strin
   return (
     <main className="report-screen min-h-screen bg-slate-100 px-3 py-5 text-slate-800 sm:px-6">
       <style>{`
-        @page { size: A4 portrait; margin: 8mm 9mm 9mm; }
+        @page { size: A4 portrait; margin: 7mm 8mm 8mm; }
         @media print {
-          html, body { background:#fff !important; color-scheme:light !important; }
-          body { -webkit-print-color-adjust:exact !important; print-color-adjust:exact !important; }
-          .report-screen { min-height:0 !important; padding:0 !important; background:#fff !important; }
-          .report-paper { background:#fff !important; color:#111827 !important; color-scheme:light !important; max-width:none !important; margin:0 !important; border:0 !important; box-shadow:none !important; overflow:visible !important; }
-          .report-paper .report-cover { background:#fff !important; color:#111827 !important; }
-          .report-toolbar { display:none !important; }
-          .report-body > :not([hidden]) ~ :not([hidden]) { margin-top:14px !important; }
-          .report-section { break-inside:auto; }
-          .report-card, .report-occurrence, .report-signature, .report-edit-item { break-inside:avoid; }
-          .report-table { width:100% !important; font-size:8.5px !important; }
-          .report-table thead { display:table-header-group; }
-          .report-table th, .report-table td { padding:4px 5px !important; }
-          .report-kpi { padding:7px !important; }
-          .report-kpi-value { font-size:10px !important; margin-top:2px !important; }
-          .report-cover { padding:10px 14px !important; break-inside:avoid; }
-          .report-cover h1 { font-size:20px !important; margin-top:4px !important; }
-          .report-body { padding:12px 14px !important; }
-          .report-section > div:first-child { padding-bottom:5px !important; }
-          .report-section h2 { font-size:12.5px !important; }
-          .report-section .space-y-3 > * + * { margin-top:5px !important; }
-          .report-occurrence > div:first-child { padding-top:7px !important; padding-bottom:7px !important; }
-          .report-occurrence .grid { gap:6px !important; padding-top:8px !important; padding-bottom:8px !important; }
-          .report-signature { padding:12px !important; }
-          .report-signature .mt-12 { margin-top:28px !important; }
-          .report-footer { padding-top:7px !important; }
-          .report-page-break { break-before:page; }
-          a { color:inherit !important; text-decoration:none !important; }
+          html, body, #root {
+            background: #fff !important;
+            color: #172033 !important;
+            color-scheme: light !important;
+          }
+          body {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
+          .report-screen {
+            min-height: 0 !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            background: #fff !important;
+            color: #172033 !important;
+          }
+          .report-paper {
+            width: 100% !important;
+            max-width: none !important;
+            margin: 0 !important;
+            border: 0 !important;
+            border-radius: 0 !important;
+            box-shadow: none !important;
+            background: #fff !important;
+            color: #172033 !important;
+            color-scheme: light !important;
+            overflow: visible !important;
+          }
+          .report-paper * {
+            color-scheme: light !important;
+            box-shadow: none !important;
+          }
+          .report-paper .report-cover {
+            background: #fff !important;
+            color: #172033 !important;
+            border-bottom: 2px solid #0e7490 !important;
+          }
+          .report-paper .bg-white { background: #fff !important; }
+          .report-paper .bg-slate-50 { background: #f8fafc !important; }
+          .report-paper .bg-slate-100 { background: #f1f5f9 !important; }
+          .report-paper .bg-cyan-50 { background: #ecfeff !important; }
+          .report-paper .text-slate-400 { color: #94a3b8 !important; }
+          .report-paper .text-slate-500 { color: #64748b !important; }
+          .report-paper .text-slate-600 { color: #475569 !important; }
+          .report-paper .text-slate-700 { color: #334155 !important; }
+          .report-paper .text-slate-800 { color: #1e293b !important; }
+          .report-paper .text-cyan-700,
+          .report-paper .text-cyan-800 { color: #0e7490 !important; }
+          .report-toolbar { display: none !important; }
+          .report-body > * + * { margin-top: 10px !important; }
+          .report-section { break-inside: auto; }
+          .report-card, .report-occurrence, .report-signature, .report-edit-item { break-inside: avoid; }
+          .report-table { width: 100% !important; font-size: 8.2px !important; }
+          .report-table thead { display: table-header-group; }
+          .report-table th, .report-table td { padding: 3.5px 4px !important; }
+          .report-kpis { gap: 5px !important; }
+          .report-kpi { padding: 6px !important; }
+          .report-kpi-value { font-size: 9px !important; margin-top: 1px !important; }
+          .report-cover { padding: 9px 12px !important; break-inside: avoid; }
+          .report-cover h1 { font-size: 18px !important; margin-top: 3px !important; }
+          .report-cover p { margin-top: 2px !important; }
+          .report-body { padding: 10px 12px !important; }
+          .report-section > div:first-child { padding-bottom: 4px !important; }
+          .report-section h2 { font-size: 11px !important; }
+          .report-section .space-y-3 > * + * { margin-top: 4px !important; }
+          .report-occurrence > div:first-child { padding-top: 5px !important; padding-bottom: 5px !important; }
+          .report-occurrence .grid { gap: 4px !important; padding-top: 5px !important; padding-bottom: 5px !important; }
+          .report-signature { padding: 9px !important; }
+          .report-signature .mt-12 { margin-top: 20px !important; }
+          .report-footer { padding-top: 5px !important; }
+          .report-page-break { break-before: page; }
+          a { color: inherit !important; text-decoration: none !important; }
         }
       `}</style>
 
@@ -99,12 +144,12 @@ function RelatorioOficial({ p, operadorNome }: { p: Plantao; operadorNome: strin
         </div>
       </div>
 
-      <article className="report-paper mx-auto max-w-[920px] overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl">
-        <header className="report-cover relative overflow-hidden bg-white px-5 py-5 text-slate-900 sm:px-7 sm:py-6">
+      <article className="report-paper mx-auto max-w-[920px] overflow-hidden rounded-lg border border-slate-200 bg-white shadow-lg">
+        <header className="report-cover relative overflow-hidden border-b-2 border-cyan-700 bg-white px-5 py-5 text-slate-900 sm:px-7 sm:py-6">
           <div className="absolute inset-y-0 left-0 w-1 bg-cyan-600" />
           <div className="absolute -right-12 -top-16 h-32 w-32 rounded-full border-[12px] border-cyan-900/5" />
           <div className="absolute -right-2 top-5 h-20 w-20 rounded-full border border-cyan-700/10" />
-          <div className="relative flex flex-wrap items-start justify-between gap-5">
+          <div className="relative flex flex-wrap items-start justify-between gap-4">
             <div className="flex items-start gap-4">
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-slate-50"><ShieldCheck className="h-6 w-6 text-cyan-700" /></div>
               <div>
@@ -120,12 +165,12 @@ function RelatorioOficial({ p, operadorNome }: { p: Plantao; operadorNome: strin
               <div className="mt-1 text-xs text-slate-600">{fmtDia(p.data_inicio)} · {p.turno || "Turno não informado"}</div>
             </div>
           </div>
-          <div className="relative mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-slate-200 pt-3 text-[10px] text-slate-500">
+          <div className="relative mt-3 flex flex-wrap items-center justify-between gap-3 border-t border-slate-200 pt-2 text-[9px] text-slate-500">
             <span>DOCUMENTO OPERACIONAL · USO INSTITUCIONAL</span><span>Referência: {String(p.id).slice(0, 12).toUpperCase()}</span>
           </div>
         </header>
 
-        <div className="report-body space-y-7 px-5 py-5 sm:px-8 sm:py-7">
+        <div className="report-body space-y-5 px-5 py-5 sm:px-8 sm:py-6">
           <section className="report-kpis grid grid-cols-2 gap-2 sm:grid-cols-4">
             <Kpi label="Data" value={fmtDia(p.data_inicio)} accent="cyan" />
             <Kpi label="Turno" value={p.turno || "—"} accent="blue" />
