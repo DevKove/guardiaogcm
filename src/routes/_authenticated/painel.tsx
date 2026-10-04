@@ -15,7 +15,7 @@ export const Route = createFileRoute("/_authenticated/painel")({
   component: Painel,
 });
 
-function Painel() {
+function Painel() {\n  // O painel usa o título institucional do shell; não renderizar cabeçalho "Ocorrências" aqui.
   const qc = useQueryClient();
   const navigate = useNavigate();
   const { data: me } = useMe();
