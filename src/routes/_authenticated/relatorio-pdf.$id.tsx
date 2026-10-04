@@ -343,7 +343,7 @@ function gerarPdfPlantao(p: Plantao, operadorNome: string, data: DadosRelatorioP
     data.escalas.forEach((e) => tableRow([
       { value: e.agentes, width: widths[0] }, { value: e.funcao, width: widths[1] },
       { value: (e.hora_inicio || "—") + "–" + (e.hora_fim || "—"), width: widths[2] }, { value: e.observacao || "—", width: widths[3] },
-    ].map((c, i) => ({ ...c, width: widths[i] })));
+    ].map((c, i) => ({ ...c, width: widths[i] }))));
   } else empty("Nenhum registro de escala foi lançado durante o período.");
 
   section("Postos e conferências");
