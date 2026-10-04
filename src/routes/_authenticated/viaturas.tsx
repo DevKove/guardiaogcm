@@ -63,7 +63,7 @@ function Viaturas() {
 
   return (
     <div className="space-y-6">
-      <PageHeader icon={Car} kicker="FROTA" title="Viaturas">
+      <PageHeader icon={Car} asset="viatura.gif" kicker="FROTA" title="Viaturas">
         {me?.isSupervisor && <Button onClick={() => setEdit({ ...vazio })}><img src={`${import.meta.env.BASE_URL}cad-assets/adicionar.gif`} alt="" aria-hidden="true" className="h-5 w-5 object-contain" /> Nova viatura</Button>}
       </PageHeader>
 
