@@ -104,7 +104,7 @@ function Layout() {
   ] as const;
 
   return (
-    <div className="min-h-screen bg-[#050a0f] text-slate-100">
+    <div className="min-h-screen bg-transparent text-slate-100">
       <div className="siren-bar print:hidden" />
 
       <header className="sticky top-0 z-40 border-b border-cyan-400/20 bg-[#05090e] print:hidden">
