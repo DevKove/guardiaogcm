@@ -54,7 +54,7 @@ function Postos() {
   const { data: alocacoesHoje = [] } = useQuery({
     queryKey: ["postos-agentes-hoje", hoje],
     queryFn: async () => {
-      const { data, error } = await supabase.from("escalas").select("posto_id, agentes, turno").eq("data", hoje);
+      const { data, error } = await supabase.from("escalas").select("id, posto_id, agentes, turno").eq("data", hoje);
       if (error) throw error;
       return data;
     },
@@ -76,19 +76,9 @@ function Postos() {
     const { error } = await supabase.from("postos_fixos").delete().eq("id", id);
     if (error) toast.error(error.message); else qc.invalidateQueries({ queryKey: ["postos"] });
   }
-  async function removerAgentePosto(escala: { posto_id: string | null; agentes: string | null; turno: string | null }) {
+  async function removerAgentePosto(escala: { id: string; agentes: string | null }) {
     if (!confirm(`Remover ${escala.agentes ?? "o agente"} deste posto fixo?`)) return;
-    const { data: registros, error: buscaError } = await supabase
-      .from("escalas")
-      .select("id")
-      .eq("posto_id", escala.posto_id)
-      .eq("data", hoje)
-      .eq("turno", escala.turno);
-
-    if (buscaError) return void toast.error(buscaError.message);
-    if (!registros?.length) return void toast.error("Destinação não encontrada.");
-
-    const escalaId = registros[0].id;
+    const escalaId = escala.id;
     const { error: integranteError } = await supabase
       .from("escala_integrantes")
       .delete()
