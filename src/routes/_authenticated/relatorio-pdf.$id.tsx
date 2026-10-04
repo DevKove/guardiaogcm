@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { AlertCircle, ArrowLeft, RefreshCw } from "lucide-react";
+import { AlertCircle, ArrowLeft, Printer, RefreshCw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { useMe } from "@/hooks/use-me";
@@ -65,53 +65,28 @@ function RelatorioPdfPlantao({ p, operadorNome }: { p: Plantao; operadorNome: st
     const url = URL.createObjectURL(blob);
     setPdfUrl(url);
 
-    return () => {
-      URL.revokeObjectURL(url);
-    };
-  }, [p, operadorNome, data]);
-
-  if (isLoading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-950 text-white">
-        <div className="text-center">
-          <div className="text-sm font-semibold">Gerando PDF do plantão...</div>
-          <div className="mt-1 text-xs text-slate-400">Preparando o documento oficial para visualização.</div>
-        </div>
-      </div>
-    );
-  }
-
-  if (isError || !data) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-950 p-6 text-white">
-        <div className="max-w-lg rounded-lg border border-red-400/30 bg-slate-900 p-6">
-          <div className="font-semibold text-red-300">Não foi possível gerar o PDF.</div>
-          <div className="mt-2 text-sm text-slate-400">
-            {error instanceof Error ? error.message : "Erro ao consolidar os dados do plantão."}
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (!pdfUrl) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-950 text-white">
-        <div className="text-sm text-slate-300">Preparando o PDF...</div>
-      </div>
-    );
-  }
+    const imprimir = () => {
+    if (!pdfUrl) return;
+    const win = window.open(pdfUrl, "_blank", "noopener,noreferrer");
+    if (!win) window.location.assign(pdfUrl);
+  };
 
   return (
-    <div className="fixed inset-0 z-[9999] bg-black">
-      <embed
-        src={pdfUrl}
-        type="application/pdf"
-        className="h-full w-full border-0"
-        aria-label={`Relatório PDF do plantão ${p.id}`}
-      />
+    <div className="fixed inset-0 z-[9999] flex flex-col bg-slate-900">
+      <header className="flex shrink-0 items-center justify-between gap-3 border-b border-slate-700 bg-slate-950 px-4 py-3 text-white shadow-lg">
+        <div className="min-w-0">
+          <div className="text-xs font-semibold uppercase tracking-[0.18em] text-cyan-400">CAD GUARDA CIVIL MUNICIPAL</div>
+          <div className="truncate text-sm font-semibold">Relatório de plantão · {fmtDia(p.data_inicio)}</div>
+        </div>
+        <Button type="button" onClick={imprimir} className="shrink-0 gap-2 bg-cyan-600 text-white hover:bg-cyan-500">
+          <Printer className="h-4 w-4" /> Imprimir PDF
+        </Button>
+      </header>
+      <div className="min-h-0 flex-1 bg-slate-800 p-2 sm:p-4">
+        <embed src={pdfUrl} type="application/pdf" className="h-full w-full rounded-sm border border-slate-700 bg-white shadow-2xl" aria-label={`Relatório PDF do plantão ${p.id}`} />
+      </div>
     </div>
-  );
+  )
 }
 
 type DadosRelatorioPlantao = Awaited<ReturnType<typeof carregarAtividades>>;
@@ -202,62 +177,126 @@ function criarPdfTexto(linhas: string[]): Blob {
   const pageWidth = 595;
   const pageHeight = 842;
   const marginLeft = 42;
-  const marginTop = 52;
-  const marginBottom = 46;
-    const lineHeight = 13;
-  const maxChars = 92;
-  const wrapped: string[] = [];
+  const marginRight = 42;
+  const top = 54;
+  const bottom = 48;
+  const maxChars = 88;
+  const lineStep = 13;
 
-  for (const original of linhas) {
-    const line = original || " ";
-    if (line.length <= maxChars) {
-      wrapped.push(line);
-      continue;
-    }
-    let rest = line;
-    while (rest.length > maxChars) {
-      let cut = rest.lastIndexOf(" ", maxChars);
-      if (cut < 20) cut = maxChars;
-      wrapped.push(rest.slice(0, cut));
+  type Cmd = { text: string; x: number; y: number; size: number; bold: boolean; gray?: boolean };
+  const pages: Cmd[][] = [];
+  let page: Cmd[] = [];
+  let y = pageHeight - top;
+
+  const newPage = () => {
+    if (page.length) pages.push(page);
+    page = [];
+    y = pageHeight - top;
+  };
+  const ensure = (height: number) => {
+    if (y - height < bottom) newPage();
+  };
+  const wrap = (value: string, limit = maxChars) => {
+    const out: string[] = [];
+    let rest = value || " ";
+    while (rest.length > limit) {
+      let cut = rest.lastIndexOf(" ", limit);
+      if (cut < 16) cut = limit;
+      out.push(rest.slice(0, cut));
       rest = rest.slice(cut).trimStart();
     }
-    wrapped.push(rest || " ");
-  }
-
-  const linesPerPage = Math.floor((pageHeight - marginTop - marginBottom) / lineHeight);
-  const pages: string[][] = [];
-  for (let i = 0; i < wrapped.length; i += linesPerPage) pages.push(wrapped.slice(i, i + linesPerPage));
-
-  const objects: string[] = [];
-  const addObject = (body: string) => {
-    objects.push(body);
-    return objects.length;
+    out.push(rest || " ");
+    return out;
   };
 
+  for (let i = 0; i < linhas.length; i++) {
+    const raw = linhas[i] ?? "";
+    if (!raw) { y -= 7; continue; }
+
+    const isHeader = i === 0 || i === 1;
+    const isHero = raw === "RELATORIO DE PLANTAO";
+    const isSection = /^[A-ZÁÉÍÓÚÃÕÇ0-9 ]+$/.test(raw) && raw.length > 4 && !raw.includes(":") && !raw.startsWith("GUARNICAO ");
+    const isRule = /^-+$/.test(raw);
+
+    if (isHeader) {
+      ensure(20);
+      page.push({ text: raw, x: marginLeft, y, size: i === 0 ? 12 : 8.5, bold: true, gray: i === 1 });
+      y -= i === 0 ? 18 : 14;
+      continue;
+    }
+    if (isHero) {
+      ensure(42);
+      page.push({ text: raw, x: marginLeft, y, size: 18, bold: true });
+      y -= 25;
+      page.push({ text: "Documento oficial de encerramento e conferência operacional", x: marginLeft, y, size: 8, bold: false, gray: true });
+      y -= 18;
+      continue;
+    }
+    if (isRule) {
+      ensure(10);
+      page.push({ text: "________________________________________________________________________________", x: marginLeft, y, size: 7, bold: false, gray: true });
+      y -= 14;
+      continue;
+    }
+    if (isSection) {
+      ensure(30);
+      page.push({ text: raw, x: marginLeft, y, size: 10, bold: true });
+      y -= 7;
+      page.push({ text: "________________________________________________________________________________", x: marginLeft, y, size: 7, bold: false, gray: true });
+      y -= 17;
+      continue;
+    }
+
+    const lines = wrap(raw);
+    ensure(lines.length * lineStep + 3);
+    lines.forEach((line, index) => {
+      const field = /^\s{0,2}[^:]{1,28}:/.test(line);
+      page.push({ text: line, x: marginLeft + (index ? 12 : 0), y, size: field && index === 0 ? 8.7 : 8.2, bold: field && index === 0 });
+      y -= lineStep;
+    });
+    y -= 2;
+  }
+  newPage();
+
+  const objects: string[] = [];
+  const addObject = (body: string) => { objects.push(body); return objects.length; };
   const catalogId = addObject("");
   const pagesId = addObject("");
-  const fontId = addObject("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>");
+  const regularFontId = addObject("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>");
+  const boldFontId = addObject("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>");
   const pageIds: number[] = [];
 
-  for (const pageLines of pages.length ? pages : [[" "]] ) {
-    const commands = [
+  pages.forEach((commands, pageIndex) => {
+    const streamParts = [
+      "q",
+      "0.93 0.95 0.97 rg",
+      `42 ${pageHeight - 40} 511 1.2 re f`,
+      "Q",
       "BT",
-      "/F1 9 Tf",
-      `${marginLeft} ${pageHeight - marginTop} Td`,
-      `${lineHeight} TL`,
-      ...pageLines.map((line, index) => {
-        const safe = pdfEscape(winAnsi(line));
-        return index === 0 ? `(${safe}) Tj` : `T* (${safe}) Tj`;
-      }),
+    ];
+    commands.forEach((cmd) => {
+      streamParts.push(
+        cmd.gray ? "0.40 g" : "0.08 g",
+        `/${cmd.bold ? "F2" : "F1"} ${cmd.size} Tf`,
+        `1 0 0 1 ${cmd.x} ${cmd.y} Tm`,
+        `(${pdfEscape(winAnsi(cmd.text))}) Tj`,
+      );
+    });
+    streamParts.push(
+      "0.45 g",
+      "/F1 7 Tf",
+      "1 0 0 1 42 24 Tm",
+      `(CAD Guarda Civil Municipal  |  Relatório de plantão  |  Página ${pageIndex + 1} de ${pages.length}) Tj`,
       "ET",
-    ].join("\n");
-    const stream = `<< /Length ${commands.length} >>\nstream\n${commands}\nendstream`;
-    const contentId = addObject(stream);
+    );
+
+    const stream = streamParts.join("\n");
+    const contentId = addObject(`<< /Length ${stream.length} >>\nstream\n${stream}\nendstream`);
     const pageId = addObject(
-      `<< /Type /Page /Parent ${pagesId} 0 R /MediaBox [0 0 ${pageWidth} ${pageHeight}] /Resources << /Font << /F1 ${fontId} 0 R >> >> /Contents ${contentId} 0 R >>`,
+      `<< /Type /Page /Parent ${pagesId} 0 R /MediaBox [0 0 ${pageWidth} ${pageHeight}] /Resources << /Font << /F1 ${regularFontId} 0 R /F2 ${boldFontId} 0 R >> >> /Contents ${contentId} 0 R >>`,
     );
     pageIds.push(pageId);
-  }
+  });
 
   objects[catalogId - 1] = `<< /Type /Catalog /Pages ${pagesId} 0 R >>`;
   objects[pagesId - 1] = `<< /Type /Pages /Kids [${pageIds.map((id) => `${id} 0 R`).join(" ")}] /Count ${pageIds.length} >>`;
