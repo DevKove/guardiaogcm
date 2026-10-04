@@ -1,5 +1,14 @@
 import { supabase } from "@/integrations/supabase/client";
 
+export type AlteracaoPlantao = {
+  campo: string;
+  label: string;
+  valor: unknown;
+  antes: unknown;
+  created_at: string;
+  usuario_id: string;
+};
+
 export type PlantaoAtividade = {
   ocorrencias: {
     id: string;
@@ -27,6 +36,7 @@ export type PlantaoAtividade = {
   postosAtivos: { id: string; nome: string; tipo: string; endereco: string | null; bairro: string | null }[];
   acoes: { descricao: string; created_at: string; protocolo: number | null; usuario_id: string }[];
   registros: { id: string; texto: string; hora: string; criado_por: string }[];
+  alteracoes: AlteracaoPlantao[];
   usuarios: Record<string, string>;
 };
 
@@ -40,7 +50,6 @@ export type ResumoPlantao = {
     bairro: string | null;
     status: string;
     prioridade: number;
-    created_at: string;
     desfecho: string | null;
   }[];
   acoes: { descricao: string; created_at: string; protocolo: number | null }[];
@@ -82,9 +91,33 @@ type HistoricoRow = {
   ocorrencias: { protocolo: number } | null;
 };
 
+type PlantaoHistoricoRow = {
+  acao: string;
+  created_at: string;
+  usuario_id: string;
+  dados: Record<string, unknown> | null;
+};
+
 type ProfileRow = { id: string; nome: string | null };
 
-/** Turno, horário e data de início calculados pelo relógio do sistema. */
+const CAMPOS_EDITAVEIS: Record<string, string> = {
+  nome_plantao: "Nome do plantão",
+  supervisor_id: "Supervisor",
+  operador_radio_id: "Operador(a) de rádio",
+  equipe: "Equipe / efetivo",
+  supervisor: "Supervisor",
+  operador_radio: "Operador(a) de rádio",
+  horario: "Horário",
+  guarnicoes: "Guarnições",
+  postos: "Postos e conferências",
+  atividades: "Atividades — frente",
+  materiais: "Materiais de carga",
+  informativo: "Informativo do plantão",
+  atividades_verso: "Atividades — verso",
+  turno: "Turno",
+  data_inicio: "Data do plantão",
+};
+
 export function turnoAtual(agora = new Date()) {
   const h = agora.getHours();
   const diurno = h >= 6 && h < 18;
@@ -101,7 +134,36 @@ export function fmtDia(d: string) {
   return `${dd}/${m}/${y}`;
 }
 
-/** Junta tudo que o operador lançou durante o plantão. */
+function jsonIguais(a: unknown, b: unknown) {
+  return JSON.stringify(a ?? null) === JSON.stringify(b ?? null);
+}
+
+function extrairAlteracoes(rows: PlantaoHistoricoRow[]): AlteracaoPlantao[] {
+  const ultimas = new Map<string, AlteracaoPlantao>();
+
+  for (const row of rows) {
+    if (row.acao !== "plantao_atualizado" || !row.dados) continue;
+    const antes = row.dados.antes && typeof row.dados.antes === "object" ? row.dados.antes as Record<string, unknown> : {};
+    const depois = row.dados.depois && typeof row.dados.depois === "object" ? row.dados.depois as Record<string, unknown> : {};
+
+    for (const [campo, label] of Object.entries(CAMPOS_EDITAVEIS)) {
+      if (!jsonIguais(antes[campo], depois[campo])) {
+        ultimas.set(campo, {
+          campo,
+          label,
+          valor: depois[campo] ?? null,
+          antes: antes[campo] ?? null,
+          created_at: row.created_at,
+          usuario_id: row.usuario_id,
+        });
+      }
+    }
+  }
+
+  return Array.from(ultimas.values()).sort((a, b) => a.created_at.localeCompare(b.created_at));
+}
+
+/** Junta somente o que foi lançado ou alterado dentro da janela temporal do plantão. */
 export async function carregarAtividades(p: {
   id: string;
   operador_id: string;
@@ -119,7 +181,7 @@ export async function carregarAtividades(p: {
     return Number.isFinite(time) && time >= inicioMs && time <= fimMs;
   };
 
-  const [oc, reg, viaturas, escalas, postosAtivos] = await Promise.all([
+  const [oc, reg, viaturas, escalas, postosAtivos, plantaoHist] = await Promise.all([
     supabase
       .from("ocorrencias")
       .select("id, protocolo, natureza, endereco, bairro, status, prioridade, created_at, updated_at, desfecho, viatura, criado_por, origem, numero, solicitante_nome, relato, despachada_em, chegada_em, encerrada_em")
@@ -133,6 +195,7 @@ export async function carregarAtividades(p: {
     supabase.from("viaturas").select("id, prefixo, placa, modelo, tipo, status, guarnicao, ativa, km_atual, observacao, updated_at").order("prefixo"),
     supabase.from("escalas").select("id, agentes, funcao, hora_inicio, hora_fim, observacao, viatura_id, posto_id, criado_por, created_at, updated_at").eq("data", p.data_inicio).eq("turno", p.turno).order("hora_inicio"),
     supabase.from("postos_fixos").select("id, nome, tipo, endereco, bairro").eq("ativo", true).order("nome"),
+    supabase.from("plantao_historico").select("acao, created_at, usuario_id, dados").eq("plantao_id", p.id).gte("created_at", p.iniciado_em).lte("created_at", fim).order("created_at", { ascending: true }),
   ]);
 
   if (oc.error) throw oc.error;
@@ -140,6 +203,7 @@ export async function carregarAtividades(p: {
   if (viaturas.error) throw viaturas.error;
   if (escalas.error) throw escalas.error;
   if (postosAtivos.error) throw postosAtivos.error;
+  if (plantaoHist.error) throw plantaoHist.error;
 
   const { data: rawHist, error: histError } = await supabase
     .from("ocorrencia_historico")
@@ -155,6 +219,8 @@ export async function carregarAtividades(p: {
   const registrosDoPlantao = (reg.data ?? []).filter((x) => durantePlantao(x.hora));
   const escalasDoPlantao = (escalas.data ?? []).filter((x) => durantePlantao(x.created_at) || durantePlantao(x.updated_at));
   const histData = (rawHist ?? []) as unknown as HistoricoRow[];
+  const auditoriaData = (plantaoHist.data ?? []) as unknown as PlantaoHistoricoRow[];
+  const alteracoes = extrairAlteracoes(auditoriaData);
 
   const ids = Array.from(
     new Set([
@@ -162,6 +228,7 @@ export async function carregarAtividades(p: {
       ...histData.map((x) => x.usuario_id),
       ...registrosDoPlantao.map((x) => x.criado_por),
       ...escalasDoPlantao.map((x) => x.criado_por),
+      ...alteracoes.map((x) => x.usuario_id),
       p.operador_id,
     ]),
   );
@@ -188,6 +255,7 @@ export async function carregarAtividades(p: {
       protocolo: h.ocorrencias?.protocolo ?? null,
     })),
     registros: registrosDoPlantao,
+    alteracoes,
     usuarios,
   };
 }
