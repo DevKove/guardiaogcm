@@ -44,15 +44,15 @@ function Postos() {
     },
   });
   const { data: efetivo = [] } = useQuery({
-    queryKey: ["equipe-escalas"],
+    queryKey: ["equipe-postos"],
     queryFn: async () => {
       const { data, error } = await supabase.from("equipe").select("id, nome, matricula, tipo, funcao").eq("ativo", true).order("nome");
       if (error) throw error;
       return data as { id: string; nome: string; matricula: string | null; tipo: string; funcao: string }[];
     },
   });
-  const { data: escalasHoje = [] } = useQuery({
-    queryKey: ["escalas", "hoje", hoje],
+  const { data: alocacoesHoje = [] } = useQuery({
+    queryKey: ["postos-agentes-hoje", hoje],
     queryFn: async () => {
       const { data, error } = await supabase.from("escalas").select("posto_id, agentes, turno").eq("data", hoje);
       if (error) throw error;
@@ -78,7 +78,7 @@ function Postos() {
   }
 
   const lista = data.filter((p) => (!tipo || p.tipo === tipo) && `${p.nome} ${p.bairro ?? ""} ${p.endereco ?? ""}`.toLowerCase().includes(q.toLowerCase()));
-  const cobertos = new Set(escalasHoje.map((e) => e.posto_id).filter(Boolean));
+  const cobertos = new Set(alocacoesHoje.map((e) => e.posto_id).filter(Boolean));
 
   return (
     <div className="space-y-6">
@@ -107,7 +107,7 @@ function Postos() {
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         {lista.map((p, i) => {
           const Icon = ICONES[p.tipo] ?? Building2;
-          const esc = escalasHoje.filter((e) => e.posto_id === p.id);
+          const esc = alocacoesHoje.filter((e) => e.posto_id === p.id);
           return (
             <div key={p.id} className={`card-3d lift animate-rise p-4 ${!p.ativo ? "opacity-50" : ""}`} style={{ animationDelay: `${i * 40}ms` }}>
               <div className="flex items-start gap-3">
@@ -151,7 +151,7 @@ function Postos() {
       </div>
 
       <PostoDialog f={edit} onClose={() => setEdit(null)} />
-      <DestinarDialog posto={destinar} efetivo={efetivo} onClose={() => setDestinar(null)} onSaved={() => { qc.invalidateQueries({ queryKey: ["escalas"] }); qc.invalidateQueries({ queryKey: ["escalas", "hoje"] }); }} />
+      <DestinarDialog posto={destinar} efetivo={efetivo} onClose={() => setDestinar(null)} onSaved={() => { qc.invalidateQueries({ queryKey: ["postos-agentes"] }); qc.invalidateQueries({ queryKey: ["postos-agentes-hoje"] }); }} />
     </div>
   );
 }
@@ -216,7 +216,7 @@ function DestinarDialog({ posto, efetivo, onClose, onSaved }: {
 
   useEffect(() => {
     if (!posto) return;
-    setData(new Date().toLocaleDateString("en-CA"));
+    setData(new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10));
     setTurno("Diurno");
     setHoraInicio("07:00");
     setHoraFim("19:00");
