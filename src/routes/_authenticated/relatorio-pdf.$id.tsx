@@ -56,13 +56,13 @@ function RelatorioOficial({ p, operadorNome }: { p: Plantao; operadorNome: strin
   const statusLabel = p.status === "aberto" ? "Em andamento" : "Encerrado";
 
   return (
-    <main className="report-screen min-h-screen bg-slate-100 px-3 py-5 text-slate-800 sm:px-6">
+    <main className="report-screen min-h-screen bg-white px-3 py-5 text-slate-800 sm:px-6">
       <style>{`
         @page { size: A4; margin: 12mm; }
         @media print {
           html, body { background: #fff !important; color-scheme: light !important; }
           body { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-          .report-screen { min-height: 0 !important; padding: 0 !important; background: #fff !important; }\n          .report-paper, .report-paper * { background-color: #fff !important; background-image: none !important; color-scheme: light !important; }\n          .report-paper { color: #111827 !important; }\n          .report-paper * { border-color: #d1d5db !important; color: inherit; }
+          .report-screen { min-height: 0 !important; padding: 0 !important; background: #fff !important; }\n          .report-paper, .report-paper * { background: #fff !important; background-color: #fff !important; background-image: none !important; color-scheme: light !important; }\n          .report-paper { color: #111827 !important; }\n          .report-paper .report-cover { color: #111827 !important; }\n          .report-paper * { border-color: #d1d5db !important; color: inherit; }
           .report-toolbar { display: none !important; }
           .report-paper { max-width: none !important; margin: 0 !important; border: 0 !important; box-shadow: none !important; overflow: visible !important; }
           .report-section { break-inside: avoid; }
