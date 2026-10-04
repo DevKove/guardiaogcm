@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { School, HeartPulse, Hospital, Landmark, Trees, Bus, Cross, MapPin, Phone, User, Clock, Pencil, Plus, Trash2, Search, Building2, CalendarClock, Users, type LucideIcon } from "lucide-react";
+import { School, HeartPulse, Hospital, Landmark, Trees, Bus, Cross, MapPin, Phone, User, Clock, Pencil, Plus, Trash2, Search, Building2, CalendarClock, type LucideIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -90,7 +90,7 @@ function Postos() {
         <StatCard icon={Building2} label="Postos ativos" value={data.filter((p) => p.ativo).length} />
         <StatCard icon={School} label="Escolas" value={data.filter((p) => p.tipo === "Escola").length} tone="text-info" delay={60} />
         <StatCard icon={HeartPulse} label="Saúde" value={data.filter((p) => p.tipo === "Unidade de Saúde" || p.tipo === "UPA / Hospital").length} tone="text-success" delay={120} />
-        <StatCard icon={User} label="Cobertos hoje" value={`${cobertos.size}/${data.filter((p) => p.ativo).length}`} tone="text-warning" delay={180} />
+        <StatCard icon={User} label="Com agentes hoje" value={`${cobertos.size}/${data.filter((p) => p.ativo).length}`} tone="text-warning" delay={180} />
       </div>
 
       <div className="flex flex-wrap gap-2">
@@ -118,7 +118,7 @@ function Postos() {
                 </div>
                 {esc.length > 0
                   ? <span className="flex items-center gap-1.5 rounded-full border border-success px-2 py-0.5 text-xs text-success"><span className="live-dot h-1.5 w-1.5 rounded-full bg-success" />Coberto</span>
-                  : <span className="rounded-full border border-muted-foreground px-2 py-0.5 text-xs text-muted-foreground">Sem escala</span>}
+                  : <span className="rounded-full border border-muted-foreground px-2 py-0.5 text-xs text-muted-foreground">Sem agentes destinados</span>}
               </div>
               <div className="mt-3 space-y-1.5 text-xs text-muted-foreground">
                 <div className="flex gap-1.5"><MapPin className="h-3.5 w-3.5 shrink-0" />{p.endereco || "—"}{p.bairro ? ` · ${p.bairro}` : ""}</div>
@@ -135,7 +135,7 @@ function Postos() {
               {me?.isSupervisor && (
                 <div className="mt-3 flex flex-wrap gap-1 border-t pt-3">
                   <Button size="sm" variant="outline" onClick={() => setDestinar({ id: p.id, nome: p.nome })} disabled={!p.ativo}>
-                    <CalendarClock className="h-3.5 w-3.5" /> Destinar agentes
+                    <CalendarClock className="h-3.5 w-3.5" /> Definir agentes do posto
                   </Button>
                   <Button size="sm" variant="ghost" onClick={() => setEdit({ id: p.id, nome: p.nome, tipo: p.tipo, endereco: p.endereco ?? "", bairro: p.bairro ?? "", telefone: p.telefone ?? "", responsavel: p.responsavel ?? "", horario: p.horario ?? "", observacao: p.observacao ?? "" })}>
                     <Pencil className="h-3.5 w-3.5" /> Editar
@@ -248,7 +248,7 @@ function DestinarDialog({ posto, efetivo, onClose, onSaved }: {
     } as never).select("id").single();
     if (error || !escala) {
       setSalvando(false);
-      return void toast.error(error?.message ?? "Não foi possível criar a escala para este posto.");
+      return void toast.error(error?.message ?? "Não foi possível registrar os agentes deste posto.");
     }
     const { error: integrantesError } = await supabase.from("escala_integrantes").insert(
       equipeIds.map((equipe_id) => ({ escala_id: escala.id, equipe_id })),
@@ -256,9 +256,9 @@ function DestinarDialog({ posto, efetivo, onClose, onSaved }: {
     if (integrantesError) {
       await supabase.from("escalas").delete().eq("id", escala.id);
       setSalvando(false);
-      return void toast.error("Não foi possível vincular os agentes: " + integrantesError.message);
+      return void toast.error("Não foi possível registrar os agentes: " + integrantesError.message);
     }
-    toast.success(`Agentes destinados ao posto ${posto.nome}.`);
+    toast.success(`Equipe do posto ${posto.nome} atualizada.`);
     setSalvando(false);
     onClose();
     onSaved();
@@ -267,9 +267,9 @@ function DestinarDialog({ posto, efetivo, onClose, onSaved }: {
   return (
     <Dialog open={!!posto} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="max-h-[90vh] overflow-y-auto">
-        <DialogHeader><DialogTitle>Destinar agentes — {posto?.nome ?? "Posto fixo"}</DialogTitle></DialogHeader>
+        <DialogHeader><DialogTitle>Agentes em serviço — {posto?.nome ?? "Posto fixo"}</DialogTitle></DialogHeader>
         <form onSubmit={salvar} className="grid grid-cols-2 gap-3">
-          <div className="col-span-2 space-y-1"><Label>Data da escala</Label><Input type="date" required value={data} onChange={(e) => setData(e.target.value)} /></div>
+          <div className="col-span-2 space-y-1"><Label>Data de atuação</Label><Input type="date" required value={data} onChange={(e) => setData(e.target.value)} /></div>
           <div className="space-y-1"><Label>Turno</Label><select className={selectCls} value={turno} onChange={(e) => mudarTurno(e.target.value)}>{TURNOS.map((t) => <option key={t} value={t} className="bg-popover">{t}</option>)}</select></div>
           <div className="space-y-1"><Label>Função</Label><select className={selectCls} value={funcao} onChange={(e) => setFuncao(e.target.value)}>{[...new Set(["Posto fixo", ...FUNCOES_ESCALA])].map((t) => <option key={t} value={t} className="bg-popover">{t}</option>)}</select></div>
           <div className="space-y-1"><Label>Início</Label><Input type="time" required value={horaInicio} onChange={(e) => setHoraInicio(e.target.value)} /></div>
