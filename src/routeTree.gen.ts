@@ -461,6 +461,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedItensRadiosRoute: AuthenticatedItensRadiosRoute,
   AuthenticatedItensCadRoute: AuthenticatedItensCadRoute,
   AuthenticatedPlantaoIdRoute: AuthenticatedPlantaoIdRoute,
+  AuthenticatedRelatorioPdfIdRoute: AuthenticatedRelatorioPdfIdRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
