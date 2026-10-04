@@ -44,7 +44,7 @@ function Usuarios() {
   return (
     <div className="space-y-6">
       <PageHeader icon={Users} kicker="ADMINISTRAÇÃO" title="Usuários e perfis">
-        <Button onClick={() => setEdit({ ...vazio })}><Plus className="h-4 w-4" /> Novo usuário</Button>
+        <Button onClick={() => setEdit({ ...vazio })}><img src={`${import.meta.env.BASE_URL}cad-assets/adicionar.gif`} alt="" aria-hidden="true" className="h-5 w-5 object-contain" /> Novo usuário</Button>
       </PageHeader>
 
       <div className="grid grid-cols-3 gap-3">
@@ -72,7 +72,7 @@ function Usuarios() {
                 <td className="px-3 py-2 text-xs text-muted-foreground">{fmtData(u.ultimo_acesso)}</td>
                 <td className="px-3 py-2 text-right whitespace-nowrap">
                   <Button size="sm" variant="ghost" onClick={() => setEdit({ id: u.id, email: u.email, senha: "", nome: u.nome, matricula: u.matricula, role: u.role })}><Pencil className="h-3.5 w-3.5" /></Button>
-                  {u.id !== me.id && <Button size="sm" variant="ghost" className="text-destructive" onClick={() => remover(u.id, u.nome || u.email)}><Trash2 className="h-3.5 w-3.5" /></Button>}
+                  {u.id !== me.id && <Button size="sm" variant="ghost" className="text-destructive" aria-label={`Excluir usuário ${u.nome || u.email}`} onClick={() => remover(u.id, u.nome || u.email)}><img src={`${import.meta.env.BASE_URL}cad-assets/excluir.gif`} alt="" aria-hidden="true" className="h-6 w-6 object-contain" /></Button>}
                 </td>
               </tr>
             ))}

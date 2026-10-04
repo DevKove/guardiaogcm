@@ -64,7 +64,7 @@ function Viaturas() {
   return (
     <div className="space-y-6">
       <PageHeader icon={Car} kicker="FROTA" title="Viaturas">
-        {me?.isSupervisor && <Button onClick={() => setEdit({ ...vazio })}><Plus className="h-4 w-4" /> Nova viatura</Button>}
+        {me?.isSupervisor && <Button onClick={() => setEdit({ ...vazio })}><img src={`${import.meta.env.BASE_URL}cad-assets/adicionar.gif`} alt="" aria-hidden="true" className="h-5 w-5 object-contain" /> Nova viatura</Button>}
       </PageHeader>
 
       <div className="grid grid-cols-2 gap-3 md:grid-cols-6">
@@ -137,7 +137,7 @@ function Viaturas() {
                 {me?.isAdmin && (
                   <>
                     <Button size="sm" variant="ghost" onClick={() => patch(v.id, { ativa: !v.ativa })}><Power className="h-3.5 w-3.5" /> {v.ativa ? "Desativar" : "Reativar"}</Button>
-                    <Button size="sm" variant="ghost" className="ml-auto text-destructive" onClick={() => remover(v.id)}><Trash2 className="h-3.5 w-3.5" /></Button>
+                    <Button size="sm" variant="ghost" className="ml-auto text-destructive" aria-label={`Remover viatura ${v.prefixo}`} onClick={() => remover(v.id)}><img src={`${import.meta.env.BASE_URL}cad-assets/excluir.gif`} alt="" aria-hidden="true" className="h-6 w-6 object-contain" /></Button>
                   </>
                 )}
               </div>
