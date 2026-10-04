@@ -548,3 +548,99 @@ header.glass {
     overflow-x: hidden;
   }
 }
+
+
+/* ==========================================================================
+   Layout global — referência visual oficial: /postos
+   Todas as telas autenticadas devem compartilhar esta mesma linguagem.
+   ========================================================================== */
+@layer components {
+  body {
+    background: #050a0f;
+  }
+
+  main {
+    background: #050a0f;
+  }
+
+  /* Superfícies de conteúdo: sem o aspecto "dashboard genérico" arredondado. */
+  main .rounded-lg,
+  main .rounded-md,
+  main .rounded-xl {
+    border-radius: 0 !important;
+  }
+
+  /* Cards, painéis, tabelas e blocos operacionais. */
+  main .border {
+    border-color: #1c2b36;
+  }
+
+  main section.border,
+  main article.border,
+  main [class*="card-3d"] {
+    background: #070d13;
+  }
+
+  /* Cabeçalhos de seção no padrão da página Postos. */
+  main section > h2,
+  main section > div > h2 {
+    color: #fff;
+  }
+
+  /* Controles de formulário no mesmo acabamento quadrado. */
+  main input,
+  main textarea,
+  main select {
+    border-radius: 0.2rem !important;
+    background: #050a0f;
+    border-color: #213440;
+  }
+
+  main input:focus,
+  main textarea:focus,
+  main select:focus {
+    border-color: rgba(54,185,239,.55);
+  }
+
+  /* Botões principais seguem o tratamento operacional da /postos. */
+  main button:not([aria-label="Sair"]) {
+    border-radius: 0.2rem;
+  }
+
+  /* Evita sombras 3D e gradientes que destoam da referência. */
+  main .shadow,
+  main .shadow-sm,
+  main .shadow-md,
+  main .shadow-lg,
+  main .shadow-xl,
+  main .shadow-2xl {
+    box-shadow: none !important;
+  }
+
+  /* Badges operacionais retangulares, como na /postos. */
+  main [class*="border"][class*="bg-emerald"],
+  main [class*="border"][class*="bg-cyan"],
+  main [class*="border"][class*="bg-amber"] {
+    box-shadow: none;
+  }
+
+  /* Separadores e áreas de ferramentas. */
+  main .border-b,
+  main .border-t {
+    border-color: #1c2b36;
+  }
+
+  /* Diálogos e menus. */
+  [role="dialog"] {
+    border-radius: 0 !important;
+    background: #070d13 !important;
+    border-color: #223744 !important;
+  }
+}
+
+@media (max-width: 768px) {
+  main {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+}
