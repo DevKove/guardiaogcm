@@ -151,12 +151,12 @@ function PlantaoControle() {
       toast.error("Não foi possível consolidar o relatório completo. O plantão continua aberto: " + (e instanceof Error ? e.message : "erro desconhecido"));
       return;
     }
-    const { error } = await supabase
+    const updateQuery = supabase
       .from("plantoes")
       .update({ status: "encerrado", encerrado_em: encerradoEm, resumo: { operador: me.nome, ...resumo } } as never)
       .eq("id", plantao.id)
-      .eq("status", "aberto")
-      .eq("operador_id", me.id);
+      .eq("status", "aberto");
+    const { error } = me.isAdmin ? await updateQuery : await updateQuery.eq("operador_id", me.id);
     setSaving(false);
     if (error) {
       toast.error("Não foi possível finalizar: " + error.message);
@@ -187,13 +187,13 @@ function PlantaoControle() {
               <h2 className="mt-1 text-xl font-bold">{plantao.turno} · {fmtDia(plantao.data_inicio)}</h2>
               <div className="mt-2 flex flex-wrap gap-3 text-xs text-muted-foreground">
                 <span><Clock3 className="mr-1 inline h-3 w-3" />Início: {new Date(plantao.iniciado_em).toLocaleString("pt-BR")}</span>
-                <span>Operador: {plantao.operador_id === me.id ? "Você" : "outro usuário"}</span>
+                <span>Operador: {plantao.operador_id === me.id ? "Você" : me.isAdmin ? "outro operador · visão administrativa" : "outro usuário"}</span>
               </div>
             </div>
             <div className="flex flex-wrap gap-2">
               <Button variant="outline" onClick={() => navigate({ to: "/plantao/$id", params: { id: plantao.id } })}><FileText className="h-4 w-4" /> Abrir relatório</Button>
-              {plantao.operador_id === me.id && (
-                <Button variant="destructive" onClick={finalizar} disabled={saving}><Square className="h-4 w-4" /> {saving ? "Finalizando..." : "Finalizar plantão"}</Button>
+              {(plantao.operador_id === me.id || me.isAdmin) && (
+                <Button variant="destructive" onClick={finalizar} disabled={saving}><Square className="h-4 w-4" /> {saving ? "Finalizando..." : me.isAdmin && plantao.operador_id !== me.id ? "Finalizar plantão (admin)" : "Finalizar plantão"}</Button>
               )}
             </div>
           </div>
