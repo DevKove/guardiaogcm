@@ -132,11 +132,14 @@ function Postos() {
                 </div>
               )}
               {p.observacao && <p className="mt-2 text-xs italic text-muted-foreground">{p.observacao}</p>}
+              <div className="mt-3 border-t pt-3">
+                <Button className="w-full justify-center gap-2" onClick={() => setDestinar({ id: p.id, nome: p.nome })} disabled={!p.ativo} aria-label={`Adicionar agente ao plantão de ${p.nome}`}>
+                  <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary-foreground/20"><Plus className="h-4 w-4" /></span>
+                  Adicionar agente ao plantão
+                </Button>
+              </div>
               {me?.isSupervisor && (
-                <div className="mt-3 flex flex-wrap gap-1 border-t pt-3">
-                  <Button size="sm" variant="outline" onClick={() => setDestinar({ id: p.id, nome: p.nome })} disabled={!p.ativo}>
-                    <CalendarClock className="h-3.5 w-3.5" /> Adicionar agente ao plantão
-                  </Button>
+                <div className="mt-2 flex flex-wrap gap-1">
                   <Button size="sm" variant="ghost" onClick={() => setEdit({ id: p.id, nome: p.nome, tipo: p.tipo, endereco: p.endereco ?? "", bairro: p.bairro ?? "", telefone: p.telefone ?? "", responsavel: p.responsavel ?? "", horario: p.horario ?? "", observacao: p.observacao ?? "" })}>
                     <Pencil className="h-3.5 w-3.5" /> Editar
                   </Button>
