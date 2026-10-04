@@ -262,6 +262,7 @@ export interface FileRouteTypes {
     | '/_authenticated/ocorrencias/$id'
     | '/_authenticated/ocorrencias/nova'
     | '/_authenticated/plantao/$id'
+    | '/_authenticated/relatorio-pdf/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
