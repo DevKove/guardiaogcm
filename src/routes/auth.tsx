@@ -20,6 +20,7 @@ export const Route = createFileRoute("/auth")({
 });
 
 function AuthPage() {
+  // Build refresh: the login header intentionally contains no animated GIFs.
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
