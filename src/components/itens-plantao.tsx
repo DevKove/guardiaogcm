@@ -12,9 +12,9 @@ import { useMe } from "@/hooks/use-me";
 export type ItemCategoria = "arma" | "radio" | "cad";
 
 const CONFIG = {
-  arma: { label: "Armas", kicker: "CONTROLE DE ARMAMENTO", icon: Shield, asset: "arma.gif", movimenta: true },
-  radio: { label: "Rádios", kicker: "COMUNICAÇÃO OPERACIONAL", icon: Radio, asset: "radio.gif", movimenta: true },
-  cad: { label: "CAD", kicker: "CONFERÊNCIA OPERACIONAL", icon: ClipboardCheck, asset: "cad.gif", movimenta: false },
+  arma: { label: "Armas", kicker: "CONTROLE DE ARMAMENTO", icon: Shield, asset: "pistola.gif", movimenta: true },
+  radio: { label: "Rádios", kicker: "COMUNICAÇÃO OPERACIONAL", icon: Radio, asset: "walkie-talkie.gif", movimenta: true },
+  cad: { label: "CAD", kicker: "CONFERÊNCIA OPERACIONAL", icon: ClipboardCheck, asset: "caderno.gif", movimenta: false },
 } as const;
 
 type Item = {
