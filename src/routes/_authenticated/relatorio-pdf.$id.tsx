@@ -49,7 +49,7 @@ function VerPlantao() {
 
   const { p, nome } = data;
   return <RelatorioPdfPlantao p={p} operadorNome={nome} />;
-
+}
 
 function RelatorioPdfPlantao({ p, operadorNome }: { p: Plantao; operadorNome: string }) {
   const { data, isLoading, isError, error } = useQuery({
