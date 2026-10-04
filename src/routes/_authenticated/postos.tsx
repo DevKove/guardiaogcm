@@ -263,6 +263,54 @@ function DestinarDialog({ posto, efetivo, onClose, onSaved }: {
     setAvisoOutroPosto(null);
   }, [posto?.id]);
 
+  useEffect(() => {
+    let ativo = true;
+
+    async function verificarOutroPosto() {
+      setAvisoOutroPosto(null);
+      if (!posto || !equipeId || !data) return;
+
+      const { data: integrantes, error: integrantesError } = await supabase
+        .from("escala_integrantes")
+        .select("escala_id")
+        .eq("equipe_id", equipeId);
+
+      if (integrantesError || !integrantes?.length) return;
+
+      const escalaIds = integrantes.map((item) => item.escala_id);
+      const { data: escalas, error: escalasError } = await supabase
+        .from("escalas")
+        .select("posto_id")
+        .eq("data", data)
+        .in("id", escalaIds)
+        .neq("posto_id", posto.id);
+
+      if (escalasError || !escalas?.length) return;
+
+      const postoIds = [...new Set(escalas.map((item) => item.posto_id).filter(Boolean))] as string[];
+      if (!postoIds.length) return;
+
+      const { data: postos, error: postosError } = await supabase
+        .from("postos_fixos")
+        .select("id, nome")
+        .in("id", postoIds);
+
+      if (postosError || !postos?.length || !ativo) return;
+
+      const nomes = postos.map((p) => p.nome).filter(Boolean);
+      if (nomes.length) {
+        setAvisoOutroPosto(
+          `⚠️ AVISO: Este agente já está destinado ao posto fixo ${nomes.join(", ")} neste dia.`,
+        );
+      }
+    }
+
+    void verificarOutroPosto();
+    return () => {
+      ativo = false;
+    };
+  }, [equipeId, data, posto?.id]);
+
   function mudarTurno(v: string) {
     setTurno(v);
     if (v === "Diurno") { setHoraInicio("07:00"); setHoraFim("19:00"); }
