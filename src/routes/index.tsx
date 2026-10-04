@@ -20,10 +20,10 @@ function Index() {
     <div className="flex min-h-screen flex-col">
       <div className="stripe-top h-2" />
       <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col justify-center px-6 py-16">
-        <div className="flex items-center gap-3 text-primary">
+        <div className="flex items-center justify-between gap-3 text-primary">
           <img src={`${import.meta.env.BASE_URL}cad-assets/distintivo-de-policia.gif`} alt="" aria-hidden="true" className="h-12 w-12 object-contain" />
           <Shield className="hidden h-10 w-10" aria-hidden="true" />
-          <span className="font-mono text-sm tracking-widest">GUARDA CIVIL MUNICIPAL</span>
+          <span className="font-mono text-sm tracking-widest">GUARDA CIVIL MUNICIPAL</span><img src={`${import.meta.env.BASE_URL}cad-assets/policia.gif`} alt="" aria-hidden="true" className="h-16 w-16 shrink-0 object-contain" />
         </div>
         <h1 className="mt-6 text-5xl font-bold leading-tight md:text-6xl">
           Central de Atendimento
