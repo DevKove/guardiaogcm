@@ -704,7 +704,7 @@ header.glass {
     background-color: #050a0f !important;
     background-image:
       linear-gradient(rgba(5,10,15,.72), rgba(5,10,15,.78)),
-      url("/guardiaogcm/cad-assets/police.png") !important;
+      url("/guardiaogcm/cad-assets/siren-light.jpg") !important;
     background-size: cover !important;
     background-position: center !important;
     background-attachment: fixed !important;
@@ -767,7 +767,7 @@ header.glass {
     background-color: #050a0f !important;
     background-image:
       linear-gradient(rgba(5,10,15,.46), rgba(5,10,15,.60)),
-      url("/guardiaogcm/cad-assets/police.png") !important;
+      url("/guardiaogcm/cad-assets/siren-light.jpg") !important;
     background-size: cover !important;
     background-position: center !important;
     background-attachment: fixed !important;
@@ -804,7 +804,7 @@ header.glass {
   .cad-app-shell {
     background-image:
       linear-gradient(rgba(5,10,15,.62), rgba(5,10,15,.72)),
-      url("/guardiaogcm/cad-assets/police.png") !important;
+      url("/guardiaogcm/cad-assets/siren-light.jpg") !important;
     background-size: cover !important;
     background-position: center !important;
     background-attachment: fixed !important;
@@ -815,7 +815,7 @@ header.glass {
     background-color: #050a0f;
     background-image:
       linear-gradient(90deg, rgba(3,8,13,.90), rgba(3,8,13,.76)),
-      url("/guardiaogcm/cad-assets/police.png");
+      url("/guardiaogcm/cad-assets/siren-light.jpg");
     background-size: cover;
     background-position: center;
     background-attachment: fixed;
