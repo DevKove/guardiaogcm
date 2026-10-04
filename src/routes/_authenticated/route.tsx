@@ -88,9 +88,9 @@ function Layout() {
   }
 
   const linkCls =
-    "inline-flex items-center gap-2 rounded-md border border-transparent px-3 py-2 text-[13px] font-medium text-muted-foreground transition-colors hover:border-border hover:bg-accent hover:text-foreground";
+    "inline-flex items-center gap-2 border border-transparent px-3 py-2 text-[12px] font-semibold uppercase tracking-wide text-muted-foreground transition-colors hover:border-cyan-400/30 hover:bg-cyan-400/5 hover:text-cyan-300";
   const activeCls =
-    "!border-primary/25 !bg-primary/10 !text-primary";
+    "!border-cyan-400/35 !bg-cyan-400/10 !text-cyan-300";
 
   const items = [
     { to: "/painel", icon: LayoutList, label: "Ocorrências" },
@@ -104,7 +104,7 @@ function Layout() {
   ] as const;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-[#050a0f] text-slate-100">
       <div className="siren-bar print:hidden" />
 
       <header className="sticky top-0 z-40 border-b border-cyan-400/20 bg-[#05090e] print:hidden">
