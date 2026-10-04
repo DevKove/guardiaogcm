@@ -1,7 +1,7 @@
 import { createFileRoute, Link, Outlet, redirect, useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
-import { Shield, LogOut, LayoutList, PlusCircle, Users, Car, BarChart3, UserCircle, School, History, PlayCircle, Palette, Check, ChevronDown } from "lucide-react";
+import { Shield, LogOut, LayoutList, PlusCircle, Users, Car, BarChart3, UserCircle, School, History, PlayCircle, Palette, Check, ChevronDown, Package, ChevronRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useMe } from "@/hooks/use-me";
 import { ROLE_LABEL } from "@/lib/cad";
@@ -15,6 +15,14 @@ export const Route = createFileRoute("/_authenticated")({
   },
   component: Layout,
 });
+
+function RadioIcon() {
+  return <span className="inline-flex h-4 w-4 items-center justify-center rounded-sm border border-primary/50 text-[9px] font-bold text-primary">R</span>;
+}
+
+function ClipboardIcon() {
+  return <span className="inline-flex h-4 w-4 items-center justify-center rounded-sm border border-primary/50 text-[9px] font-bold text-primary">C</span>;
+}
 
 function Relogio() {
   const [d, setD] = useState(new Date());
@@ -42,6 +50,7 @@ function Layout() {
   const navigate = useNavigate();
   const [theme, setTheme] = useState("escuro");
   const [themeOpen, setThemeOpen] = useState(false);
+  const [itensOpen, setItensOpen] = useState(false);
   const themeMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -155,10 +164,10 @@ function Layout() {
                 <div
                   role="menu"
                   aria-label="Selecionar tema"
-                  className="absolute right-0 top-[calc(100%+0.45rem)] z-[100] w-64 overflow-hidden rounded-lg border p-1.5 shadow-2xl ring-1 ring-black/30 animate-rise bg-card text-card-foreground border-border"
+                  className="absolute right-0 top-[calc(100%+0.45rem)] z-[100] w-64 overflow-hidden rounded-lg border border-border bg-card p-1.5 text-card-foreground shadow-2xl ring-1 ring-black/30 animate-rise"
                 >
-                  <div className="border-b px-2.5 py-2" className="border-border">
-                    <div className="text-[10px] font-bold uppercase tracking-[0.12em]" className="text-muted-foreground">Tema visual</div>
+                  <div className="border-b border-border px-2.5 py-2">
+                    <div className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">Tema visual</div>
                     <div className="mt-0.5 text-[11px]" className="text-muted-foreground">Escolha a aparência do CAD</div>
                   </div>
                   <div className="pt-1">
@@ -228,6 +237,26 @@ function Layout() {
                 <span className="whitespace-nowrap">{i.label}</span>
               </Link>
             ))}
+            <div className="relative">
+              <button type="button" className={linkCls} aria-haspopup="menu" aria-expanded={itensOpen} onClick={() => setItensOpen((open) => !open)}>
+                <Package className="h-4 w-4 shrink-0" strokeWidth={1.9} />
+                <span className="whitespace-nowrap">Itens</span>
+                <ChevronDown className={itensOpen ? "h-3 w-3 rotate-180 transition-transform" : "h-3 w-3 transition-transform"} />
+              </button>
+              {itensOpen && (
+                <div role="menu" aria-label="Itens operacionais" className="absolute left-0 top-[calc(100%+0.25rem)] z-50 min-w-48 overflow-hidden rounded-md border border-border bg-card p-1 text-card-foreground shadow-xl ring-1 ring-black/10">
+                  <Link to="/itens-armas" role="menuitem" className="flex items-center justify-between gap-3 rounded px-3 py-2 text-xs font-semibold text-foreground hover:bg-accent hover:text-accent-foreground">
+                    <span className="flex items-center gap-2"><Shield className="h-4 w-4 text-primary" />Armas</span><ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
+                  </Link>
+                  <Link to="/itens-radios" role="menuitem" className="flex items-center justify-between gap-3 rounded px-3 py-2 text-xs font-semibold text-foreground hover:bg-accent hover:text-accent-foreground">
+                    <span className="flex items-center gap-2"><RadioIcon />Rádios</span><ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
+                  </Link>
+                  <Link to="/itens-cad" role="menuitem" className="flex items-center justify-between gap-3 rounded px-3 py-2 text-xs font-semibold text-foreground hover:bg-accent hover:text-accent-foreground">
+                    <span className="flex items-center gap-2"><ClipboardIcon />CAD</span><ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
+                  </Link>
+                </div>
+              )}
+            </div>
             {me?.isAdmin && (
               <Link to="/usuarios" className={linkCls} activeProps={{ className: activeCls }}>
                 <Users className="h-4 w-4 shrink-0" strokeWidth={1.9} />
