@@ -130,7 +130,7 @@ function Nova() {
         <h2 className="font-semibold text-primary">Solicitante</h2>
         <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-1"><Label>Nome</Label><Input value={f.solicitante_nome} onChange={(e) => set("solicitante_nome", e.target.value)} /></div>
-          <div className="space-y-1"><Label>Telefone</Label><Input value={f.solicitante_telefone} onChange={(e) => set("solicitante_telefone", e.target.value)} /></div>
+          <div className="space-y-1"><Label><span className="inline-flex items-center gap-2"><img src={`${import.meta.env.BASE_URL}cad-assets/telefone.gif`} alt="" aria-hidden="true" className="h-5 w-5 object-contain" />Telefone</span></Label><Input type="tel" autoComplete="tel" value={f.solicitante_telefone} onChange={(e) => set("solicitante_telefone", e.target.value)} /></div>
         </div>
       </section>
 

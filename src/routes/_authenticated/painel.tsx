@@ -220,7 +220,7 @@ function Painel() {
               <tr key={o.id} onClick={() => navigate({ to: "/ocorrencias/$id", params: { id: o.id } })} className="cursor-pointer border-b last:border-0 hover:bg-accent/50">
                 <td className="px-3 py-2 font-mono">
                   <Link to="/ocorrencias/$id" params={{ id: o.id }} className="text-primary hover:underline">
-                    {fmtProtocolo(o.protocolo, o.created_at)}
+                    <span className="inline-flex items-center gap-2"><img src={`${import.meta.env.BASE_URL}cad-assets/alerta.png`} alt="" aria-hidden="true" className="h-4 w-4 object-contain opacity-80" />{fmtProtocolo(o.protocolo, o.created_at)}</span>
                   </Link>
                 </td>
                 <td className="px-3 py-2">
