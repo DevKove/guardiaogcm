@@ -688,3 +688,48 @@ header.glass {
     padding-right: 12px;
   }
 }
+
+
+/* PHOTO POLICE LIGHTS BACKGROUND */
+@keyframes cad-police-photo-pulse {
+  0%, 100% { opacity: .18; transform: scale(1.015); }
+  50% { opacity: .27; transform: scale(1.035); }
+}
+
+@layer components {
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -2;
+    pointer-events: none;
+    background-image:
+      linear-gradient(rgba(3, 8, 13, .78), rgba(3, 8, 13, .82)),
+      url("https://images.unsplash.com/photo-1608095476825-d4e0f916372f?auto=format&fit=crop&fm=jpg&q=80&w=1920");
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
+    filter: saturate(.9) contrast(1.05);
+    opacity: .23;
+    animation: cad-police-photo-pulse 9s ease-in-out infinite;
+    transform-origin: center;
+    will-change: transform, opacity;
+  }
+
+  body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background:
+      linear-gradient(rgba(5, 10, 15, .24), rgba(5, 10, 15, .38)),
+      radial-gradient(ellipse 35% 55% at 8% 50%, rgba(255, 25, 35, .08), transparent 75%),
+      radial-gradient(ellipse 35% 55% at 92% 50%, rgba(30, 115, 255, .09), transparent 75%);
+    opacity: .9;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body::before { animation: none !important; }
+}
