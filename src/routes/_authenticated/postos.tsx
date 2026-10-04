@@ -33,7 +33,7 @@ function Postos() {
   const [destinar, setDestinar] = useState<{ id: string; nome: string } | null>(null);
   const [q, setQ] = useState("");
   const [tipo, setTipo] = useState("");
-  const hoje = new Date().toISOString().slice(0, 10);
+  const hoje = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10);
 
   const { data = [] } = useQuery({
     queryKey: ["postos"],
@@ -134,7 +134,7 @@ function Postos() {
               {p.observacao && <p className="mt-2 text-xs italic text-muted-foreground">{p.observacao}</p>}
               {me?.isSupervisor && (
                 <div className="mt-3 flex flex-wrap gap-1 border-t pt-3">
-                  <Button size="sm" variant="outline" onClick={() => setDestinar({ id: p.id, nome: p.nome })} disabled={!p.ativo || efetivo.length === 0}>
+                  <Button size="sm" variant="outline" onClick={() => setDestinar({ id: p.id, nome: p.nome })} disabled={!p.ativo}>
                     <CalendarClock className="h-3.5 w-3.5" /> Destinar agentes
                   </Button>
                   <Button size="sm" variant="ghost" onClick={() => setEdit({ id: p.id, nome: p.nome, tipo: p.tipo, endereco: p.endereco ?? "", bairro: p.bairro ?? "", telefone: p.telefone ?? "", responsavel: p.responsavel ?? "", horario: p.horario ?? "", observacao: p.observacao ?? "" })}>
@@ -205,7 +205,7 @@ function DestinarDialog({ posto, efetivo, onClose, onSaved }: {
   onClose: () => void;
   onSaved: () => void;
 }) {
-  const [data, setData] = useState(new Date().toLocaleDateString("en-CA"));
+  const [data, setData] = useState(new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10));
   const [turno, setTurno] = useState("Diurno");
   const [horaInicio, setHoraInicio] = useState("07:00");
   const [horaFim, setHoraFim] = useState("19:00");
