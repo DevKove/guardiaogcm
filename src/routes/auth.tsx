@@ -40,7 +40,6 @@ function AuthPage() {
       if (error) throw error;
       navigate({ to: "/painel" });
     } catch {
-      // Keep authentication failures generic to avoid exposing account state or provider details.
       toast.error("Não foi possível autenticar. Confira os dados e tente novamente.");
     } finally {
       setLoading(false);
@@ -62,7 +61,9 @@ function AuthPage() {
       <div className="flex min-h-[calc(100vh-105px)] items-center justify-center px-4 py-8">
         <form onSubmit={submit} className="w-full max-w-sm space-y-4 border border-slate-800 bg-[#070d13] p-6 shadow-none">
           <div className="mb-4 flex items-center gap-3 border-b border-cyan-400/20 pb-4">
-            <img src={`${import.meta.env.BASE_URL}cad-assets/distintivo-de-policia.gif`} alt="Distintivo animado da Guarda Municipal" className="h-14 w-14 shrink-0 object-contain" /><img src={`${import.meta.env.BASE_URL}cad-assets/policia1.gif`} alt="" aria-hidden="true" className="h-12 w-12 shrink-0 object-contain" />
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-md border border-cyan-400/25">
+              <Shield className="h-6 w-6 text-cyan-300" />
+            </div>
             <div>
               <div className="flex items-center gap-2 text-cyan-300">
                 <Shield className="h-4 w-4" />
