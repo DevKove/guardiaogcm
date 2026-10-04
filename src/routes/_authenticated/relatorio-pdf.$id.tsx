@@ -270,14 +270,14 @@ function gerarPdfPlantao(p: Plantao, operadorNome: string, data: DadosRelatorioP
   section("Identificação do plantão", "DADOS GERAIS");
   const colGap = 18;
   const colW = (contentW - colGap) / 2;
-  const leftFields = [
+  const leftFields: [string, string | null | undefined][] = [
     ["Operador responsável", operadorNome],
     ["Supervisor", p.supervisor],
     ["Operador de rádio", p.operador_radio],
     ["Nome do plantão", p.nome_plantao],
     ["Equipe / grupamento", p.equipe],
   ];
-  const rightFields = [
+  const rightFields: [string, string | null | undefined][] = [
     ["Horário previsto", p.horario],
     ["Início efetivo", fmt(p.iniciado_em)],
     ["Encerramento efetivo", fmt(p.encerrado_em)],
@@ -285,29 +285,31 @@ function gerarPdfPlantao(p: Plantao, operadorNome: string, data: DadosRelatorioP
     ["Identificação", p.id],
   ];
   const metaTop = y;
-  for (let i = 0; i < Math.max(leftFields.length, rightFields.length); i++) {
+  leftFields.forEach((left, i) => {
+    const right = rightFields[i];
     const rowHeight = Math.max(
-      field(leftFields[i][0], leftFields[i][1], M + 5, y, colW - 8),
-      field(rightFields[i][0], rightFields[i][1], M + colW + colGap, y, colW - 5),
+      field(left[0], left[1], M + 5, y, colW - 8),
+      right ? field(right[0], right[1], M + colW + colGap, y, colW - 5) : 0,
     );
     y -= rowHeight;
-  }
+  });
   y = Math.min(y, metaTop - 140);
   section("Guarnições", p.guarnicoes?.length ? String(p.guarnicoes.length) + " equipe(s)" : "SEM REGISTRO");
   if (p.guarnicoes?.length) {
-    const widths = [contentW * 0.17, contentW * 0.23, contentW * 0.20, contentW * 0.20, contentW * 0.20];
+    const widths: [number, number, number, number, number] = [contentW * 0.17, contentW * 0.23, contentW * 0.20, contentW * 0.20, contentW * 0.20];
     tableRow([
       { value: "VIATURA", width: widths[0] }, { value: "ENCARREGADO", width: widths[1] },
       { value: "CONDUTOR", width: widths[2] }, { value: "AUXILIAR 1", width: widths[3] }, { value: "AUXILIAR 2", width: widths[4] },
     ], { header: true, height: 24 });
     p.guarnicoes.forEach((g) => tableRow([
-      { value: g.viatura }, { value: g.encarregado }, { value: g.condutor }, { value: g.aux1 }, { value: g.aux2 },
-    ].map((c, i) => ({ ...c, width: widths[i] }))));
+      { value: g.viatura, width: widths[0] }, { value: g.encarregado, width: widths[1] },
+      { value: g.condutor, width: widths[2] }, { value: g.aux1, width: widths[3] }, { value: g.aux2, width: widths[4] },
+    ]));
   } else empty("Nenhuma guarnição foi informada para este plantão.");
 
   section("Ocorrências atendidas", String(data.ocorrencias.length) + " registro(s)");
   if (data.ocorrencias.length) {
-    const widths = [contentW * 0.14, contentW * 0.22, contentW * 0.35, contentW * 0.17, contentW * 0.12];
+    const widths: [number, number, number, number, number] = [contentW * 0.14, contentW * 0.22, contentW * 0.35, contentW * 0.17, contentW * 0.12];
     tableRow([
       { value: "PROTOCOLO", width: widths[0] }, { value: "NATUREZA", width: widths[1] },
       { value: "LOCAL", width: widths[2] }, { value: "STATUS", width: widths[3] }, { value: "PRIORIDADE", width: widths[4] },
@@ -335,15 +337,16 @@ function gerarPdfPlantao(p: Plantao, operadorNome: string, data: DadosRelatorioP
 
   section("Escala operacional", String(data.escalas.length) + " escala(s)");
   if (data.escalas.length) {
-    const widths = [contentW * 0.30, contentW * 0.22, contentW * 0.19, contentW * 0.29];
+    const widths: [number, number, number, number] = [contentW * 0.30, contentW * 0.22, contentW * 0.19, contentW * 0.29];
     tableRow([
       { value: "AGENTES", width: widths[0] }, { value: "FUNÇÃO", width: widths[1] },
       { value: "HORÁRIO", width: widths[2] }, { value: "OBSERVAÇÃO", width: widths[3] },
     ], { header: true, height: 24 });
     data.escalas.forEach((e) => tableRow([
       { value: e.agentes, width: widths[0] }, { value: e.funcao, width: widths[1] },
-      { value: (e.hora_inicio || "—") + "–" + (e.hora_fim || "—"), width: widths[2] }, { value: e.observacao || "—", width: widths[3] },
-    ].map((c, i) => ({ ...c, width: widths[i] }))));
+      { value: (e.hora_inicio || "—") + "–" + (e.hora_fim || "—"), width: widths[2] },
+      { value: e.observacao || "—", width: widths[3] },
+    ]));
   } else empty("Nenhum registro de escala foi lançado durante o período.");
 
   section("Postos e conferências");
