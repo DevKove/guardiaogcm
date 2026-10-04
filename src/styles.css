@@ -1,3 +1,47 @@
+/* CAD SIREN BACKGROUND */
+@keyframes cad-siren-rotate {
+  0% { transform: rotate(0deg) scale(1.08); }
+  50% { transform: rotate(180deg) scale(1.12); }
+  100% { transform: rotate(360deg) scale(1.08); }
+}
+@keyframes cad-siren-pulse {
+  0%, 100% { opacity: 0.035; }
+  50% { opacity: 0.075; }
+}
+@layer components {
+  body { position: relative; isolation: isolate; overflow-x: hidden; }
+  body::before {
+    content: "";
+    position: fixed;
+    inset: -35%;
+    z-index: -2;
+    pointer-events: none;
+    background: conic-gradient(from 0deg at 50% 50%, transparent 0deg, rgba(255,35,35,.42) 38deg, transparent 78deg, transparent 150deg, rgba(35,105,255,.48) 188deg, transparent 228deg, transparent 300deg, rgba(255,255,255,.20) 322deg, transparent 350deg);
+    filter: blur(58px);
+    opacity: .055;
+    animation: cad-siren-rotate 14s linear infinite;
+    transform-origin: center;
+    will-change: transform;
+  }
+  body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background:
+      radial-gradient(ellipse 42% 34% at 14% 52%, rgba(255,30,30,.10), transparent 72%),
+      radial-gradient(ellipse 42% 34% at 86% 52%, rgba(35,105,255,.11), transparent 72%),
+      radial-gradient(ellipse 24% 20% at 50% 50%, rgba(255,255,255,.035), transparent 75%);
+    opacity: .55;
+    animation: cad-siren-pulse 4.5s ease-in-out infinite;
+  }
+  #root { position: relative; z-index: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  body::before, body::after { animation: none !important; }
+}
+
 @import "tailwindcss" source(none);
 @source "../src";
 @import "tw-animate-css";
