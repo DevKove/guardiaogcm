@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { AlertCircle, ArrowLeft, Lock, Printer, RefreshCw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -99,7 +99,10 @@ function RelatorioPdfPlantao({ p, operadorNome }: { p: Plantao; operadorNome: st
     // diretamente ao visualizador nativo de PDF do navegador.
     window.location.replace(url);
 
-    return () => URL.revokeObjectURL(url);
+    // Mantemos o blob disponível durante o carregamento do leitor PDF.
+    // Revogar no cleanup imediato podia invalidar o documento antes da abertura.
+    const revokeTimer = window.setTimeout(() => URL.revokeObjectURL(url), 60_000);
+    return () => window.clearTimeout(revokeTimer);
   }, [p, operadorNome, data]);
 
   if (isLoading) {
