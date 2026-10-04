@@ -373,6 +373,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPlantaoRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/itens-armas': {
+      id: '/_authenticated/itens-armas'
+      path: '/itens-armas'
+      fullPath: '/itens-armas'
+      preLoaderRoute: typeof AuthenticatedItensArmasRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/itens-radios': {
+      id: '/_authenticated/itens-radios'
+      path: '/itens-radios'
+      fullPath: '/itens-radios'
+      preLoaderRoute: typeof AuthenticatedItensRadiosRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/itens-cad': {
+      id: '/_authenticated/itens-cad'
+      path: '/itens-cad'
+      fullPath: '/itens-cad'
+      preLoaderRoute: typeof AuthenticatedItensCadRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/plantao/$id': {
       id: '/_authenticated/plantao/$id'
       path: '/plantao/$id'
@@ -397,6 +418,9 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedOcorrenciasIdRoute: typeof AuthenticatedOcorrenciasIdRoute
   AuthenticatedOcorrenciasNovaRoute: typeof AuthenticatedOcorrenciasNovaRoute
   AuthenticatedPlantaoRoute: typeof AuthenticatedPlantaoRoute
+  AuthenticatedItensArmasRoute: typeof AuthenticatedItensArmasRoute
+  AuthenticatedItensRadiosRoute: typeof AuthenticatedItensRadiosRoute
+  AuthenticatedItensCadRoute: typeof AuthenticatedItensCadRoute
   AuthenticatedPlantaoIdRoute: typeof AuthenticatedPlantaoIdRoute
 }
 
