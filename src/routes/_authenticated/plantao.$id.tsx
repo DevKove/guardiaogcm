@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { useMe } from "@/hooks/use-me";
 import { FichaPlantao } from "@/components/ficha-plantao";
-import { carregarAtividades, fmtDia, type Plantao, type PlantaoAtividade } from "@/lib/plantao";
+import { carregarAtividades, fmtDia, type Plantao } from "@/lib/plantao";
 
 export const Route = createFileRoute("/_authenticated/plantao/$id")({
   head: () => ({ meta: [{ title: "Relatório de plantão · CAD" }] }),
