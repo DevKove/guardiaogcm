@@ -26,6 +26,7 @@ import { Route as AuthenticatedOcorrenciasIdRouteImport } from './routes/_authen
 import { Route as AuthenticatedOcorrenciasNovaRouteImport } from './routes/_authenticated/ocorrencias.nova'
 import { Route as AuthenticatedPlantaoRouteImport } from './routes/_authenticated/plantao'
 import { Route as AuthenticatedPlantaoIdRouteImport } from './routes/_authenticated/plantao.$id'
+import { Route as AuthenticatedRelatorioPdfIdRouteImport } from './routes/_authenticated/relatorio-pdf.$id'
 import { Route as AuthenticatedItensArmasRouteImport } from './routes/_authenticated/itens-armas'
 import { Route as AuthenticatedItensRadiosRouteImport } from './routes/_authenticated/itens-radios'
 import { Route as AuthenticatedItensCadRouteImport } from './routes/_authenticated/itens-cad'
@@ -125,6 +126,11 @@ const AuthenticatedPlantaoIdRoute = AuthenticatedPlantaoIdRouteImport.update({
   path: '/plantao/$id',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedRelatorioPdfIdRoute = AuthenticatedRelatorioPdfIdRouteImport.update({
+  id: '/relatorio-pdf/$id',
+  path: '/relatorio-pdf/$id',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -146,6 +152,7 @@ export interface FileRoutesByFullPath {
   '/itens-cad': typeof AuthenticatedItensCadRoute
   '/plantao': typeof AuthenticatedPlantaoRoute
   '/plantao/$id': typeof AuthenticatedPlantaoIdRoute
+  '/relatorio-pdf/$id': typeof AuthenticatedRelatorioPdfIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -166,6 +173,7 @@ export interface FileRoutesByTo {
   '/itens-radios': typeof AuthenticatedItensRadiosRoute
   '/itens-cad': typeof AuthenticatedItensCadRoute
   '/plantao/$id': typeof AuthenticatedPlantaoIdRoute
+  '/relatorio-pdf/$id': typeof AuthenticatedRelatorioPdfIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -189,6 +197,7 @@ export interface FileRoutesById {
   '/_authenticated/itens-cad': typeof AuthenticatedItensCadRoute
   '/_authenticated/plantao': typeof AuthenticatedPlantaoRoute
   '/_authenticated/plantao/$id': typeof AuthenticatedPlantaoIdRoute
+  '/_authenticated/relatorio-pdf/$id': typeof AuthenticatedRelatorioPdfIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -212,6 +221,7 @@ export interface FileRouteTypes {
     | '/itens-cad'
     | '/plantao'
     | '/plantao/$id'
+    | '/relatorio-pdf/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -233,6 +243,7 @@ export interface FileRouteTypes {
     | '/itens-cad'
     | '/plantao'
     | '/plantao/$id'
+    | '/relatorio-pdf/$id'
   id:
     | '__root__'
     | '/'
@@ -399,6 +410,13 @@ declare module '@tanstack/react-router' {
       path: '/plantao/$id'
       fullPath: '/plantao/$id'
       preLoaderRoute: typeof AuthenticatedPlantaoIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/relatorio-pdf/$id': {
+      id: '/_authenticated/relatorio-pdf/$id'
+      path: '/relatorio-pdf/$id'
+      fullPath: '/relatorio-pdf/$id'
+      preLoaderRoute: typeof AuthenticatedRelatorioPdfIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
   }
