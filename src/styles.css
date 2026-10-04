@@ -32,7 +32,9 @@
     background:
       radial-gradient(ellipse 42% 34% at 14% 52%, rgba(255,30,30,.10), transparent 72%),
       radial-gradient(ellipse 42% 34% at 86% 52%, rgba(35,105,255,.11), transparent 72%),
-      radial-gradient(ellipse 24% 20% at 50% 50%, rgba(255,255,255,.035), transparent 75%);
+      radial-gradient(ellipse 24% 20% at 50% 50%, rgba(255,255,255,.035), transparent 75%),
+      linear-gradient(rgba(5,10,15,.82), rgba(5,10,15,.82)),
+      url("/guardiaogcm/cad-assets/siren-light.jpg") center / cover no-repeat;
     opacity: .55;
     animation: cad-siren-pulse 4.5s ease-in-out infinite;
   }
