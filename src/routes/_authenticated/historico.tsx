@@ -81,18 +81,17 @@ function Historico() {
                   <div className="mt-1 text-xs text-success">Finalizado</div>
                 </div>
                 <div className="flex shrink-0 flex-col gap-1">
-                  <Button
-  type="button"
-  size="sm"
-  variant="outline"
-  aria-label={`Visualizar PDF do plantão ${p.turno}`}
-  onClick={() => {
-    window.location.assign(`/guardiaogcm/relatorio-pdf/${encodeURIComponent(p.id)}`);
-  }}
->
-  <FileText className="h-4 w-4" />
-  Visualizar PDF
-</Button>
+                  <Button asChild size="sm" variant="outline">
+                    <a
+                      href={`/guardiaogcm/relatorio-pdf/${encodeURIComponent(p.id)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={`Visualizar PDF do plantão ${p.turno} em nova guia`}
+                    >
+                      <FileText className="h-4 w-4" />
+                      Visualizar PDF
+                    </a>
+                  </Button>
                   {me?.isAdmin && <Button asChild size="sm"><a href={`/guardiaogcm/plantao?historico=${encodeURIComponent(p.id)}`} className="inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm"><Pencil className="h-4 w-4" /> Editar</a></Button>}
                 </div>
               </div>
