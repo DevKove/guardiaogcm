@@ -60,9 +60,9 @@ function RelatorioOficial({ p, operadorNome }: { p: Plantao; operadorNome: strin
       <style>{`
         @page { size: A4; margin: 12mm; }
         @media print {
-          html, body { background: #fff !important; }
+          html, body { background: #fff !important; color-scheme: light !important; }
           body { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-          .report-screen { min-height: 0 !important; padding: 0 !important; background: #fff !important; }
+          .report-screen { min-height: 0 !important; padding: 0 !important; background: #fff !important; }\n          .report-paper, .report-paper * { background-color: #fff !important; background-image: none !important; color-scheme: light !important; }\n          .report-paper { color: #111827 !important; }\n          .report-paper * { border-color: #d1d5db !important; color: inherit; }
           .report-toolbar { display: none !important; }
           .report-paper { max-width: none !important; margin: 0 !important; border: 0 !important; box-shadow: none !important; overflow: visible !important; }
           .report-section { break-inside: avoid; }
@@ -92,7 +92,7 @@ function RelatorioOficial({ p, operadorNome }: { p: Plantao; operadorNome: strin
                 <p className="mt-1 max-w-md text-xs text-slate-300">Central de Atendimento e Despacho · Registro operacional oficial</p>
               </div>
             </div>
-            <div className="relative rounded-lg border border-cyan-200/30 bg-white/10 px-4 py-3 text-right backdrop-blur-sm">
+            <div className="relative rounded-lg border border-slate-200 bg-white px-3 py-2 text-right">
               <div className="text-[9px] font-bold uppercase tracking-[0.2em] text-cyan-200">Situação do plantão</div>
               <div className="mt-1 text-xs font-extrabold uppercase tracking-wide">{statusLabel}</div>
               <div className="mt-1 text-xs text-slate-300">{fmtDia(p.data_inicio)} · {p.turno || "Turno não informado"}</div>
