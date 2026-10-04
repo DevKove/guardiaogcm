@@ -98,116 +98,163 @@ function Postos() {
   const cobertos = new Set(alocacoesHoje.map((e) => e.posto_id).filter(Boolean));
 
   return (
-    <div className="min-h-full space-y-6 pb-8">
-      <div className="relative overflow-hidden rounded-2xl border border-border/60 bg-gradient-to-br from-primary/10 via-card to-card p-5 shadow-sm md:p-6">
-        <div className="absolute -right-12 -top-12 h-36 w-36 rounded-full bg-primary/10 blur-2xl" />
-        <div className="relative flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
-          <div className="flex items-start gap-4">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-lg">
-              <School className="h-6 w-6" />
-            </div>
+    <div className="min-h-full space-y-6 bg-[#050a0f] pb-10 text-slate-100">
+      <section className="relative overflow-hidden border-b border-cyan-400/20 bg-[#05090e] px-4 py-5 md:px-6">
+        <div className="absolute inset-x-0 top-0 h-px bg-cyan-400/80" />
+        <div className="relative mx-auto max-w-[1600px]">
+          <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
             <div>
-              <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-primary">Central de Operações</div>
-              <h1 className="mt-1 text-2xl font-bold tracking-tight">Postos fixos</h1>
-              <p className="mt-1 max-w-2xl text-sm text-muted-foreground">Acompanhe a cobertura dos pontos estratégicos e destine agentes diretamente para o plantão.</p>
+              <div className="flex items-center gap-2">
+                <span className="h-2 w-2 rounded-full bg-cyan-400 shadow-[0_0_10px_rgba(34,211,238,.75)]" />
+                <span className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-300">CAD GUARDA MUNICIPAL</span>
+              </div>
+              <div className="mt-1 text-[10px] font-medium uppercase tracking-[0.24em] text-slate-500">Atendimento / Despacho / Gestão de postos fixos</div>
+              <h1 className="mt-5 text-2xl font-bold tracking-tight text-white md:text-3xl">Postos fixos</h1>
+              <p className="mt-1 max-w-2xl text-sm text-slate-400">Controle operacional dos pontos estratégicos e da destinação de agentes por plantão.</p>
             </div>
-          </div>
-          <div className="flex items-center gap-3 rounded-xl border border-border/60 bg-background/70 px-4 py-3 backdrop-blur">
-            <span className="live-dot h-2.5 w-2.5 rounded-full bg-success" />
-            <div>
-              <div className="text-xs font-semibold">Operação ativa</div>
-              <div className="text-[11px] text-muted-foreground">{new Date(hoje + "T12:00:00").toLocaleDateString("pt-BR", { weekday: "long", day: "2-digit", month: "long" })}</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-        <StatCard icon={Building2} label="Postos ativos" value={data.filter((p) => p.ativo).length} />
-        <StatCard icon={School} label="Escolas" value={data.filter((p) => p.tipo === "Escola").length} tone="text-info" delay={60} />
-        <StatCard icon={HeartPulse} label="Saúde" value={data.filter((p) => p.tipo === "Unidade de Saúde" || p.tipo === "UPA / Hospital").length} tone="text-success" delay={120} />
-        <StatCard icon={User} label="Com agentes hoje" value={`${cobertos.size}/${data.filter((p) => p.ativo).length}`} tone="text-warning" delay={180} />
-      </div>
-
-      <div className="flex flex-col gap-3 rounded-2xl border border-border/60 bg-card/80 p-3 shadow-sm md:flex-row md:items-center">
-        <div className="relative w-full max-w-sm">
-          <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input className="pl-9" placeholder="Buscar nome, bairro, endereço..." value={q} onChange={(e) => setQ(e.target.value)} />
-        </div>
-        <select className={`${selectCls} w-full md:w-auto`} value={tipo} onChange={(e) => setTipo(e.target.value)}>
-          <option value="" className="bg-popover">Todos os tipos</option>
-          {TIPOS_POSTO.map((t) => <option key={t} className="bg-popover">{t}</option>)}
-        </select>
-      </div>
-
-      <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-        {lista.map((p, i) => {
-          const Icon = ICONES[p.tipo] ?? Building2;
-          const esc = alocacoesHoje.filter((e) => e.posto_id === p.id);
-          return (
-            <div key={p.id} className={`card-3d lift animate-rise p-4 ${!p.ativo ? "opacity-50" : ""}`} style={{ animationDelay: `${i * 40}ms` }}>
-              <div className="flex items-start gap-3">
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary ring-1 ring-primary/10"><Icon className="h-5 w-5" /></div>
-                <div className="min-w-0 flex-1">
-                  <div className="font-semibold leading-tight">{p.nome}</div>
-                  <div className="text-xs text-muted-foreground">{p.tipo}</div>
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="border border-slate-700 bg-[#080f16] px-4 py-2.5">
+                <div className="text-[10px] uppercase tracking-wider text-slate-500">Data operacional</div>
+                <div className="mt-0.5 text-sm font-semibold text-white">{new Date(hoje + "T12:00:00").toLocaleDateString("pt-BR")}</div>
+              </div>
+              <div className="border border-emerald-400/30 bg-emerald-400/5 px-4 py-2.5">
+                <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-wider text-emerald-300">
+                  <span className="live-dot h-1.5 w-1.5 rounded-full bg-emerald-400" /> Operação ativa
                 </div>
-                {esc.length > 0
-                  ? <span className="flex items-center gap-1.5 rounded-full border border-success px-2 py-0.5 text-xs text-success"><span className="live-dot h-1.5 w-1.5 rounded-full bg-success" />Coberto</span>
-                  : <span className="rounded-full border border-muted-foreground px-2 py-0.5 text-xs text-muted-foreground">Sem agentes destinados</span>}
+                <div className="mt-0.5 text-xs text-slate-400">Cobertura em tempo real</div>
               </div>
-              <div className="mt-3 space-y-1.5 text-xs text-muted-foreground">
-                <div className="flex gap-1.5"><MapPin className="h-3.5 w-3.5 shrink-0" />{p.endereco || "—"}{p.bairro ? ` · ${p.bairro}` : ""}</div>
-                <div className="flex gap-1.5"><Phone className="h-3.5 w-3.5" />{p.telefone || "—"}</div>
-                <div className="flex gap-1.5"><User className="h-3.5 w-3.5" />{p.responsavel || "—"}</div>
-                <div className="flex gap-1.5"><Clock className="h-3.5 w-3.5" />{p.horario || "—"}</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <main className="mx-auto max-w-[1600px] space-y-5 px-4 md:px-6">
+        <section className="border border-cyan-400/20 bg-[#070d13] p-4 md:p-5">
+          <div className="mb-4 flex items-center justify-between gap-3">
+            <div>
+              <div className="text-xs font-semibold uppercase tracking-[0.18em] text-cyan-300">Painel operacional</div>
+              <h2 className="mt-1 text-lg font-bold text-white">Cobertura dos postos</h2>
+            </div>
+            <div className="hidden text-right text-xs text-slate-500 sm:block">Destinações registradas hoje</div>
+          </div>
+          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+            {[
+              { label: "Postos ativos", value: data.filter((p) => p.ativo).length, icon: Building2, tone: "text-cyan-300" },
+              { label: "Escolas", value: data.filter((p) => p.tipo === "Escola").length, icon: School, tone: "text-sky-300" },
+              { label: "Saúde", value: data.filter((p) => p.tipo === "Unidade de Saúde" || p.tipo === "UPA / Hospital").length, icon: HeartPulse, tone: "text-emerald-300" },
+              { label: "Com agentes hoje", value: `${cobertos.size}/${data.filter((p) => p.ativo).length}`, icon: User, tone: "text-amber-300" },
+            ].map((s) => (
+              <div key={s.label} className="border border-slate-800 bg-[#091119] p-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">{s.label}</span>
+                  <s.icon className={`h-4 w-4 ${s.tone}`} />
+                </div>
+                <div className={`mt-2 text-2xl font-bold ${s.tone}`}>{s.value}</div>
               </div>
-              {esc.length > 0 && (
-                <div className="mt-4 rounded-xl border border-success/30 bg-success/5 p-3 text-xs">
-                  {esc.map((e, j) => (
-                    <div key={j} className="flex items-center justify-between gap-2">
-                      <span><b>{e.turno}:</b> {e.agentes}</span>
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="ghost"
-                        className="h-7 px-2 text-destructive hover:text-destructive"
-                        onClick={() => removerAgentePosto(e)}
-                        title="Remover agente do posto fixo"
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                        <span className="sr-only">Remover agente do posto</span>
-                      </Button>
+            ))}
+          </div>
+        </section>
+
+        <section className="flex flex-col gap-3 border border-slate-800 bg-[#070d13] p-3 md:flex-row md:items-center">
+          <div className="relative min-w-0 flex-1">
+            <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-500" />
+            <Input
+              className="h-10 border-slate-700 bg-[#050a0f] pl-9 text-slate-100 placeholder:text-slate-600 focus-visible:ring-cyan-400"
+              placeholder="Buscar posto, bairro, endereço..."
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+            />
+          </div>
+          <select className={`${selectCls} h-10 border-slate-700 bg-[#050a0f] text-slate-200 md:w-56`} value={tipo} onChange={(e) => setTipo(e.target.value)}>
+            <option value="" className="bg-[#070d13]">Todos os tipos</option>
+            {TIPOS_POSTO.map((t) => <option key={t} className="bg-[#070d13]">{t}</option>)}
+          </select>
+        </section>
+
+        <section>
+          <div className="mb-3 flex items-end justify-between">
+            <div>
+              <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500">Rede operacional</div>
+              <h2 className="mt-1 text-xl font-bold text-white">Pontos estratégicos</h2>
+            </div>
+            <div className="text-xs text-slate-500">{lista.length} posto(s)</div>
+          </div>
+
+          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+            {lista.map((p, i) => {
+              const Icon = ICONES[p.tipo] ?? Building2;
+              const esc = alocacoesHoje.filter((e) => e.posto_id === p.id);
+              return (
+                <article key={p.id} className={`group border border-slate-800 bg-[#070d13] transition-colors hover:border-cyan-400/50 ${!p.ativo ? "opacity-50" : ""}`} style={{ animationDelay: `${i * 40}ms` }}>
+                  <div className="border-b border-slate-800 px-4 py-3">
+                    <div className="flex items-start gap-3">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center border border-cyan-400/20 bg-cyan-400/5 text-cyan-300">
+                        <Icon className="h-5 w-5" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="truncate text-sm font-bold text-white">{p.nome}</div>
+                        <div className="mt-0.5 text-[10px] uppercase tracking-wider text-slate-500">{p.tipo}</div>
+                      </div>
+                      {esc.length > 0 ? (
+                        <span className="flex shrink-0 items-center gap-1.5 border border-emerald-400/30 bg-emerald-400/5 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-emerald-300">
+                          <span className="live-dot h-1.5 w-1.5 rounded-full bg-emerald-400" /> Coberto
+                        </span>
+                      ) : (
+                        <span className="shrink-0 border border-slate-700 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-slate-500">Sem agente</span>
+                      )}
                     </div>
-                  ))}
-                </div>
-              )}
-              {p.observacao && <p className="mt-2 text-xs italic text-muted-foreground">{p.observacao}</p>}
-              <div className="mt-4 border-t border-border/60 pt-4">
-                <Button className="h-11 w-full justify-center gap-2 rounded-xl shadow-sm transition-transform hover:scale-[1.01]" onClick={() => setDestinar({ id: p.id, nome: p.nome })} disabled={!p.ativo} aria-label={`Adicionar agente ao plantão de ${p.nome}`}>
-                  <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary-foreground/20"><Plus className="h-4 w-4" /></span>
-                  Adicionar agente ao plantão
-                </Button>
-              </div>
-              {me?.isSupervisor && (
-                <div className="mt-2 flex flex-wrap gap-1">
-                  <Button size="sm" variant="ghost" onClick={() => setEdit({ id: p.id, nome: p.nome, tipo: p.tipo, endereco: p.endereco ?? "", bairro: p.bairro ?? "", telefone: p.telefone ?? "", responsavel: p.responsavel ?? "", horario: p.horario ?? "", observacao: p.observacao ?? "" })}>
-                    <Pencil className="h-3.5 w-3.5" /> Editar
-                  </Button>
-                  <Button size="sm" variant="ghost" onClick={() => patch(p.id, { ativo: !p.ativo })}>{p.ativo ? "Desativar" : "Reativar"}</Button>
-                  {me.isAdmin && <Button size="sm" variant="ghost" className="ml-auto text-destructive" onClick={() => remover(p.id)}><Trash2 className="h-3.5 w-3.5" /></Button>}
-                </div>
-              )}
-            </div>
-          );
-        })}
-        {lista.length === 0 && <div className="card-3d col-span-full p-10 text-center text-muted-foreground">Nenhum posto cadastrado.</div>}
-      </div>
+                  </div>
+
+                  <div className="space-y-2 px-4 py-3 text-xs text-slate-400">
+                    <div className="flex gap-2"><MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0 text-cyan-400" /><span>{p.endereco || "Endereço não informado"}{p.bairro ? ` · ${p.bairro}` : ""}</span></div>
+                    <div className="flex gap-2"><Phone className="h-3.5 w-3.5 shrink-0 text-slate-500" /><span>{p.telefone || "Telefone não informado"}</span></div>
+                    <div className="flex gap-2"><User className="h-3.5 w-3.5 shrink-0 text-slate-500" /><span>{p.responsavel || "Responsável não informado"}</span></div>
+                    <div className="flex gap-2"><Clock className="h-3.5 w-3.5 shrink-0 text-slate-500" /><span>{p.horario || "Horário não informado"}</span></div>
+                  </div>
+
+                  {esc.length > 0 && (
+                    <div className="mx-4 mb-3 border border-cyan-400/15 bg-cyan-400/[0.03]">
+                      <div className="border-b border-slate-800 px-3 py-2 text-[10px] font-semibold uppercase tracking-wider text-cyan-300">Agentes destinados</div>
+                      {esc.map((e, j) => (
+                        <div key={j} className="flex items-center justify-between gap-2 border-b border-slate-800/70 px-3 py-2 last:border-b-0">
+                          <span className="min-w-0 truncate text-xs text-slate-300"><b className="text-white">{e.turno}</b> · {e.agentes}</span>
+                          <Button type="button" size="sm" variant="ghost" className="h-7 px-2 text-slate-500 hover:bg-red-400/10 hover:text-red-300" onClick={() => removerAgentePosto(e)} title="Remover agente do posto fixo">
+                            <Trash2 className="h-3.5 w-3.5" /><span className="sr-only">Remover agente do posto</span>
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {p.observacao && <p className="mx-4 mb-3 border-l-2 border-slate-700 pl-3 text-xs italic text-slate-500">{p.observacao}</p>}
+
+                  <div className="border-t border-slate-800 p-3">
+                    <Button className="h-10 w-full rounded-none border border-cyan-400/50 bg-cyan-400/10 font-semibold text-cyan-300 shadow-none hover:bg-cyan-400/20" onClick={() => setDestinar({ id: p.id, nome: p.nome })} disabled={!p.ativo} aria-label={`Adicionar agente ao plantão de ${p.nome}`}>
+                      <Plus className="mr-1.5 h-4 w-4" /> Adicionar agente ao plantão
+                    </Button>
+                    {me?.isSupervisor && (
+                      <div className="mt-2 flex items-center gap-1">
+                        <Button size="sm" variant="ghost" className="h-8 text-xs text-slate-400 hover:text-cyan-300" onClick={() => setEdit({ id: p.id, nome: p.nome, tipo: p.tipo, endereco: p.endereco ?? "", bairro: p.bairro ?? "", telefone: p.telefone ?? "", responsavel: p.responsavel ?? "", horario: p.horario ?? "", observacao: p.observacao ?? "" })}>
+                          <Pencil className="h-3.5 w-3.5" /> Editar
+                        </Button>
+                        <Button size="sm" variant="ghost" className="h-8 text-xs text-slate-400 hover:text-cyan-300" onClick={() => patch(p.id, { ativo: !p.ativo })}>{p.ativo ? "Desativar" : "Reativar"}</Button>
+                        {me.isAdmin && <Button size="sm" variant="ghost" className="ml-auto h-8 text-xs text-red-400 hover:bg-red-400/10 hover:text-red-300" onClick={() => remover(p.id)}><Trash2 className="h-3.5 w-3.5" /></Button>}
+                      </div>
+                    )}
+                  </div>
+                </article>
+              );
+            })}
+            {lista.length === 0 && <div className="col-span-full border border-slate-800 bg-[#070d13] p-10 text-center text-sm text-slate-500">Nenhum posto cadastrado.</div>}
+          </div>
+        </section>
+      </main>
 
       <PostoDialog f={edit} onClose={() => setEdit(null)} />
       <DestinarDialog posto={destinar} efetivo={efetivo} onClose={() => setDestinar(null)} onSaved={() => { qc.invalidateQueries({ queryKey: ["postos-agentes"] }); qc.invalidateQueries({ queryKey: ["postos-agentes-hoje"] }); }} />
     </div>
   );
+
 }
 
 function PostoDialog({ f: init, onClose }: { f: Form | null; onClose: () => void }) {
