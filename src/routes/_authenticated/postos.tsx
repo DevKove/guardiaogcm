@@ -267,33 +267,28 @@ function DestinarDialog({ posto, efetivo, onClose, onSaved }: {
     setAvisoOutroPosto(null);
     if (!posto || !idAgente || !dataAtuacao) return;
 
-    const { data: integrantes, error: integrantesError } = await supabase
-      .from("escala_integrantes")
-      .select("escala_id")
-      .eq("equipe_id", idAgente);
+    // A tabela escalas já guarda o nome do agente e é a mesma fonte usada
+    // para exibir as destinações nos cartões dos postos. Isso evita depender
+    // de uma segunda leitura de escala_integrantes para a validação visual.
+    const membro = efetivo.find((m) => m.id === idAgente);
+    if (!membro?.nome) return;
 
-    if (integrantesError) {
-      console.error("Erro ao verificar outros postos:", integrantesError);
-      return;
-    }
-
-    if (!integrantes?.length) return;
-
-    const escalaIds = integrantes.map((item) => item.escala_id);
-    const { data: escalas, error: escalasError } = await supabase
+    const { data: escalas, error } = await supabase
       .from("escalas")
-      .select("id, posto_id")
+      .select("id, posto_id, agentes")
       .eq("data", dataAtuacao)
-      .in("id", escalaIds)
+      .eq("agentes", membro.nome)
       .neq("posto_id", posto.id);
 
-    if (escalasError) {
-      console.error("Erro ao verificar escalas do agente:", escalasError);
+    if (error) {
+      console.error("Erro ao verificar outros postos:", error);
       return;
     }
 
+    if (!escalas?.length) return;
+
     const postoIds = [...new Set(
-      (escalas ?? []).map((escala) => escala.posto_id).filter(Boolean),
+      escalas.map((escala) => escala.posto_id).filter(Boolean),
     )] as string[];
 
     if (!postoIds.length) return;
