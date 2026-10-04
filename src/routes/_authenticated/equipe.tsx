@@ -86,7 +86,7 @@ function Equipe() {
 
   return (
     <div className="space-y-6">
-      <PageHeader icon={Shield} kicker="EFETIVO OPERACIONAL" title="Equipe">
+      <PageHeader icon={Shield} asset="police.png" kicker="EFETIVO OPERACIONAL" title="Equipe">
         {me?.isSupervisor && <Button onClick={() => setEdit({ ...vazio })}><img src={`${import.meta.env.BASE_URL}cad-assets/adicionar.gif`} alt="" aria-hidden="true" className="h-5 w-5 object-contain" /> Novo integrante</Button>}
       </PageHeader>
 
