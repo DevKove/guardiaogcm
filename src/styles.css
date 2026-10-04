@@ -758,3 +758,42 @@ header.glass {
 @media (prefers-reduced-motion: reduce) {
   body::before { animation: none !important; }
 }
+
+/* FUNDO OPERACIONAL NO SHELL — aplica diretamente ao container visível do CAD. */
+@layer components {
+  .cad-app-shell {
+    position: relative;
+    isolation: isolate;
+    background-color: #050a0f !important;
+    background-image:
+      linear-gradient(rgba(5,10,15,.46), rgba(5,10,15,.60)),
+      url("https://images.unsplash.com/photo-1608095476825-d4e0f916372f?auto=format&fit=crop&fm=jpg&q=90&w=1920") !important;
+    background-size: cover !important;
+    background-position: center !important;
+    background-attachment: fixed !important;
+    background-repeat: no-repeat !important;
+  }
+
+  .cad-app-shell::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background:
+      radial-gradient(ellipse 42% 75% at 0% 50%, rgba(235,20,35,.28), transparent 70%),
+      radial-gradient(ellipse 42% 75% at 100% 50%, rgba(20,95,255,.30), transparent 70%);
+    mix-blend-mode: screen;
+    animation: cad-police-light-left 5.5s ease-in-out infinite;
+  }
+
+  .cad-app-shell > header,
+  .cad-app-shell > main {
+    position: relative;
+    z-index: 1;
+  }
+
+  .cad-app-shell > main {
+    background: rgba(5,10,15,.48) !important;
+  }
+}
