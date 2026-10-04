@@ -764,6 +764,8 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "supervisor" | "operador"
+      item_categoria: "arma" | "radio" | "cad"
+      item_mov_status: "pendente" | "retirado" | "devolvido" | "conferido"
       ocorrencia_status: "aberta" | "em_atendimento" | "encerrada" | "cancelada"
       viatura_status:
         | "disponivel"
