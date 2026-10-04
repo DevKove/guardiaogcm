@@ -165,10 +165,7 @@ function Painel() {
           </div>
         </section>
       )}
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-3"><img src={`${import.meta.env.BASE_URL}cad-assets/alerta.png`} alt="" aria-hidden="true" className="h-9 w-9 shrink-0 object-contain" /><h1 className="text-2xl font-bold">Ocorrências</h1></div>
-        </div>
+      <div className="flex flex-wrap items-end justify-end gap-4">
         <div className="flex gap-2">
           <Input
             placeholder="Buscar protocolo, endereço, natureza..."
