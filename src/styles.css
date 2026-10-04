@@ -46,47 +46,47 @@
 
 :root {
   color-scheme: dark;
-  --radius: 0.55rem;
-  --background: oklch(0.14 0.018 250);
-  --foreground: oklch(0.94 0.008 245);
-  --card: oklch(0.185 0.018 250);
-  --card-foreground: oklch(0.94 0.008 245);
-  --popover: oklch(0.205 0.02 250);
-  --popover-foreground: oklch(0.94 0.008 245);
-  --primary: oklch(0.72 0.12 235);
-  --primary-foreground: oklch(0.12 0.018 250);
-  --secondary: oklch(0.23 0.02 250);
-  --secondary-foreground: oklch(0.92 0.008 245);
-  --muted: oklch(0.22 0.018 250);
-  --muted-foreground: oklch(0.66 0.018 245);
-  --accent: oklch(0.25 0.022 250);
-  --accent-foreground: oklch(0.95 0.008 245);
-  --destructive: oklch(0.64 0.19 25);
-  --destructive-foreground: oklch(0.98 0 0);
-  --success: oklch(0.7 0.13 150);
-  --info: oklch(0.7 0.12 235);
-  --warning: oklch(0.78 0.13 80);
-  --border: oklch(0.30 0.022 250);
-  --input: oklch(0.28 0.022 250);
-  --ring: oklch(0.72 0.12 235);
-  --chart-1: oklch(0.72 0.12 235);
-  --chart-2: oklch(0.7 0.13 150);
-  --chart-3: oklch(0.78 0.13 80);
-  --chart-4: oklch(0.64 0.19 25);
-  --chart-5: oklch(0.62 0.02 245);
-  --sidebar: oklch(0.115 0.018 250);
-  --sidebar-foreground: oklch(0.92 0.008 245);
-  --sidebar-primary: oklch(0.72 0.12 235);
-  --sidebar-primary-foreground: oklch(0.12 0.018 250);
-  --sidebar-accent: oklch(0.22 0.02 250);
-  --sidebar-accent-foreground: oklch(0.94 0.008 245);
-  --sidebar-border: oklch(0.26 0.022 250);
-  --sidebar-ring: oklch(0.72 0.12 235);
+  --radius: 0.35rem;
+  --background: #050a0f;
+  --foreground: #e7f0f5;
+  --card: #070d13;
+  --card-foreground: #e7f0f5;
+  --popover: #091119;
+  --popover-foreground: #e7f0f5;
+  --primary: #36b9ef;
+  --primary-foreground: #031018;
+  --secondary: #0d1720;
+  --secondary-foreground: #dce8ee;
+  --muted: #0b141c;
+  --muted-foreground: #8495a1;
+  --accent: #10202b;
+  --accent-foreground: #e9f6fb;
+  --destructive: #ef5350;
+  --destructive-foreground: #fff;
+  --success: #54d58a;
+  --info: #36b9ef;
+  --warning: #e8b84a;
+  --border: #1c2b36;
+  --input: #213440;
+  --ring: #36b9ef;
+  --chart-1: #36b9ef;
+  --chart-2: #54d58a;
+  --chart-3: #e8b84a;
+  --chart-4: #ef5350;
+  --chart-5: #8495a1;
+  --sidebar: #03080d;
+  --sidebar-foreground: #dce8ee;
+  --sidebar-primary: #36b9ef;
+  --sidebar-primary-foreground: #031018;
+  --sidebar-accent: #0d1720;
+  --sidebar-accent-foreground: #e9f6fb;
+  --sidebar-border: #162631;
+  --sidebar-ring: #36b9ef;
   --font-sans: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
   --font-mono: "JetBrains Mono", "Cascadia Code", ui-monospace, monospace;
-  --surface-1: oklch(0.17 0.018 250);
-  --surface-2: oklch(0.205 0.02 250);
-  --surface-3: oklch(0.235 0.022 250);
+  --surface-1: #070d13;
+  --surface-2: #091119;
+  --surface-3: #0d1720;
 }
 
 
@@ -314,12 +314,9 @@
 
 @utility card-3d {
   background: var(--surface-1);
-  border: 2px solid var(--border);
-  border-radius: var(--radius-xl);
-  box-shadow:
-    0 10px 24px -16px oklch(0 0 0 / 0.95),
-    0 2px 5px -3px oklch(0 0 0 / 0.55),
-    inset 0 1px 0 color-mix(in oklab, var(--foreground) 7%, transparent);
+  border: 1px solid var(--border);
+  border-radius: 0.55rem;
+  box-shadow: 0 8px 24px -18px rgba(0,0,0,.95), inset 0 1px 0 rgba(255,255,255,.025);
   transition: border-color 160ms ease, background-color 160ms ease, box-shadow 160ms ease;
 }
 
@@ -347,9 +344,9 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border: 2px solid color-mix(in oklab, var(--primary) 28%, var(--border));
-  border-radius: 0.65rem;
-  background: color-mix(in oklab, var(--primary) 10%, var(--surface-2));
+  border: 1px solid color-mix(in oklab, var(--primary) 30%, var(--border));
+  border-radius: 0.35rem;
+  background: color-mix(in oklab, var(--primary) 8%, var(--surface-2));
   color: var(--primary);
 }
 
@@ -428,4 +425,64 @@ header.glass {
 
 header.glass {
   border-bottom-width: 1.5px;
+}
+
+
+/* Linguagem visual CAD — aplicada aos componentes compartilhados de todo o sistema. */
+@layer components {
+  table {
+    border-collapse: separate;
+    border-spacing: 0;
+  }
+
+  thead {
+    background: #081019;
+  }
+
+  th {
+    color: #718390;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+  }
+
+  tbody tr {
+    border-color: var(--border);
+    transition: background-color 120ms ease;
+  }
+
+  tbody tr:hover {
+    background: rgba(54,185,239,.035);
+  }
+
+  [role="dialog"] {
+    border-color: #223744;
+    background: #070d13;
+    box-shadow: 0 28px 70px rgba(0,0,0,.65);
+  }
+
+  [role="dialog"] input,
+  [role="dialog"] textarea,
+  [role="dialog"] select {
+    background: #050a0f;
+  }
+
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: #050a0f;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #213440;
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #2c4858;
+  }
 }
