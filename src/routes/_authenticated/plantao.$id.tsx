@@ -87,88 +87,258 @@ function RelatorioPdfPlantao({ p, operadorNome }: { p: Plantao; operadorNome: st
     queryKey: ["plantao", "pdf", p.id],
     queryFn: () => carregarAtividades(p),
   });
+  const [pdfUrl, setPdfUrl] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    if (!data) return;
+    const blob = gerarPdfPlantao(p, operadorNome, data);
+    const url = URL.createObjectURL(blob);
+    setPdfUrl(url);
+    return () => URL.revokeObjectURL(url);
+  }, [p, operadorNome, data]);
 
   if (isLoading) {
-    return <div className="mx-auto max-w-4xl p-8 text-sm text-muted-foreground">Gerando relatório do plantão...</div>;
+    return <div className="mx-auto max-w-4xl p-8 text-sm text-muted-foreground">Gerando PDF do plantão...</div>;
   }
 
   if (isError || !data) {
-    return <div className="mx-auto max-w-4xl space-y-3 p-8"><div className="font-semibold text-destructive">Não foi possível gerar o relatório.</div><div className="text-sm text-muted-foreground">{error instanceof Error ? error.message : "Erro ao consolidar os dados do plantão."}</div></div>;
+    return (
+      <div className="mx-auto max-w-4xl space-y-3 p-8">
+        <div className="font-semibold text-destructive">Não foi possível gerar o PDF.</div>
+        <div className="text-sm text-muted-foreground">
+          {error instanceof Error ? error.message : "Erro ao consolidar os dados do plantão."}
+        </div>
+      </div>
+    );
+  }
+
+  if (!pdfUrl) {
+    return <div className="mx-auto max-w-4xl p-8 text-sm text-muted-foreground">Preparando visualização PDF...</div>;
   }
 
   return (
-    <div className="min-h-screen bg-white text-black">
-      <div className="mx-auto max-w-4xl space-y-5 p-8 print:max-w-none print:p-6">
-        <div className="flex items-start justify-between border-b-2 border-black pb-4">
-          <div>
-            <div className="text-xs font-bold tracking-[0.22em]">GUARDA CIVIL MUNICIPAL</div>
-            <h1 className="mt-1 text-2xl font-bold">RELATÓRIO DE PLANTÃO</h1>
-            <div className="text-sm">Central de Atendimento e Despacho</div>
-          </div>
-          <div className="text-right text-sm">
-            <div><strong>Data:</strong> {fmtDia(p.data_inicio)}</div>
-            <div><strong>Turno:</strong> {p.turno}</div>
-            <div><strong>Status:</strong> {p.status}</div>
-          </div>
+    <div className="fixed inset-0 z-50 flex min-h-screen flex-col bg-slate-950">
+      <div className="flex shrink-0 items-center justify-between gap-3 border-b border-white/10 bg-slate-900 px-4 py-3 text-white">
+        <div className="min-w-0">
+          <div className="text-xs font-bold uppercase tracking-[0.18em] text-primary">Guarda Civil Municipal</div>
+          <div className="truncate text-sm font-semibold">Relatório de plantão · {fmtDia(p.data_inicio)} · {p.turno}</div>
+          <div className="text-[11px] text-slate-400">Documento PDF real · somente leitura</div>
         </div>
-
-        <div className="grid grid-cols-2 gap-3 border-b pb-4 text-sm md:grid-cols-4">
-          <Campo l="Operador" v={operadorNome} />
-          <Campo l="Equipe" v={p.equipe} />
-          <Campo l="Supervisor" v={p.supervisor} />
-          <Campo l="Horário" v={p.horario} />
-          <Campo l="Início" v={formatarDataHora(p.iniciado_em)} />
-          <Campo l="Encerramento" v={formatarDataHora(p.encerrado_em)} />
-          <Campo l="Nome do plantão" v={p.nome_plantao} />
-          <Campo l="Operador de rádio" v={p.operador_radio} />
-        </div>
-
-        <SecaoPdf titulo="Guarnições">
-          {p.guarnicoes?.length ? (
-            <table className="w-full border-collapse text-xs">
-              <thead><tr className="border-b"><th className="p-1 text-left">Viatura</th><th className="p-1 text-left">Encarregado</th><th className="p-1 text-left">Condutor</th><th className="p-1 text-left">Auxiliar 1</th><th className="p-1 text-left">Auxiliar 2</th></tr></thead>
-              <tbody>{p.guarnicoes.map((g, i) => <tr key={i} className="border-b"><td className="p-1">{g.viatura || "—"}</td><td className="p-1">{g.encarregado || "—"}</td><td className="p-1">{g.condutor || "—"}</td><td className="p-1">{g.aux1 || "—"}</td><td className="p-1">{g.aux2 || "—"}</td></tr>)}</tbody>
-            </table>
-          ) : <VazioPdf />}
-        </SecaoPdf>
-
-        <SecaoPdf titulo="Ocorrências do plantão">
-          {data.ocorrencias.length ? (
-            <table className="w-full border-collapse text-xs">
-              <thead><tr className="border-b"><th className="p-1 text-left">Protocolo</th><th className="p-1 text-left">Natureza</th><th className="p-1 text-left">Endereço</th><th className="p-1 text-left">Status</th><th className="p-1 text-left">Desfecho</th></tr></thead>
-              <tbody>{data.ocorrencias.map((o) => <tr key={o.id} className="border-b"><td className="p-1 font-mono">{o.protocolo}</td><td className="p-1">{o.natureza}</td><td className="p-1">{o.endereco}{o.numero ? ", " + o.numero : ""}{o.bairro ? " — " + o.bairro : ""}</td><td className="p-1">{o.status}</td><td className="p-1">{o.desfecho || "—"}</td></tr>)}</tbody>
-            </table>
-          ) : <VazioPdf />}
-        </SecaoPdf>
-
-        <SecaoPdf titulo="Registros operacionais">
-          {data.registros.length ? <div className="space-y-1 text-xs">{data.registros.map((r) => <div key={r.id} className="border-b pb-1"><strong>{formatarDataHora(r.hora)}</strong> — {data.usuarios[r.criado_por] ?? "Operador"}: {r.texto}</div>)}</div> : <VazioPdf />}
-        </SecaoPdf>
-
-        <SecaoPdf titulo="Ações e histórico">
-          {data.acoes.length ? <div className="space-y-1 text-xs">{data.acoes.map((a, i) => <div key={i} className="border-b pb-1"><strong>{formatarDataHora(a.created_at)}</strong> — {data.usuarios[a.usuario_id] ?? "Operador"}{a.protocolo ? ` · Protocolo ${a.protocolo}` : ""}: {a.descricao}</div>)}</div> : <VazioPdf />}
-        </SecaoPdf>
-
-        <SecaoPdf titulo="Informações registradas">
-          <Campo l="Atividades" v={p.atividades} />
-          <Campo l="Materiais" v={p.materiais} />
-          <Campo l="Informativo" v={p.informativo} />
-          <Campo l="Atividades — verso" v={p.atividades_verso} />
-          <Campo l="Observações" v={p.observacoes} />
-        </SecaoPdf>
-
-        <div className="grid grid-cols-2 gap-12 pt-12 text-center text-xs">
-          <div className="border-t border-black pt-1">Operador responsável</div>
-          <div className="border-t border-black pt-1">Supervisor de turno</div>
-        </div>
-
-        <div className="flex justify-end gap-2 pt-4 print:hidden">
-          <button type="button" onClick={() => window.print()} className="rounded-md border px-4 py-2 text-sm font-semibold">Gerar / salvar PDF</button>
-          <a href="/guardiaogcm/historico" className="rounded-md border px-4 py-2 text-sm">Voltar ao histórico</a>
+        <div className="flex shrink-0 items-center gap-2">
+          <a
+            href={pdfUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="rounded-md border border-white/15 bg-white/5 px-3 py-2 text-xs font-semibold hover:bg-white/10"
+          >
+            Abrir PDF em nova guia
+          </a>
+          <a
+            href={`${import.meta.env.BASE_URL}historico`}
+            className="rounded-md border border-white/15 bg-white/5 px-3 py-2 text-xs font-semibold hover:bg-white/10"
+          >
+            Voltar ao histórico
+          </a>
         </div>
       </div>
+      <iframe
+        title={`PDF do plantão ${p.turno} ${fmtDia(p.data_inicio)}`}
+        src={pdfUrl}
+        className="min-h-0 w-full flex-1 border-0 bg-white"
+      />
     </div>
   );
+}
+
+type DadosRelatorioPlantao = Awaited<ReturnType<typeof carregarAtividades>>;
+
+function gerarPdfPlantao(p: Plantao, operadorNome: string, data: DadosRelatorioPlantao): Blob {
+  const linhas: string[] = [];
+  const add = (text = "") => linhas.push(text);
+  const section = (title: string) => {
+    add("");
+    add(title.toUpperCase());
+    add("-".repeat(Math.min(78, Math.max(20, title.length + 8))));
+  };
+  const campo = (label: string, value?: string | null) => add(`${label}: ${value || "—"}`);
+
+  add("GUARDA CIVIL MUNICIPAL");
+  add("CENTRAL DE ATENDIMENTO E DESPACHO");
+  add("RELATORIO DE PLANTAO");
+  add("");
+  campo("Data", fmtDia(p.data_inicio));
+  campo("Turno", p.turno);
+  campo("Status", p.status);
+  campo("Operador", operadorNome);
+  campo("Equipe", p.equipe);
+  campo("Supervisor", p.supervisor);
+  campo("Horario", p.horario);
+  campo("Inicio", formatarDataHora(p.iniciado_em));
+  campo("Encerramento", formatarDataHora(p.encerrado_em));
+  campo("Nome do plantao", p.nome_plantao);
+  campo("Operador de radio", p.operador_radio);
+
+  section("Guarnicoes");
+  if (p.guarnicoes?.length) {
+    p.guarnicoes.forEach((g, i) => {
+      add(`Guarnicao ${i + 1}`);
+      campo("  Viatura", g.viatura);
+      campo("  Encarregado", g.encarregado);
+      campo("  Condutor", g.condutor);
+      campo("  Auxiliar 1", g.aux1);
+      campo("  Auxiliar 2", g.aux2);
+    });
+  } else add("Nenhuma guarnicao registrada.");
+
+  section("Postos e conferencias");
+  if (p.postos?.length) {
+    p.postos.forEach((posto, i) => add(`${i + 1}. ${typeof posto === "string" ? posto : JSON.stringify(posto)}`));
+  } else add("Nenhum posto ou conferencia registrado.");
+
+  section("Ocorrencias do plantao");
+  if (data.ocorrencias.length) {
+    data.ocorrencias.forEach((o) => {
+      add(`Protocolo: ${o.protocolo || "—"}`);
+      campo("  Natureza", o.natureza);
+      campo("  Endereco", [o.endereco, o.numero, o.bairro].filter(Boolean).join(", "));
+      campo("  Status", o.status);
+      campo("  Desfecho", o.desfecho);
+      add("");
+    });
+  } else add("Nenhuma ocorrencia registrada.");
+
+  section("Registros operacionais");
+  if (data.registros.length) {
+    data.registros.forEach((r) => add(`${formatarDataHora(r.hora)} — ${data.usuarios[r.criado_por] ?? "Operador"}: ${r.texto}`));
+  } else add("Nenhum registro operacional.");
+
+  section("Acoes e historico");
+  if (data.acoes.length) {
+    data.acoes.forEach((a) =>
+      add(`${formatarDataHora(a.created_at)} — ${data.usuarios[a.usuario_id] ?? "Operador"}${a.protocolo ? ` · Protocolo ${a.protocolo}` : ""}: ${a.descricao}`),
+    );
+  } else add("Nenhuma acao registrada.");
+
+  section("Informacoes registradas");
+  campo("Atividades", p.atividades);
+  campo("Materiais", p.materiais);
+  campo("Informativo", p.informativo);
+  campo("Atividades - verso", p.atividades_verso);
+  campo("Observacoes", p.observacoes);
+
+  add("");
+  add("Documento gerado pelo CAD Guarda Civil Municipal.");
+  add("Operador responsavel: ______________________________");
+  add("Supervisor de turno:   ______________________________");
+
+  return criarPdfTexto(linhas);
+}
+
+function criarPdfTexto(linhas: string[]): Blob {
+  const pageWidth = 595;
+  const pageHeight = 842;
+  const marginLeft = 42;
+  const marginTop = 52;
+  const marginBottom = 46;
+  const fontSize = 9;
+  const lineHeight = 13;
+  const maxChars = 92;
+  const wrapped: string[] = [];
+
+  for (const original of linhas) {
+    const line = original || " ";
+    if (line.length <= maxChars) {
+      wrapped.push(line);
+      continue;
+    }
+    let rest = line;
+    while (rest.length > maxChars) {
+      let cut = rest.lastIndexOf(" ", maxChars);
+      if (cut < 20) cut = maxChars;
+      wrapped.push(rest.slice(0, cut));
+      rest = rest.slice(cut).trimStart();
+    }
+    wrapped.push(rest || " ");
+  }
+
+  const linesPerPage = Math.floor((pageHeight - marginTop - marginBottom) / lineHeight);
+  const pages: string[][] = [];
+  for (let i = 0; i < wrapped.length; i += linesPerPage) pages.push(wrapped.slice(i, i + linesPerPage));
+
+  const objects: string[] = [];
+  const addObject = (body: string) => {
+    objects.push(body);
+    return objects.length;
+  };
+
+  const catalogId = addObject("");
+  const pagesId = addObject("");
+  const fontId = addObject("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>");
+  const pageIds: number[] = [];
+
+  for (const pageLines of pages.length ? pages : [[" "]] ) {
+    const commands = [
+      "BT",
+      "/F1 9 Tf",
+      `${marginLeft} ${pageHeight - marginTop} Td`,
+      `${lineHeight} TL`,
+      ...pageLines.map((line, index) => {
+        const safe = pdfEscape(winAnsi(line));
+        return index === 0 ? `(${safe}) Tj` : `T* (${safe}) Tj`;
+      }),
+      "ET",
+    ].join("\n");
+    const stream = `<< /Length ${commands.length} >>\\nstream\\n${commands}\\nendstream`;
+    const contentId = addObject(stream);
+    const pageId = addObject(
+      `<< /Type /Page /Parent ${pagesId} 0 R /MediaBox [0 0 ${pageWidth} ${pageHeight}] /Resources << /Font << /F1 ${fontId} 0 R >> >> /Contents ${contentId} 0 R >>`,
+    );
+    pageIds.push(pageId);
+  }
+
+  objects[catalogId - 1] = `<< /Type /Catalog /Pages ${pagesId} 0 R >>`;
+  objects[pagesId - 1] = `<< /Type /Pages /Kids [${pageIds.map((id) => `${id} 0 R`).join(" ")}] /Count ${pageIds.length} >>`;
+
+  let pdf = "%PDF-1.4\\n%\xE2\xE3\xCF\xD3\\n";
+  const offsets: number[] = [0];
+  for (let i = 0; i < objects.length; i++) {
+    offsets.push(pdf.length);
+    pdf += `${i + 1} 0 obj\\n${objects[i]}\\nendobj\\n`;
+  }
+  const xref = pdf.length;
+  pdf += `xref\\n0 ${objects.length + 1}\\n0000000000 65535 f \\n`;
+  for (let i = 1; i < offsets.length; i++) pdf += `${String(offsets[i]).padStart(10, "0")} 00000 n \\n`;
+  pdf += `trailer\\n<< /Size ${objects.length + 1} /Root ${catalogId} 0 R >>\\nstartxref\\n${xref}\\n%%EOF`;
+
+  const bytes = new Uint8Array(pdf.length);
+  for (let i = 0; i < pdf.length; i++) bytes[i] = pdf.charCodeAt(i) & 0xff;
+  return new Blob([bytes], { type: "application/pdf" });
+}
+
+function winAnsi(value: string): string {
+  return value
+    .replace(/\u20AC/g, "\x80")
+    .replace(/[\u2018\u2019]/g, "'")
+    .replace(/[\u201C\u201D]/g, '"')
+    .replace(/\u2013/g, "-")
+    .replace(/\u2014/g, "-")
+    .replace(/\u2022/g, "*")
+    .replace(/[\u00A0]/g, " ")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, (mark) => {
+      const map: Record<string, string> = {
+        "\u0300": "\x60",
+        "\u0301": "\xB4",
+        "\u0302": "\x5E",
+        "\u0303": "\x7E",
+        "\u0308": "\xA8",
+      };
+      return map[mark] ?? "";
+    });
+}
+
+function pdfEscape(value: string): string {
+  return value.replace(/\\/g, "\\\\").replace(/\(/g, "\\(").replace(/\)/g, "\\)");
 }
 
 function SecaoPdf({ titulo, children }: { titulo: string; children: React.ReactNode }) {
