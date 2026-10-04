@@ -26,6 +26,9 @@ import { Route as AuthenticatedOcorrenciasIdRouteImport } from './routes/_authen
 import { Route as AuthenticatedOcorrenciasNovaRouteImport } from './routes/_authenticated/ocorrencias.nova'
 import { Route as AuthenticatedPlantaoRouteImport } from './routes/_authenticated/plantao'
 import { Route as AuthenticatedPlantaoIdRouteImport } from './routes/_authenticated/plantao.$id'
+import { Route as AuthenticatedItensArmasRouteImport } from './routes/_authenticated/itens-armas'
+import { Route as AuthenticatedItensRadiosRouteImport } from './routes/_authenticated/itens-radios'
+import { Route as AuthenticatedItensCadRouteImport } from './routes/_authenticated/itens-cad'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -108,6 +111,15 @@ const AuthenticatedPlantaoRoute = AuthenticatedPlantaoRouteImport.update({
   path: '/plantao',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedItensArmasRoute = AuthenticatedItensArmasRouteImport.update({
+  id: '/itens-armas', path: '/itens-armas', getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedItensRadiosRoute = AuthenticatedItensRadiosRouteImport.update({
+  id: '/itens-radios', path: '/itens-radios', getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedItensCadRoute = AuthenticatedItensCadRouteImport.update({
+  id: '/itens-cad', path: '/itens-cad', getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedPlantaoIdRoute = AuthenticatedPlantaoIdRouteImport.update({
   id: '/plantao/$id',
   path: '/plantao/$id',
@@ -129,6 +141,9 @@ export interface FileRoutesByFullPath {
   '/imprimir/$id': typeof AuthenticatedImprimirIdRoute
   '/ocorrencias/$id': typeof AuthenticatedOcorrenciasIdRoute
   '/ocorrencias/nova': typeof AuthenticatedOcorrenciasNovaRoute
+  '/itens-armas': typeof AuthenticatedItensArmasRoute
+  '/itens-radios': typeof AuthenticatedItensRadiosRoute
+  '/itens-cad': typeof AuthenticatedItensCadRoute
   '/plantao': typeof AuthenticatedPlantaoRoute
   '/plantao/$id': typeof AuthenticatedPlantaoIdRoute
 }
@@ -166,6 +181,9 @@ export interface FileRoutesById {
   '/_authenticated/imprimir/$id': typeof AuthenticatedImprimirIdRoute
   '/_authenticated/ocorrencias/$id': typeof AuthenticatedOcorrenciasIdRoute
   '/_authenticated/ocorrencias/nova': typeof AuthenticatedOcorrenciasNovaRoute
+  '/_authenticated/itens-armas': typeof AuthenticatedItensArmasRoute
+  '/_authenticated/itens-radios': typeof AuthenticatedItensRadiosRoute
+  '/_authenticated/itens-cad': typeof AuthenticatedItensCadRoute
   '/_authenticated/plantao': typeof AuthenticatedPlantaoRoute
   '/_authenticated/plantao/$id': typeof AuthenticatedPlantaoIdRoute
 }
@@ -186,6 +204,9 @@ export interface FileRouteTypes {
     | '/imprimir/$id'
     | '/ocorrencias/$id'
     | '/ocorrencias/nova'
+    | '/itens-armas'
+    | '/itens-radios'
+    | '/itens-cad'
     | '/plantao'
     | '/plantao/$id'
   fileRoutesByTo: FileRoutesByTo
