@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { AlertCircle, ArrowLeft, Lock, Printer, RefreshCw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -88,25 +88,18 @@ function RelatorioPdfPlantao({ p, operadorNome }: { p: Plantao; operadorNome: st
     queryKey: ["plantao", "pdf", p.id],
     queryFn: () => carregarAtividades(p),
   });
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
 
   useEffect(() => {
     if (!data) return;
 
     const blob = gerarPdfPlantao(p, operadorNome, data);
     const url = URL.createObjectURL(blob);
+    setPdfUrl(url);
 
-    // Entrega o Blob diretamente ao visualizador PDF do navegador.
-    // Primeiro tentamos uma nova guia; se o navegador bloquear a abertura
-    // por não haver mais ativação do usuário após a consulta assíncrona,
-    // fazemos a navegação na própria guia.
-    const pdfWindow = window.open(url, "_blank", "noopener,noreferrer");
-    if (!pdfWindow) {
-      window.location.assign(url);
-    }
-
-    // O leitor PDF pode precisar de alguns segundos para consumir o Blob.
-    const revokeTimer = window.setTimeout(() => URL.revokeObjectURL(url), 60_000);
-    return () => window.clearTimeout(revokeTimer);
+    return () => {
+      URL.revokeObjectURL(url);
+    };
   }, [p, operadorNome, data]);
 
   if (isLoading) {
@@ -114,7 +107,7 @@ function RelatorioPdfPlantao({ p, operadorNome }: { p: Plantao; operadorNome: st
       <div className="flex min-h-screen items-center justify-center bg-slate-950 text-white">
         <div className="text-center">
           <div className="text-sm font-semibold">Gerando PDF do plantão...</div>
-          <div className="mt-1 text-xs text-slate-400">O arquivo será aberto no visualizador PDF do navegador.</div>
+          <div className="mt-1 text-xs text-slate-400">Preparando o documento oficial para visualização.</div>
         </div>
       </div>
     );
@@ -133,9 +126,22 @@ function RelatorioPdfPlantao({ p, operadorNome }: { p: Plantao; operadorNome: st
     );
   }
 
+  if (!pdfUrl) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-slate-950 text-white">
+        <div className="text-sm text-slate-300">Preparando o PDF...</div>
+      </div>
+    );
+  }
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-950 text-white">
-      <div className="text-sm text-slate-300">Abrindo o PDF...</div>
+    <div className="fixed inset-0 z-[9999] bg-black">
+      <embed
+        src={pdfUrl}
+        type="application/pdf"
+        className="h-full w-full border-0"
+        aria-label={`Relatório PDF do plantão ${p.id}`}
+      />
     </div>
   );
 }
