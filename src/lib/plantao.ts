@@ -240,9 +240,14 @@ export async function carregarAtividades(p: {
   const auditoriaData = (plantaoHist.data ?? []) as unknown as PlantaoHistoricoRow[];
   const alteracoes = extrairAlteracoes(auditoriaData);
   const situacaoPorItem = new Map((plantaoItens.data ?? []).map((m: any) => [m.item_id, m]));
+  const movimentoMaisRecentePorItem = new Map<string, any>();
+  for (const m of itemMov.data ?? []) {
+    if (!movimentoMaisRecentePorItem.has(m.item_id)) movimentoMaisRecentePorItem.set(m.item_id, m);
+  }
   const itensPlantao = (catalogoItens.data ?? []).map((item: any) => {
     const mov = situacaoPorItem.get(item.id) ?? {};
-    return { id: item.id, item_id: item.id, categoria: item.categoria, nome: item.nome, identificacao: item.identificacao ?? null, patrimonio: item.patrimonio ?? null, observacao: item.observacao ?? null, ativo: item.ativo, status: mov.status ?? "pendente", situacao: mov.situacao ?? "OK", retirado_por: mov.retirado_por ?? null, retirado_em: mov.retirado_em ?? null, entregue_por: mov.entregue_por ?? null, entregue_em: mov.entregue_em ?? null, conferido_por: mov.conferido_por ?? null, conferido_em: mov.conferido_em ?? null };
+    const hist = movimentoMaisRecentePorItem.get(item.id) ?? {};
+    return { id: item.id, item_id: item.id, categoria: item.categoria, nome: item.nome, identificacao: item.identificacao ?? null, patrimonio: item.patrimonio ?? null, observacao: item.observacao ?? null, ativo: item.ativo, status: mov.status ?? "pendente", situacao: mov.situacao ?? "OK", retirado_por: hist.retirado_por ?? mov.retirado_por ?? null, retirado_em: hist.retirado_em ?? mov.retirado_em ?? null, entregue_por: hist.entregue_por ?? mov.entregue_por ?? null, entregue_em: hist.entregue_em ?? mov.entregue_em ?? null, conferido_por: mov.conferido_por ?? null, conferido_em: mov.conferido_em ?? null };
   });
 
   const movimentacoesItens = (itemMov.data ?? []).map((m: any) => ({
