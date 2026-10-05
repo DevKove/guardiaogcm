@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Users, Pencil, ShieldCheck, ShieldHalf, UserCog, UserCheck, Clock3 } from "lucide-react";
+import { Users, Pencil, ShieldCheck, ShieldHalf, UserCog, UserCheck, Clock3, FlaskConical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { useMe } from "@/hooks/use-me";
 import { PageHeader, StatCard } from "@/components/page-header";
 import { ROLE_LABEL, fmtData, selectCls } from "@/lib/cad";
-import { listarUsuarios, salvarUsuario, excluirUsuario, aprovarUsuario } from "@/lib/usuarios.api";
+import { listarUsuarios, salvarUsuario, excluirUsuario, aprovarUsuario, criarUsuarioTestePendente } from "@/lib/usuarios.api";
 
 export const Route = createFileRoute("/_authenticated/usuarios")({
   head: () => ({ meta: [{ title: "Usuários · CAD" }, { name: "description", content: "Cadastro de usuários e permissões." }] }),
@@ -31,6 +31,7 @@ function Usuarios() {
   const { data: me } = useMe();
   const qc = useQueryClient();
   const [edit, setEdit] = useState<Form | null>(null);
+  const [testOpen, setTestOpen] = useState(false);
   const { data = [], error } = useQuery({ queryKey: ["usuarios"], enabled: !!me?.isAdmin, queryFn: listarUsuarios });
 
   async function aprovar(id: string, nome: string) {
@@ -53,7 +54,10 @@ function Usuarios() {
   return (
     <div className="space-y-6">
       <PageHeader icon={Users} asset="escaneamento-de-rosto.gif" kicker="ADMINISTRAÇÃO" title="Usuários e perfis">
-        <Button onClick={() => setEdit({ ...vazio })}><img src={`${import.meta.env.BASE_URL}cad-assets/adicionar.gif`} alt="" aria-hidden="true" className="h-5 w-5 object-contain" /> Novo usuário</Button>
+        <div className="flex flex-wrap gap-2">
+          <Button variant="outline" onClick={() => setTestOpen(true)}><FlaskConical className="mr-2 h-4 w-4" /> Usuário de teste</Button>
+          <Button onClick={() => setEdit({ ...vazio })}><img src={`${import.meta.env.BASE_URL}cad-assets/adicionar.gif`} alt="" aria-hidden="true" className="h-5 w-5 object-contain" /> Novo usuário</Button>
+        </div>
       </PageHeader>
 
       {data.some((u) => !u.aprovado) && (
@@ -115,7 +119,55 @@ function Usuarios() {
       </div>
 
       <UsuarioDialog f={edit} onClose={() => setEdit(null)} />
+      <TestePendenteDialog open={testOpen} onClose={() => setTestOpen(false)} />
     </div>
+  );
+}
+
+function TestePendenteDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const qc = useQueryClient();
+  const [f, setF] = useState({ email: "", senha: "", nome: "Usuário de teste", matricula: "" });
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    if (open) setF({ email: "", senha: "", nome: "Usuário de teste", matricula: "" });
+  }, [open]);
+
+  const set = (k: keyof typeof f) => (e: React.ChangeEvent<HTMLInputElement>) => setF({ ...f, [k]: e.target.value });
+
+  async function submit(e: React.FormEvent) {
+    e.preventDefault();
+    setBusy(true);
+    try {
+      await criarUsuarioTestePendente(f);
+      toast.success("Usuário de teste criado como pendente");
+      onClose();
+      qc.invalidateQueries({ queryKey: ["usuarios"] });
+    } catch (err) {
+      toast.error((err as Error).message);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2"><FlaskConical className="h-5 w-5 text-warning" /> Usuário de teste administrativo</DialogTitle>
+        </DialogHeader>
+        <div className="rounded-md border border-warning/30 bg-warning/5 p-3 text-sm text-muted-foreground">
+          Cria uma conta confirmada no Auth, mas <strong className="text-foreground">sem aprovação e sem perfil operacional</strong>. Nenhum e-mail é enviado. Use este modo para testar o fluxo de aprovação.
+        </div>
+        <form onSubmit={submit} className="grid grid-cols-2 gap-3">
+          <div className="col-span-2 space-y-1"><Label>Nome completo *</Label><Input required maxLength={120} value={f.nome} onChange={set("nome")} /></div>
+          <div className="space-y-1"><Label>E-mail *</Label><Input type="email" required value={f.email} onChange={set("email")} /></div>
+          <div className="space-y-1"><Label>Matrícula</Label><Input maxLength={40} value={f.matricula} onChange={set("matricula")} /></div>
+          <div className="col-span-2 space-y-1"><Label>Senha *</Label><Input type="password" minLength={12} maxLength={72} required value={f.senha} onChange={set("senha")} /></div>
+          <Button type="submit" disabled={busy} className="col-span-2">{busy ? "Criando..." : "Criar pendente"}</Button>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 }
 
