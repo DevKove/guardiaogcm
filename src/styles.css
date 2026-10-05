@@ -135,7 +135,6 @@
   --surface-3: #0d1720;
 }
 
-
 /* Temas selecionáveis pelo usuário: todas as cores usam tokens para manter componentes consistentes. */
 :root[data-theme="claro"] {
   color-scheme: light;
@@ -447,135 +446,6 @@
   }
 }
 
-@media print {
-  /* Impressão documental: remove completamente o shell visual do CAD. */
-  @page {
-    size: A4 portrait;
-    margin: 10mm 12mm;
-  }
-
-  html,
-  body {
-    background: #fff !important;
-    background-color: #fff !important;
-    background-image: none !important;
-    color: #111 !important;
-  }
-
-  body:has(.cad-print-document),
-  body:has(.cad-print-document) #root,
-  body:has(.cad-print-document) .cad-app-shell,
-  body:has(.cad-print-document) .cad-app-shell > main {
-    background: #fff !important;
-    background-color: #fff !important;
-    background-image: none !important;
-    color: #111 !important;
-  }
-
-  body:has(.cad-print-document) {
-    margin: 0 !important;
-    padding: 0 !important;
-    min-height: 0 !important;
-    color-scheme: light !important;
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-  }
-
-  body:has(.cad-print-document) .cad-app-shell {
-    min-height: 0 !important;
-  }
-
-  body:has(.cad-print-document) .cad-app-shell > main {
-    max-width: none !important;
-    margin: 0 !important;
-    padding: 0 !important;
-  }
-
-  body:has(.cad-print-document) .cad-app-shell > header,
-  body:has(.cad-print-document) .siren-bar,
-  .cad-print-toolbar {
-    display: none !important;
-  }
-
-  .cad-print-document {
-    width: 100% !important;
-    max-width: none !important;
-    min-height: 0 !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    background: #fff !important;
-    background-color: #fff !important;
-    background-image: none !important;
-    color: #111 !important;
-    box-shadow: none !important;
-    text-shadow: none !important;
-  }
-
-  .cad-print-document::before,
-  .cad-print-document::after,
-  .cad-print-document *::before,
-  .cad-print-document *::after {
-    background-image: none !important;
-    box-shadow: none !important;
-  }
-
-  .cad-print-document,
-  .cad-print-document * {
-    color: #111 !important;
-    box-shadow: none !important;
-    text-shadow: none !important;
-  }
-
-  .cad-print-section {
-    break-inside: auto;
-  }
-
-  .cad-print-section > h3 {
-    break-after: avoid;
-  }
-
-  .cad-print-table {
-    width: 100% !important;
-    font-size: 9px !important;
-    border-collapse: collapse !important;
-    background: #fff !important;
-  }
-
-  .cad-print-table thead {
-    display: table-header-group;
-    background: #fff !important;
-  }
-
-  .cad-print-table tbody,
-  .cad-print-table tr,
-  .cad-print-table th,
-  .cad-print-table td {
-    background: #fff !important;
-    background-color: #fff !important;
-    color: #111 !important;
-  }
-
-  .cad-print-table th,
-  .cad-print-table td {
-    padding: 3px 4px !important;
-    border: 1px solid #d1d5db !important;
-  }
-
-  .cad-print-signatures {
-    break-inside: avoid;
-    padding-top: 32px !important;
-  }
-
-  .cad-print-muted {
-    color: #555 !important;
-  }
-
-  .plantao-break {
-    break-before: page;
-  }
-}
-
-
 /* Molduras com contorno ligeiramente mais definido, mantendo os temas existentes. */
 .card-3d,
 .icon-chip {
@@ -593,7 +463,6 @@ header.glass {
 header.glass {
   border-bottom-width: 1.5px;
 }
-
 
 /* Linguagem visual CAD — aplicada aos componentes compartilhados de todo o sistema. */
 @layer components {
@@ -653,7 +522,6 @@ header.glass {
     background: #2c4858;
   }
 }
-
 
 /* Design System global baseado na referência visual de /postos. */
 @layer components {
@@ -715,7 +583,6 @@ header.glass {
     overflow-x: hidden;
   }
 }
-
 
 /* ==========================================================================
    Layout global — referência visual oficial: /postos
@@ -811,7 +678,6 @@ header.glass {
     padding-right: 12px;
   }
 }
-
 
 /* POLICE CAD BACKGROUND */
 @keyframes cad-police-light-left {
@@ -921,8 +787,6 @@ header.glass {
   }
 }
 
-
-
 /* Escala visual dos ativos gráficos do CAD: imagens e GIFs 20% maiores em todo o sistema. */
 @layer components {
   img[src*="cad-assets/"] {
@@ -971,7 +835,6 @@ header.glass {
     animation: none !important;
   }
 }
-
 
 /* ==========================================================================
    TEMA CLARO — correção global
@@ -1128,5 +991,162 @@ header.glass {
     border-color: var(--border) !important;
     color: var(--foreground) !important;
     box-shadow: 0 18px 60px rgba(15,23,42,.12) !important;
+  }
+}
+
+/* ==========================================================================
+   IMPRESSÃO DOCUMENTAL — camada final e isolada
+   O tema visual do CAD nunca participa da impressão.
+   ========================================================================== */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 10mm 12mm;
+  }
+
+  html:has(.cad-print-document),
+  body:has(.cad-print-document),
+  body:has(.cad-print-document) #root,
+  body:has(.cad-print-document) .cad-app-shell,
+  body:has(.cad-print-document) .cad-app-shell > main {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    background-image: none !important;
+    color: #111111 !important;
+    box-shadow: none !important;
+  }
+
+  body:has(.cad-print-document) {
+    margin: 0 !important;
+    padding: 0 !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+    color-scheme: light !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  body:has(.cad-print-document)::before,
+  body:has(.cad-print-document)::after,
+  body:has(.cad-print-document) .cad-app-shell::before,
+  body:has(.cad-print-document) .cad-app-shell::after {
+    display: none !important;
+    content: none !important;
+    background: none !important;
+    background-image: none !important;
+  }
+
+  body:has(.cad-print-document) .cad-app-shell {
+    min-height: 0 !important;
+    background: #ffffff !important;
+    background-image: none !important;
+  }
+
+  body:has(.cad-print-document) .cad-app-shell > header,
+  body:has(.cad-print-document) .cad-app-shell > .siren-bar,
+  .cad-print-toolbar {
+    display: none !important;
+  }
+
+  body:has(.cad-print-document) .cad-app-shell > main {
+    width: auto !important;
+    max-width: none !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+    background-image: none !important;
+  }
+
+  .cad-print-document {
+    display: block !important;
+    width: 100% !important;
+    max-width: none !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    background-image: none !important;
+    color: #111111 !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+    filter: none !important;
+    mix-blend-mode: normal !important;
+  }
+
+  .cad-print-document,
+  .cad-print-document * {
+    color: #111111 !important;
+    background-image: none !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+    filter: none !important;
+    mix-blend-mode: normal !important;
+  }
+
+  .cad-print-document,
+  .cad-print-document *,
+  .cad-print-document *::before,
+  .cad-print-document *::after {
+    background-color: #ffffff !important;
+  }
+
+  .cad-print-document h1,
+  .cad-print-document h2,
+  .cad-print-document h3,
+  .cad-print-document h4,
+  .cad-print-document h5,
+  .cad-print-document h6,
+  .cad-print-document p,
+  .cad-print-document span,
+  .cad-print-document div,
+  .cad-print-document td,
+  .cad-print-document th {
+    color: #111111 !important;
+  }
+
+  .cad-print-document table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    background: #ffffff !important;
+  }
+
+  .cad-print-document thead,
+  .cad-print-document tbody,
+  .cad-print-document tr,
+  .cad-print-document th,
+  .cad-print-document td {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    color: #111111 !important;
+  }
+
+  .cad-print-document th,
+  .cad-print-document td {
+    border: 1px solid #d1d5db !important;
+    padding: 3px 4px !important;
+  }
+
+  .cad-print-document .cad-print-muted,
+  .cad-print-document .text-muted-foreground {
+    color: #555555 !important;
+  }
+
+  .cad-print-document .cad-print-section {
+    break-inside: auto;
+  }
+
+  .cad-print-document .cad-print-section > h3 {
+    break-after: avoid;
+  }
+
+  .cad-print-document .cad-print-signatures {
+    break-inside: avoid;
+  }
+
+  .cad-print-document .plantao-break {
+    break-before: page;
   }
 }
