@@ -7,7 +7,8 @@ export type Usuario = {
   email: string;
   nome: string;
   matricula: string;
-  role: Role;
+  role: Role | null;
+  aprovado: boolean;
   ultimo_acesso: string | null;
 };
 
@@ -32,6 +33,11 @@ export async function salvarUsuario(data: {
   role: Role;
 }) {
   return invoke({ action: "save", data });
+}
+
+export async function aprovarUsuario(id: string) {
+  const { error } = await supabase.rpc("admin_approve_user", { _actor: (await supabase.auth.getUser()).data.user?.id, _user_id: id });
+  if (error) throw new Error(error.message);
 }
 
 export async function excluirUsuario(id: string) {
