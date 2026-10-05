@@ -199,10 +199,10 @@ function Painel() {
               </div>
             </div>
             <div className="space-y-3">
-              <div className="flex items-center gap-2 text-xs font-semibold uppercase text-muted-foreground"><PackageCheck className="h-4 w-4" /> Armas e rádios — retirada e entrega</div>
+              <div className="flex items-center gap-2 text-xs font-semibold uppercase text-muted-foreground"><PackageCheck className="h-4 w-4" /> Movimentações de itens — retirada e devolução</div>
               <div className="max-h-80 space-y-2 overflow-auto rounded-lg border p-3 text-xs">
                 {feed?.movimentacoesItens.map((m) => <div key={m.id} className="rounded-md border p-2"><b>{m.item_nome}</b>{m.item_identificacao ? ` · #${m.item_identificacao}` : ""} · {m.categoria.toUpperCase()}<div className="text-muted-foreground">Retirada: {feed.usuarios[m.retirado_por] ?? m.retirado_por.slice(0, 8)} · {new Date(m.retirado_em).toLocaleString("pt-BR")}</div><div className="text-muted-foreground">{m.entregue_em ? `Entrega: ${feed.usuarios[m.entregue_por ?? ""] ?? "Responsável"} · ${new Date(m.entregue_em).toLocaleString("pt-BR")}` : "Entrega pendente"}</div></div>)}
-                {!feed?.movimentacoesItens.length && <span className="text-muted-foreground">Nenhuma movimentação de arma ou rádio neste plantão.</span>}
+                {!feed?.movimentacoesItens.length && <span className="text-muted-foreground">Nenhuma retirada ou devolução de item registrada neste plantão.</span>}
               </div>
             </div>
             <div className="space-y-3">
