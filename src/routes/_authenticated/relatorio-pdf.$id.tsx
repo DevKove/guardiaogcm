@@ -284,7 +284,7 @@ function BoletimPlantao({ p, operador, matricula }: { p: Plantao; operador: stri
           <G l="Atividades — verso" v={p.atividades_verso} />
           <G l="Observações" v={p.observacoes} />
         </Sec>
-      )
+      )}
 
       {selecionados.assinaturas && (
       <div className="cad-print-signatures grid grid-cols-2 gap-8 pt-12 text-center text-xs">
