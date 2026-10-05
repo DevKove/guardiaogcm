@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { CheckCircle2, FileText, PlayCircle } from "lucide-react";
+import { CheckCircle2, ClipboardList, FileText, PackageCheck, PlayCircle, Radio, ShieldCheck, Users } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { PRIORIDADES, STATUS, fmtData, fmtProtocolo, type Status } from "@/lib/cad";
@@ -71,16 +71,19 @@ function Painel() {
   });
 
   useEffect(() => {
-    const ch = supabase
-      .channel("ocorrencias-painel")
-      .on("postgres_changes", { event: "*", schema: "public", table: "ocorrencias" }, () =>
-        qc.invalidateQueries({ queryKey: ["ocorrencias"] }),
-      )
-      .subscribe();
-    return () => {
-      supabase.removeChannel(ch);
-    };
-  }, [qc]);
+    if (!plantaoAtual?.id) return;
+    const tabelas = ["ocorrencias", "ocorrencia_historico", "plantao_historico", "plantao_registros", "plantoes", "escalas", "viaturas", "itens", "plantao_itens", "plantao_item_movimentos"];
+    const channel = supabase.channel("painel-operacional-tempo-real");
+    for (const tabela of tabelas) {
+      channel.on("postgres_changes", { event: "*", schema: "public", table: tabela }, () => {
+        qc.invalidateQueries({ queryKey: ["ocorrencias"] });
+        qc.invalidateQueries({ queryKey: ["plantao-atual"] });
+        qc.invalidateQueries({ queryKey: ["plantao-home-feed", plantaoAtual.id] });
+      });
+    }
+    channel.subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [qc, plantaoAtual?.id]);
 
   const counts = useMemo(() => {
     const c = { aberta: 0, em_atendimento: 0, encerrada: 0, cancelada: 0 };
@@ -137,30 +140,69 @@ function Painel() {
         </div>
       </section>
       {plantaoAtual && (
-        <section className="card-3d animate-rise space-y-4 p-4">
+        <section className="card-3d animate-rise space-y-5 p-4">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div>
-              <div className="flex items-center gap-2 text-sm font-semibold text-primary"><FileText className="h-4 w-4" /> Relatório do plantão em tempo real</div>
-              <div className="text-xs text-muted-foreground">As informações abaixo são atualizadas automaticamente enquanto o plantão estiver aberto.</div>
+              <div className="flex items-center gap-2 text-sm font-semibold text-primary"><FileText className="h-4 w-4" /> Atualização em tempo real</div>
+              <div className="text-xs text-muted-foreground">Resumo operacional completo do plantão. Alterações, lançamentos, ocorrências, escalas, viaturas e movimentações de itens são atualizados automaticamente.</div>
             </div>
             <Link to="/plantao/$id" params={{ id: plantaoAtual.id }} className="text-xs font-semibold text-primary hover:underline">Abrir relatório completo</Link>
           </div>
-          <div className="grid gap-3 md:grid-cols-4">
-            <div className="rounded-lg border p-3"><div className="text-[10px] uppercase text-muted-foreground">Equipe</div><div className="text-sm font-semibold">{plantaoAtual.equipe || "Não informada"}</div></div>
-            <div className="rounded-lg border p-3"><div className="text-[10px] uppercase text-muted-foreground">Supervisor</div><div className="text-sm font-semibold">{plantaoAtual.supervisor || "Não informado"}</div></div>
+          <div className="grid gap-3 md:grid-cols-6">
             <div className="rounded-lg border p-3"><div className="text-[10px] uppercase text-muted-foreground">Ocorrências</div><div className="font-mono text-xl font-bold text-primary">{feed?.ocorrencias.length ?? 0}</div></div>
             <div className="rounded-lg border p-3"><div className="text-[10px] uppercase text-muted-foreground">Lançamentos</div><div className="font-mono text-xl font-bold text-primary">{feed?.registros.length ?? 0}</div></div>
+            <div className="rounded-lg border p-3"><div className="text-[10px] uppercase text-muted-foreground">Ações</div><div className="font-mono text-xl font-bold text-primary">{feed?.acoes.length ?? 0}</div></div>
+            <div className="rounded-lg border p-3"><div className="text-[10px] uppercase text-muted-foreground">Alterações</div><div className="font-mono text-xl font-bold text-primary">{feed?.alteracoes.length ?? 0}</div></div>
+            <div className="rounded-lg border p-3"><div className="text-[10px] uppercase text-muted-foreground">Escalas</div><div className="font-mono text-xl font-bold text-primary">{feed?.escalas.length ?? 0}</div></div>
+            <div className="rounded-lg border p-3"><div className="text-[10px] uppercase text-muted-foreground">Mov. itens</div><div className="font-mono text-xl font-bold text-primary">{feed?.movimentacoesItens.length ?? 0}</div></div>
           </div>
           <div className="grid gap-4 lg:grid-cols-2">
-            <div>
-              <div className="mb-2 text-xs font-semibold uppercase text-muted-foreground">Informativo</div>
-              <div className="min-h-16 whitespace-pre-wrap rounded-lg border p-3 text-sm">{plantaoAtual.informativo || "Nenhuma informação lançada ainda."}</div>
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 text-xs font-semibold uppercase text-muted-foreground"><ClipboardList className="h-4 w-4" /> Dados do plantão</div>
+              <div className="rounded-lg border p-3 text-sm">
+                <div><b>Equipe:</b> {plantaoAtual.equipe || "Não informada"}</div>
+                <div><b>Supervisor:</b> {plantaoAtual.supervisor || "Não informado"}</div>
+                <div className="mt-2"><b>Informativo:</b><div className="mt-1 whitespace-pre-wrap text-muted-foreground">{plantaoAtual.informativo || "—"}</div></div>
+                <div className="mt-2"><b>Atividades:</b><div className="mt-1 whitespace-pre-wrap text-muted-foreground">{plantaoAtual.atividades || "—"}</div></div>
+                <div className="mt-2"><b>Materiais:</b><div className="mt-1 whitespace-pre-wrap text-muted-foreground">{plantaoAtual.materiais || "—"}</div></div>
+                <div className="mt-2"><b>Atividades — verso:</b><div className="mt-1 whitespace-pre-wrap text-muted-foreground">{plantaoAtual.atividades_verso || "—"}</div></div>
+              </div>
             </div>
-            <div>
-              <div className="mb-2 text-xs font-semibold uppercase text-muted-foreground">Últimos lançamentos</div>
-              <div className="space-y-1 rounded-lg border p-3 text-xs">
-                {feed?.registros.slice(0, 5).map((r) => <div key={r.id} className="border-b py-1 last:border-0"><span className="font-mono">{new Date(r.hora).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}</span> · {r.texto} <span className="text-muted-foreground">— {feed.usuarios[r.criado_por] ?? r.criado_por.slice(0, 8)}</span></div>)}
-                {!feed?.registros.length && <span className="text-muted-foreground">Nenhum lançamento ainda.</span>}
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 text-xs font-semibold uppercase text-muted-foreground"><FileText className="h-4 w-4" /> Lançamentos e ações</div>
+              <div className="max-h-72 space-y-1 overflow-auto rounded-lg border p-3 text-xs">
+                {feed?.registros.map((r) => <div key={r.id} className="border-b py-1.5 last:border-0"><span className="font-mono">{new Date(r.hora).toLocaleString("pt-BR")}</span> · {r.texto} <span className="text-muted-foreground">— {feed.usuarios[r.criado_por] ?? r.criado_por.slice(0, 8)}</span></div>)}
+                {feed?.acoes.map((a, i) => <div key={`acao-${i}`} className="border-b py-1.5 last:border-0"><span className="font-mono">{new Date(a.created_at).toLocaleString("pt-BR")}</span> · {a.descricao}{a.protocolo ? ` · Protocolo ${a.protocolo}` : ""} <span className="text-muted-foreground">— {feed.usuarios[a.usuario_id] ?? a.usuario_id.slice(0, 8)}</span></div>)}
+                {!feed?.registros.length && !feed?.acoes.length && <span className="text-muted-foreground">Nenhum lançamento ainda.</span>}
+              </div>
+            </div>
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 text-xs font-semibold uppercase text-muted-foreground"><ShieldCheck className="h-4 w-4" /> Ocorrências do plantão</div>
+              <div className="max-h-80 space-y-2 overflow-auto rounded-lg border p-3 text-xs">
+                {feed?.ocorrencias.map((o) => <div key={o.id} className="rounded-md border p-2"><div className="font-semibold">Protocolo {fmtProtocolo(o.protocolo, o.created_at)} · {o.natureza}</div><div>{o.endereco}{o.bairro ? ` · ${o.bairro}` : ""}</div><div className="mt-1 text-muted-foreground">Status: {STATUS[o.status as Status]?.label ?? o.status} · Prioridade: {PRIORIDADES[o.prioridade]?.label ?? o.prioridade} · Viatura: {o.viatura || "—"}</div><div className="mt-1 whitespace-pre-wrap">{o.relato || "Sem relato."}</div><div className="mt-1 text-muted-foreground">Desfecho: {o.desfecho || "—"}</div></div>)}
+                {!feed?.ocorrencias.length && <span className="text-muted-foreground">Nenhuma ocorrência vinculada ao plantão.</span>}
+              </div>
+            </div>
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 text-xs font-semibold uppercase text-muted-foreground"><Users className="h-4 w-4" /> Escalas e viaturas</div>
+              <div className="max-h-80 space-y-2 overflow-auto rounded-lg border p-3 text-xs">
+                {feed?.escalas.map((e) => <div key={e.id} className="rounded-md border p-2"><b>{e.funcao}</b> · {e.agentes}<div className="text-muted-foreground">{e.hora_inicio} às {e.hora_fim}{e.observacao ? ` · ${e.observacao}` : ""}</div></div>)}
+                {feed?.viaturas.map((v) => <div key={v.id} className="rounded-md border p-2"><b>{v.prefixo}</b> · {v.modelo || v.tipo} · {v.status}<div className="text-muted-foreground">Guarnição: {v.guarnicao || "—"} · KM: {v.km_atual ?? "—"}{v.observacao ? ` · ${v.observacao}` : ""}</div></div>)}
+                {!feed?.escalas.length && !feed?.viaturas.length && <span className="text-muted-foreground">Nenhuma escala ou viatura registrada.</span>}
+              </div>
+            </div>
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 text-xs font-semibold uppercase text-muted-foreground"><PackageCheck className="h-4 w-4" /> Armas e rádios — retirada e entrega</div>
+              <div className="max-h-80 space-y-2 overflow-auto rounded-lg border p-3 text-xs">
+                {feed?.movimentacoesItens.map((m) => <div key={m.id} className="rounded-md border p-2"><b>{m.item_nome}</b>{m.item_identificacao ? ` · #${m.item_identificacao}` : ""} · {m.categoria.toUpperCase()}<div className="text-muted-foreground">Retirada: {feed.usuarios[m.retirado_por] ?? m.retirado_por.slice(0, 8)} · {new Date(m.retirado_em).toLocaleString("pt-BR")}</div><div className="text-muted-foreground">{m.entregue_em ? `Entrega: ${feed.usuarios[m.entregue_por ?? ""] ?? "Responsável"} · ${new Date(m.entregue_em).toLocaleString("pt-BR")}` : "Entrega pendente"}</div></div>)}
+                {!feed?.movimentacoesItens.length && <span className="text-muted-foreground">Nenhuma movimentação de arma ou rádio neste plantão.</span>}
+              </div>
+            </div>
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 text-xs font-semibold uppercase text-muted-foreground"><Radio className="h-4 w-4" /> Alterações realizadas</div>
+              <div className="max-h-80 space-y-2 overflow-auto rounded-lg border p-3 text-xs">
+                {feed?.alteracoes.map((a) => <div key={`${a.campo}-${a.created_at}`} className="rounded-md border p-2"><b>{a.label}</b><div className="mt-1 whitespace-pre-wrap">Atual: {typeof a.valor === "object" ? JSON.stringify(a.valor, null, 2) : String(a.valor ?? "—")}</div><div className="text-muted-foreground">Anterior: {typeof a.antes === "object" ? JSON.stringify(a.antes) : String(a.antes ?? "—")} · {new Date(a.created_at).toLocaleString("pt-BR")} · {feed.usuarios[a.usuario_id] ?? a.usuario_id.slice(0, 8)}</div></div>)}
+                {!feed?.alteracoes.length && <span className="text-muted-foreground">Nenhuma edição registrada no plantão.</span>}
               </div>
             </div>
           </div>
