@@ -101,7 +101,7 @@ export function PlantaoResumoTempoReal({ plantao }: { plantao: Plantao }) {
   const postosAtivos = (data?.postosAtivos ?? []).filter((p) => idsPostosEscalados.has(p.id));
   const viaturasAtivas = viaturas.filter((v) => v.ativa).length;
 
-  function gerarPdf() {
+  async function gerarPdf() {
     const janela = window.open("", "_blank");
     if (!janela) {
       window.alert("O navegador bloqueou a janela do relatório. Permita pop-ups para este site e tente novamente.");
@@ -109,7 +109,42 @@ export function PlantaoResumoTempoReal({ plantao }: { plantao: Plantao }) {
     }
 
     try {
+    // O PDF consulta os vínculos diretamente no banco no momento da geração.
+    // Isso evita que um resumo em cache/atualização atrasada produza um PDF sem os itens.
+    const [{ data: itensPdf, error: itensPdfError }, { data: movimentosPdf, error: movimentosPdfError }] = await Promise.all([
+      supabase
+        .from("plantao_itens")
+        .select("id,item_id,status,situacao,retirado_por,retirado_em,entregue_por,entregue_em,conferido_por,conferido_em,itens!inner(id,categoria,nome,identificacao,patrimonio,observacao,ativo)")
+        .eq("plantao_id", plantaoId)
+        .order("created_at", { ascending: true }),
+      supabase
+        .from("plantao_item_movimentos")
+        .select("id,item_id,retirado_por,retirado_em,entregue_por,entregue_em,itens!inner(nome,identificacao,categoria)")
+        .eq("plantao_id", plantaoId)
+        .order("retirado_em", { ascending: true }),
+    ]);
+    if (itensPdfError) throw itensPdfError;
+    if (movimentosPdfError) throw movimentosPdfError;
+
     const usuarios = data?.usuarios ?? {};
+    const itensDiretos = (itensPdf ?? []) as any[];
+    const movimentosDiretos = (movimentosPdf ?? []) as any[];
+
+    // Complementa os nomes dos responsáveis que não estejam no resumo em memória.
+    const idsItens = Array.from(new Set([
+      ...itensDiretos.flatMap((item) => [item.retirado_por, item.entregue_por, item.conferido_por].filter(Boolean)),
+      ...movimentosDiretos.flatMap((mov) => [mov.retirado_por, mov.entregue_por].filter(Boolean)),
+    ]));
+    const { data: perfisItens, error: perfisItensError } = idsItens.length
+      ? await supabase.from("profiles").select("id,nome").in("id", idsItens)
+      : { data: [], error: null };
+    if (perfisItensError) throw perfisItensError;
+    const usuariosPdf: Record<string, string> = {
+      ...usuarios,
+      ...Object.fromEntries((perfisItens ?? []).map((p: any) => [p.id, p.nome || p.id.slice(0, 8)])),
+    };
+    const nomeUsuarioPdf = (id: string | null | undefined) => id ? (usuariosPdf[id] ?? id.slice(0, 8)) : "—";
+
     const occurrenceRows = ocorrencias.map((o) => `<tr>
       <td>${cell(hora(o.created_at))}</td><td>${cell(fmtProtocolo(o.protocolo, o.created_at))}</td>
       <td>${cell(o.natureza)}</td><td>${cell([o.endereco, o.numero, o.bairro].filter(Boolean).join(", "))}</td>
@@ -120,17 +155,19 @@ export function PlantaoResumoTempoReal({ plantao }: { plantao: Plantao }) {
     const postRows = postosAtivos.map((p) => `<tr><td>${cell(p.nome)}</td><td>${cell(p.tipo)}</td><td>${cell([p.endereco, p.bairro].filter(Boolean).join(" · "))}</td></tr>`).join("");
     const recordRows = registros.map((r) => `<tr><td>${cell(dataHora(r.hora))}</td><td>${cell(r.texto)}</td><td>${cell(usuarios[r.criado_por] ?? (r.criado_por ? r.criado_por.slice(0, 8) : "—"))}</td></tr>`).join("");
     const actionRows = acoes.map((a) => `<tr><td>${cell(dataHora(a.created_at))}</td><td>${cell(a.protocolo ? fmtProtocolo(a.protocolo, a.created_at) : "—")}</td><td>${cell(a.descricao)}</td><td>${cell(usuarios[a.usuario_id] ?? (a.usuario_id ? a.usuario_id.slice(0, 8) : "—"))}</td></tr>`).join("");
-    const itemRows = (data?.itensPlantao ?? []).flatMap((item) => {
-      const usuario = (id: string | null) => id ? (usuarios[id] ?? id.slice(0, 8)) : "—";
+    const itemRows = itensDiretos.flatMap((row) => {
+      const item = row.itens ?? {};
       const eventos = [
-        item.retirado_em ? { data: item.retirado_em, acao: "Retirada", usuario: usuario(item.retirado_por), detalhes: "Item retirado para uso no plantão." } : null,
-        item.entregue_em ? { data: item.entregue_em, acao: "Devolução", usuario: usuario(item.entregue_por), detalhes: "Item devolvido." } : null,
-        item.conferido_em ? { data: item.conferido_em, acao: "Conferência", usuario: usuario(item.conferido_por), detalhes: item.situacao || "Conferido" } : null,
+        row.retirado_em ? { data: row.retirado_em, acao: "Retirada", usuario: nomeUsuarioPdf(row.retirado_por), detalhes: "Item retirado para uso no plantão." } : null,
+        row.entregue_em ? { data: row.entregue_em, acao: "Devolução", usuario: nomeUsuarioPdf(row.entregue_por), detalhes: "Item devolvido." } : null,
+        row.conferido_em ? { data: row.conferido_em, acao: "Conferência", usuario: nomeUsuarioPdf(row.conferido_por), detalhes: row.situacao || "Conferido" } : null,
       ].filter(Boolean) as { data: string; acao: string; usuario: string; detalhes: string }[];
-      if (!eventos.length) eventos.push({ data: plantao.iniciado_em, acao: "Vinculado ao plantão", usuario: "—", detalhes: `${item.status} · ${item.situacao}` });
+      if (!eventos.length) {
+        eventos.push({ data: plantao.iniciado_em, acao: "Vinculado ao plantão", usuario: "—", detalhes: `${row.status ?? "pendente"} · ${row.situacao ?? "OK"}` });
+      }
       return eventos.map((evento) => `<tr><td>${cell(dataHora(evento.data))}</td><td>${cell(item.nome)}</td><td>${cell(item.identificacao || "—")}</td><td>${cell(item.patrimonio || "—")}</td><td>${cell(evento.acao)}</td><td>${cell(evento.usuario)}</td><td>${cell(evento.detalhes)}</td></tr>`);
     }).join("");
-    const itemMovementRows = (data?.movimentacoesItens ?? []).map((m) => `<tr><td>${cell(m.item_nome)}</td><td>${cell(m.item_identificacao || "—")}</td><td>${cell(m.categoria || "—")}</td><td>${cell(usuarios[m.retirado_por] ?? m.retirado_por.slice(0, 8))}</td><td>${cell(dataHora(m.retirado_em))}</td><td>${cell(m.entregue_por ? (usuarios[m.entregue_por] ?? m.entregue_por.slice(0, 8)) : "Pendente")}</td><td>${cell(m.entregue_em ? dataHora(m.entregue_em) : "Pendente")}</td></tr>`).join("");
+    const itemMovementRows = movimentosDiretos.map((m) => `<tr><td>${cell(m.itens?.nome ?? "Item")}</td><td>${cell(m.itens?.identificacao || "—")}</td><td>${cell(m.itens?.categoria || "—")}</td><td>${cell(nomeUsuarioPdf(m.retirado_por))}</td><td>${cell(dataHora(m.retirado_em))}</td><td>${cell(m.entregue_por ? nomeUsuarioPdf(m.entregue_por) : "Pendente")}</td><td>${cell(m.entregue_em ? dataHora(m.entregue_em) : "Pendente")}</td></tr>`).join("");
     const generatedAt = new Date().toLocaleString("pt-BR");
 
       janela.document.open();
