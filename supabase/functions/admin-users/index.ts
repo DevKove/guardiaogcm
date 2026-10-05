@@ -111,7 +111,7 @@ Deno.serve(async (req) => {
       const [{ data: authData, error: authError }, { data: profiles }, { data: roles }] =
         await Promise.all([
           admin.auth.admin.listUsers({ page: 1, perPage: 1000 }),
-          admin.from("profiles").select("id, nome, matricula"),
+          admin.from("profiles").select("id, nome, matricula, aprovado"),
           admin.from("user_roles").select("user_id, role"),
         ]);
 
@@ -119,13 +119,14 @@ Deno.serve(async (req) => {
 
       const result = authData.users.map((u) => {
         const profile = profiles?.find((p) => p.id === u.id);
-        const role = roles?.find((r) => r.user_id === u.id)?.role ?? "operador";
+        const role = roles?.find((r) => r.user_id === u.id)?.role ?? null;
         return {
           id: u.id,
           email: u.email ?? "",
           nome: profile?.nome ?? "",
           matricula: profile?.matricula ?? "",
           role,
+          aprovado: profile?.aprovado ?? false,
           ultimo_acesso: u.last_sign_in_at ?? null,
         };
       }).sort((a, b) => a.nome.localeCompare(b.nome));
