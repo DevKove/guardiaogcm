@@ -175,7 +175,7 @@ function extrairAlteracoes(rows: PlantaoHistoricoRow[]): AlteracaoPlantao[] {
   return Array.from(ultimas.values()).sort((a, b) => a.created_at.localeCompare(b.created_at));
 }
 
-/** Junta somente o que foi lançado ou alterado dentro da janela temporal do plantão. */
+/** Consolida tudo que está vinculado ao plantão e, para tabelas sem plantao_id, usa a data/turno como vínculo. */
 export async function carregarAtividades(p: {
   id: string;
   operador_id: string;
@@ -185,13 +185,6 @@ export async function carregarAtividades(p: {
   turno: string;
 }): Promise<PlantaoAtividade> {
   const fim = p.encerrado_em ?? new Date().toISOString();
-  const inicioMs = new Date(p.iniciado_em).getTime();
-  const fimMs = new Date(fim).getTime();
-  const durantePlantao = (value?: string | null) => {
-    if (!value) return false;
-    const time = new Date(value).getTime();
-    return Number.isFinite(time) && time >= inicioMs && time <= fimMs;
-  };
 
   const [oc, reg, viaturas, escalas, postosAtivos, plantaoHist, itemMov, catalogoItens, plantaoItens] = await Promise.all([
     supabase
@@ -207,10 +200,10 @@ export async function carregarAtividades(p: {
     supabase.from("viaturas").select("id, prefixo, placa, modelo, tipo, status, guarnicao, ativa, km_atual, observacao, updated_at").order("prefixo"),
     supabase.from("escalas").select("id, agentes, funcao, hora_inicio, hora_fim, observacao, viatura_id, posto_id, criado_por, created_at, updated_at").eq("data", p.data_inicio).eq("turno", p.turno).order("hora_inicio"),
     supabase.from("postos_fixos").select("id, nome, tipo, endereco, bairro").eq("ativo", true).order("nome"),
-    supabase.from("plantao_historico").select("acao, created_at, usuario_id, dados").eq("plantao_id", p.id).gte("created_at", p.iniciado_em).lte("created_at", fim).order("created_at", { ascending: true }),
+    supabase.from("plantao_historico").select("acao, created_at, usuario_id, dados").eq("plantao_id", p.id).order("created_at", { ascending: true }),
     supabase.from("plantao_item_movimentos").select("id,item_id,retirado_por,retirado_em,entregue_por,entregue_em,itens!inner(nome,identificacao,categoria)").eq("plantao_id", p.id).order("retirado_em", { ascending: false }),
-    supabase.from("itens").select("id,categoria,nome,identificacao,patrimonio,observacao,ativo").eq("ativo", true).order("categoria").order("nome"),
-    supabase.from("plantao_itens").select("id,item_id,status,situacao,retirado_por,retirado_em,entregue_por,entregue_em,conferido_por,conferido_em").eq("plantao_id", p.id),
+    supabase.from("itens").select("id,categoria,nome,identificacao,patrimonio,observacao,ativo").order("categoria").order("nome"),
+    supabase.from("plantao_itens").select("id,item_id,status,situacao,retirado_por,retirado_em,entregue_por,entregue_em,conferido_por,conferido_em,itens!inner(id,categoria,nome,identificacao,patrimonio,observacao,ativo)").eq("plantao_id", p.id),
   ]);
 
   if (oc.error) throw oc.error;
@@ -226,16 +219,17 @@ export async function carregarAtividades(p: {
   const { data: rawHist, error: histError } = await supabase
     .from("ocorrencia_historico")
     .select("descricao, created_at, usuario_id, ocorrencias!inner(protocolo, plantao_id)")
-    .eq("ocorrencias.plantao_id", p.id)
-    .gte("created_at", p.iniciado_em)
-    .lte("created_at", fim)
+     .eq("ocorrencias.plantao_id", p.id)
     .order("created_at", { ascending: false });
 
   if (histError) throw histError;
 
-  const ocorrenciasDoPlantao = (oc.data ?? []).filter((x) => durantePlantao(x.created_at) || durantePlantao(x.updated_at));
-  const registrosDoPlantao = (reg.data ?? []).filter((x) => durantePlantao(x.hora));
-  const escalasDoPlantao = (escalas.data ?? []).filter((x) => durantePlantao(x.created_at) || durantePlantao(x.updated_at));
+  // Registros com plantao_id são a fonte de verdade do plantão. Não os filtramos novamente por timestamp,
+  // pois alterações retroativas, sincronizações e lançamentos feitos poucos minutos fora da janela ainda
+  // pertencem ao mesmo plantão e não podem desaparecer do relatório.
+  const ocorrenciasDoPlantao = oc.data ?? [];
+  const registrosDoPlantao = reg.data ?? [];
+  const escalasDoPlantao = escalas.data ?? [];
   const histData = (rawHist ?? []) as unknown as HistoricoRow[];
   const auditoriaData = (plantaoHist.data ?? []) as unknown as PlantaoHistoricoRow[];
   const alteracoes = extrairAlteracoes(auditoriaData);
@@ -244,10 +238,28 @@ export async function carregarAtividades(p: {
   for (const m of itemMov.data ?? []) {
     if (!movimentoMaisRecentePorItem.has(m.item_id)) movimentoMaisRecentePorItem.set(m.item_id, m);
   }
-  const itensPlantao = (catalogoItens.data ?? []).map((item: any) => {
-    const mov = situacaoPorItem.get(item.id) ?? {};
-    const hist = movimentoMaisRecentePorItem.get(item.id) ?? {};
-    return { id: item.id, item_id: item.id, categoria: item.categoria, nome: item.nome, identificacao: item.identificacao ?? null, patrimonio: item.patrimonio ?? null, observacao: item.observacao ?? null, ativo: item.ativo, status: mov.status ?? "pendente", situacao: mov.situacao ?? "OK", retirado_por: hist.retirado_por ?? mov.retirado_por ?? null, retirado_em: hist.retirado_em ?? mov.retirado_em ?? null, entregue_por: hist.entregue_por ?? mov.entregue_por ?? null, entregue_em: hist.entregue_em ?? mov.entregue_em ?? null, conferido_por: mov.conferido_por ?? null, conferido_em: mov.conferido_em ?? null };
+  // Exibe somente os itens efetivamente vinculados a este plantão, inclusive itens que depois foram desativados.
+  const itensPlantao = (plantaoItens.data ?? []).map((row: any) => {
+    const item = row.itens ?? {};
+    const hist = movimentoMaisRecentePorItem.get(row.item_id) ?? {};
+    return {
+      id: row.id,
+      item_id: row.item_id,
+      categoria: item.categoria ?? "",
+      nome: item.nome ?? "Item",
+      identificacao: item.identificacao ?? null,
+      patrimonio: item.patrimonio ?? null,
+      observacao: item.observacao ?? null,
+      ativo: item.ativo ?? false,
+      status: row.status ?? "pendente",
+      situacao: row.situacao ?? "OK",
+      retirado_por: hist.retirado_por ?? row.retirado_por ?? null,
+      retirado_em: hist.retirado_em ?? row.retirado_em ?? null,
+      entregue_por: hist.entregue_por ?? row.entregue_por ?? null,
+      entregue_em: hist.entregue_em ?? row.entregue_em ?? null,
+      conferido_por: row.conferido_por ?? null,
+      conferido_em: row.conferido_em ?? null,
+    };
   });
 
   const movimentacoesItens = (itemMov.data ?? []).map((m: any) => ({
