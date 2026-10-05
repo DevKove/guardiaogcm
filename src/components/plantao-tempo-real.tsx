@@ -102,6 +102,7 @@ export function PlantaoResumoTempoReal({ plantao }: { plantao: Plantao }) {
   const viaturasAtivas = viaturas.filter((v) => v.ativa).length;
 
   async function gerarPdf() {
+    // PDF do plantão: consultar itens e movimentações diretamente no banco antes de montar o documento.
     const janela = window.open("", "_blank");
     if (!janela) {
       window.alert("O navegador bloqueou a janela do relatório. Permita pop-ups para este site e tente novamente.");
