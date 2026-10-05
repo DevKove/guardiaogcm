@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { CheckCircle2, PlayCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -63,11 +63,15 @@ function Painel() {
     },
   });
 
-  useEffect(() => {
-    if (!plantaoAtual?.id) return;
-    const tabelas = ["ocorrencias", "ocorrencia_historico", "plantao_historico", "plantao_registros", "plantao_integrantes", "plantoes", "escalas", "viaturas", "itens", "plantao_itens", "plantao_item_movimentos"];
-    const channel = supabase.channel("painel-operacional-tempo-real");
-    for (const tltro,
+  const counts = useMemo(() => {
+    const c = { aberta: 0, em_atendimento: 0, encerrada: 0, cancelada: 0 };
+    data.forEach((o) => c[o.status as Status]++);
+    return c;
+  }, [data]);
+
+  const lista = data
+    .filter((o) =>
+      filtro === "todas" ? true : filtro === "ativas" ? o.status === "aberta" || o.status === "em_atendimento" : o.status === filtro,
     )
     .filter((o) => {
       if (!busca) return true;
@@ -113,18 +117,35 @@ function Painel() {
           </div>
         </div>
       </section>
-      {plantaoAtual && (
-        <section className="card-3d animate-rise space-y-5 p-4">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <div>
-              <div className="flex items-center gap-2 text-sm font-semibold text-primary"><FileText className="h-4 w-4" /> Atualização em tempo real</div>
-              <div className="text-xs text-muted-foreground">Resumo operacional completo do plantão. Alterações, lançamentos, ocorrências, escalas, viaturas e movimentações de itens são atualizados automaticamente.</div>
-            </div>
-            <Link to="/plantao/$id" params={{ id: plantaoAtual.id }} className="text-xs font-semibold text-primary hover:underline">Abrir relatório completo</Link>
-          </div>
-          <div className="grid gap-3 md:grid-cols-6">
-            <div className="rounded-lg border p-3"><div className="text-[10px] uppercase text-muted-foreground">Ocorrências</div><div className="font-mono text-xl font-bold text-primary">{feed?.ocorrencias.length ?? 0}</div></div>
-            <div className="rounded-lg border p-3"><div className="text-[10px] uppercase text-muted-foreground">LalassName="w-full text-sm">
+      <div className="flex flex-wrap items-end justify-end gap-4">
+        <div className="flex gap-2">
+          <Input
+            placeholder="Buscar protocolo, endereço, natureza..."
+            className="w-72"
+            value={busca}
+            onChange={(e) => setBusca(e.target.value)}
+          />
+          <Link to="/ocorrencias/nova" className="inline-flex items-center rounded-md bg-primary px-4 text-sm font-semibold text-primary-foreground hover:opacity-90">
+            + Nova ocorrência
+          </Link>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
+        {cards.map((c) => (
+          <button
+            key={c.k}
+            onClick={() => setFiltro(c.k)}
+            className={`card-3d animate-rise p-4 text-left transition ${filtro === c.k ? "border-primary" : "hover:border-muted-foreground"}`}
+          >
+            <div className="text-xs text-muted-foreground">{c.label}</div>
+            <div className={`font-mono text-3xl font-bold ${c.cls}`}>{c.v}</div>
+          </button>
+        ))}
+      </div>
+
+      <div className="overflow-x-auto card-3d animate-rise">
+        <table className="w-full text-sm">
           <thead className="border-b text-left text-xs uppercase text-muted-foreground">
             <tr>
               <th className="px-3 py-2">Protocolo</th>
