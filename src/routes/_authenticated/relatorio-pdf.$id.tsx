@@ -61,6 +61,10 @@ function Relatorio() {
 type Dados = Awaited<ReturnType<typeof carregarAtividades>>;
 
 function BoletimPlantao({ p, operador, matricula }: { p: Plantao; operador: string; matricula: string }) {
+  const [selecionados, setSelecionados] = useState<Record<string, boolean>>({
+    geral: true, alteracoes: true, ocorrencias: true, escalas: true, guarnicoes: true, postos: true,
+    itens: true, movimentacoes: true, registros: true, acoes: true, informacoes: true, assinaturas: true,
+  });
   const { data, isLoading, isError, error, refetch } = useQuery({
     queryKey: ["plantao-relatorio-dados", p.id],
     queryFn: () => carregarAtividades(p),
@@ -81,10 +85,6 @@ function BoletimPlantao({ p, operador, matricula }: { p: Plantao; operador: stri
   const fim = p.encerrado_em ?? new Date().toISOString();
   const status = p.status === "aberto" ? "Em andamento" : "Encerrado";
   const imprimir = () => window.print();
-  const [selecionados, setSelecionados] = useState<Record<string, boolean>>({
-    geral: true, alteracoes: true, ocorrencias: true, escalas: true, guarnicoes: true, postos: true,
-    itens: true, movimentacoes: true, registros: true, acoes: true, informacoes: true, assinaturas: true,
-  });
   const opcoes = [
     ["geral", "Dados gerais"], ["alteracoes", "Alterações registradas"], ["ocorrencias", "Ocorrências"],
     ["escalas", "Escalas"], ["guarnicoes", "Guarnições"], ["postos", "Postos e conferências"],
@@ -203,7 +203,7 @@ function BoletimPlantao({ p, operador, matricula }: { p: Plantao; operador: stri
           ) : <G l="Resultado" v="Nenhuma escala foi lançada ou alterada durante o plantão." />}
         </Sec>)}
 
-      {selecionados.guarnicoes && ({<Sec t="Guarnições">
+      {selecionados.guarnicoes && (<Sec t="Guarnições">
           {p.guarnicoes?.length ? (
             <div className="col-span-2">
               <table className="cad-print-table w-full">
@@ -212,9 +212,9 @@ function BoletimPlantao({ p, operador, matricula }: { p: Plantao; operador: stri
               </table>
             </div>
           ) : <G l="Resultado" v="Nenhuma guarnição informada." />}
-        </Sec>})}
+        </Sec>)}
 
-      {selecionados.postos && ({<Sec t="Postos e conferências">
+      {selecionados.postos && (<Sec t="Postos e conferências">
           {p.postos?.length ? (
             <div className="col-span-2">
               <table className="cad-print-table w-full">
@@ -276,15 +276,15 @@ function BoletimPlantao({ p, operador, matricula }: { p: Plantao; operador: stri
           ) : <G l="Resultado" v="Nenhuma ação registrada durante o plantão." />}
         </Sec>)}
 
-      {(p.atividades || p.materiais || p.informativo || p.atividades_verso || p.observacoes) && (
-      {selecionados.informacoes && (  <Sec t="Informações do plantão">
-            <G l="Atividades" v={p.atividades} />
-            <G l="Materiais" v={p.materiais} />
-            <G l="Informativo" v={p.informativo} />
-            <G l="Atividades — verso" v={p.atividades_verso} />
-            <G l="Observações" v={p.observacoes} />
-          </Sec>)}
-      )}
+      {selecionados.informacoes && (p.atividades || p.materiais || p.informativo || p.atividades_verso || p.observacoes) && (
+        <Sec t="Informações do plantão">
+          <G l="Atividades" v={p.atividades} />
+          <G l="Materiais" v={p.materiais} />
+          <G l="Informativo" v={p.informativo} />
+          <G l="Atividades — verso" v={p.atividades_verso} />
+          <G l="Observações" v={p.observacoes} />
+        </Sec>
+      )
 
       {selecionados.assinaturas && (
       <div className="cad-print-signatures grid grid-cols-2 gap-8 pt-12 text-center text-xs">
