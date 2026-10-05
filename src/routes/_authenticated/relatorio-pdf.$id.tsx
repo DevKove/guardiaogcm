@@ -214,9 +214,9 @@ function BoletimPlantao({ p, operador, matricula }: { p: Plantao; operador: stri
             </table>
           </div>
         ) : <G l="Resultado" v="Nenhuma guarnição informada." />}
-      </Sec>
+      </Sec>}
 
-      <Sec t="Postos e conferências">
+      {camposAlterados.has("postos") && <Sec t="Postos e conferências">
         {p.postos?.length ? (
           <div className="col-span-2">
             <table className="plantao-table w-full">
@@ -225,7 +225,7 @@ function BoletimPlantao({ p, operador, matricula }: { p: Plantao; operador: stri
             </table>
           </div>
         ) : <G l="Resultado" v="Nenhum posto informado." />}
-      </Sec>
+      </Sec>}
 
       <Sec t="Registros operacionais">
         {data.registros.length ? (
