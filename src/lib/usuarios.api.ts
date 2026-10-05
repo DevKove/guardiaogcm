@@ -43,3 +43,12 @@ export async function aprovarUsuario(id: string) {
 export async function excluirUsuario(id: string) {
   return invoke({ action: "delete", id });
 }
+
+export async function criarUsuarioTestePendente(data: {
+  email: string;
+  senha: string;
+  nome: string;
+  matricula: string;
+}) {
+  return invoke({ action: "create_test_pending", data });
+}
