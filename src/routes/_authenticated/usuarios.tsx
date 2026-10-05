@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Users, Plus, Pencil, Trash2, ShieldCheck, ShieldHalf, UserCog } from "lucide-react";
+import { Users, Pencil, ShieldCheck, ShieldHalf, UserCog, UserCheck, Clock3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { useMe } from "@/hooks/use-me";
 import { PageHeader, StatCard } from "@/components/page-header";
 import { ROLE_LABEL, fmtData, selectCls } from "@/lib/cad";
-import { listarUsuarios, salvarUsuario, excluirUsuario } from "@/lib/usuarios.api";
+import { listarUsuarios, salvarUsuario, excluirUsuario, aprovarUsuario } from "@/lib/usuarios.api";
 
 export const Route = createFileRoute("/_authenticated/usuarios")({
   head: () => ({ meta: [{ title: "Usuários · CAD" }, { name: "description", content: "Cadastro de usuários e permissões." }] }),
@@ -33,6 +33,15 @@ function Usuarios() {
   const [edit, setEdit] = useState<Form | null>(null);
   const { data = [], error } = useQuery({ queryKey: ["usuarios"], enabled: !!me?.isAdmin, queryFn: listarUsuarios });
 
+  async function aprovar(id: string, nome: string) {
+    if (!confirm(`Aprovar o acesso de ${nome}?`)) return;
+    try {
+      await aprovarUsuario(id);
+      toast.success("Usuário aprovado como operador");
+      qc.invalidateQueries({ queryKey: ["usuarios"] });
+    } catch (e) { toast.error((e as Error).message); }
+  }
+
   async function remover(id: string, nome: string) {
     if (!confirm(`Excluir o usuário ${nome}? Esta ação não pode ser desfeita.`)) return;
     try { await excluirUsuario(id); toast.success("Usuário excluído"); qc.invalidateQueries({ queryKey: ["usuarios"] }); }
@@ -46,6 +55,31 @@ function Usuarios() {
       <PageHeader icon={Users} asset="escaneamento-de-rosto.gif" kicker="ADMINISTRAÇÃO" title="Usuários e perfis">
         <Button onClick={() => setEdit({ ...vazio })}><img src={`${import.meta.env.BASE_URL}cad-assets/adicionar.gif`} alt="" aria-hidden="true" className="h-5 w-5 object-contain" /> Novo usuário</Button>
       </PageHeader>
+
+      {data.some((u) => !u.aprovado) && (
+        <div className="card-3d border border-warning/30 bg-warning/5 p-4">
+          <div className="mb-3 flex items-center gap-2 text-warning">
+            <Clock3 className="h-5 w-5" />
+            <div>
+              <div className="font-semibold">Cadastros aguardando aprovação</div>
+              <div className="text-xs text-muted-foreground">Revise e autorize os novos usuários antes de liberar o acesso operacional.</div>
+            </div>
+          </div>
+          <div className="space-y-2">
+            {data.filter((u) => !u.aprovado).map((u) => (
+              <div key={u.id} className="flex flex-wrap items-center justify-between gap-3 border border-border/60 bg-background/40 p-3">
+                <div>
+                  <div className="font-semibold">{u.nome || "Sem nome"}</div>
+                  <div className="text-xs text-muted-foreground">{u.email}{u.matricula ? ` · Matrícula ${u.matricula}` : ""}</div>
+                </div>
+                <Button size="sm" onClick={() => aprovar(u.id, u.nome || u.email)}>
+                  <UserCheck className="mr-2 h-4 w-4" /> Aprovar acesso
+                </Button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-3 gap-3">
         <StatCard icon={ShieldCheck} label="Administradores" value={data.filter((u) => u.role === "admin").length} tone="text-destructive" />
@@ -67,11 +101,11 @@ function Usuarios() {
                 <td className="px-3 py-2 text-muted-foreground">{u.email}</td>
                 <td className="px-3 py-2 font-mono">{u.matricula || "—"}</td>
                 <td className="px-3 py-2">
-                  <span className={`rounded-full border px-2 py-0.5 text-xs ${u.role === "admin" ? "border-destructive text-destructive" : u.role === "supervisor" ? "border-warning text-warning" : "border-info text-info"}`}>{ROLE_LABEL[u.role]}</span>
+                  <span className={`rounded-full border px-2 py-0.5 text-xs ${!u.aprovado ? "border-warning text-warning" : u.role === "admin" ? "border-destructive text-destructive" : u.role === "supervisor" ? "border-warning text-warning" : "border-info text-info"}`}>{!u.aprovado ? "Pendente" : u.role ? ROLE_LABEL[u.role] : "Sem perfil"}</span>
                 </td>
                 <td className="px-3 py-2 text-xs text-muted-foreground">{fmtData(u.ultimo_acesso)}</td>
                 <td className="px-3 py-2 text-right whitespace-nowrap">
-                  <Button size="sm" variant="ghost" onClick={() => setEdit({ id: u.id, email: u.email, senha: "", nome: u.nome, matricula: u.matricula, role: u.role })}><Pencil className="h-3.5 w-3.5" /></Button>
+                  {u.aprovado && u.role && <Button size="sm" variant="ghost" onClick={() => setEdit({ id: u.id, email: u.email, senha: "", nome: u.nome, matricula: u.matricula, role: u.role as Role })}><Pencil className="h-3.5 w-3.5" /></Button>}
                   {u.id !== me.id && <Button size="sm" variant="ghost" className="text-destructive" aria-label={`Excluir usuário ${u.nome || u.email}`} onClick={() => remover(u.id, u.nome || u.email)}><img src={`${import.meta.env.BASE_URL}cad-assets/excluir.gif`} alt="" aria-hidden="true" className="h-6 w-6 object-contain" /></Button>}
                 </td>
               </tr>
