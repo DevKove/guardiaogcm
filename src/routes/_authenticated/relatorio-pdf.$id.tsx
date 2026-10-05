@@ -84,10 +84,10 @@ function BoletimPlantao({ p, operador, matricula }: { p: Plantao; operador: stri
   const camposAlterados = new Set(data.alteracoes.map((a) => a.campo));
 
   return (
-    <div className="plantao-print mx-auto max-w-3xl space-y-4 bg-card p-8 text-sm print:bg-transparent print:p-0">
+    <div className="plantao-print mx-auto max-w-3xl space-y-4 bg-white p-8 text-sm text-black print:bg-white print:p-0">
       <style>{`
         @page { size: A4 portrait; margin: 10mm 12mm 10mm; }
-        @media print {
+        .plantao-print, .plantao-print * { background-color: #fff; color: #111; }\n        .plantao-print .text-muted-foreground { color: #555 !important; }\n        @media print {
           html, body, #root {
             background: #fff !important;
             color: #111 !important;
