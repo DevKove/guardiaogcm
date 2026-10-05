@@ -184,9 +184,8 @@ export async function carregarAtividades(p: {
   data_inicio: string;
   turno: string;
 }): Promise<PlantaoAtividade> {
-  const fim = p.encerrado_em ?? new Date().toISOString();
 
-  const [oc, reg, viaturas, escalas, postosAtivos, plantaoHist, itemMov, catalogoItens, plantaoItens] = await Promise.all([
+  const [oc, reg, viaturas, escalas, postosAtivos, plantaoHist, itemMov, plantaoItens] = await Promise.all([
     supabase
       .from("ocorrencias")
       .select("id, protocolo, natureza, endereco, bairro, status, prioridade, created_at, updated_at, desfecho, viatura, criado_por, origem, numero, solicitante_nome, relato, despachada_em, chegada_em, encerrada_em")
@@ -202,7 +201,6 @@ export async function carregarAtividades(p: {
     supabase.from("postos_fixos").select("id, nome, tipo, endereco, bairro").eq("ativo", true).order("nome"),
     supabase.from("plantao_historico").select("acao, created_at, usuario_id, dados").eq("plantao_id", p.id).order("created_at", { ascending: true }),
     supabase.from("plantao_item_movimentos").select("id,item_id,retirado_por,retirado_em,entregue_por,entregue_em,itens!inner(nome,identificacao,categoria)").eq("plantao_id", p.id).order("retirado_em", { ascending: false }),
-    supabase.from("itens").select("id,categoria,nome,identificacao,patrimonio,observacao,ativo").order("categoria").order("nome"),
     supabase.from("plantao_itens").select("id,item_id,status,situacao,retirado_por,retirado_em,entregue_por,entregue_em,conferido_por,conferido_em,itens!inner(id,categoria,nome,identificacao,patrimonio,observacao,ativo)").eq("plantao_id", p.id),
   ]);
 
@@ -213,7 +211,6 @@ export async function carregarAtividades(p: {
   if (postosAtivos.error) throw postosAtivos.error;
   if (plantaoHist.error) throw plantaoHist.error;
   if (itemMov.error) throw itemMov.error;
-  if (catalogoItens.error) throw catalogoItens.error;
   if (plantaoItens.error) throw plantaoItens.error;
 
   const { data: rawHist, error: histError } = await supabase
