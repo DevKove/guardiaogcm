@@ -31,6 +31,7 @@ type Movimento = {
   entregue_em: string | null; conferido_por: string | null; conferido_em: string | null;
 };
 type Equipe = { id: string; nome: string; matricula: string | null };
+type HistoricoMovimento = { id: string; item_id: string; retirado_por: string; retirado_em: string; entregue_por: string | null; entregue_em: string | null; registrado_por: string };
 
 export function ItensPlantao({ categoria }: { categoria: ItemCategoria }) {
   const cfg = CONFIG[categoria];
@@ -72,6 +73,23 @@ export function ItensPlantao({ categoria }: { categoria: ItemCategoria }) {
     },
   });
 
+  const { data: historicoMovimentos = [] } = useQuery({
+    queryKey: ["itens-historico-movimentos", plantao?.id, categoria],
+    enabled: !!plantao?.id && cfg.movimenta,
+    queryFn: async () => {
+      const ids = itens.map((i) => i.id);
+      if (!ids.length || !plantao?.id) return [] as HistoricoMovimento[];
+      const { data, error } = await supabase
+        .from("plantao_item_movimentos")
+        .select("id,item_id,retirado_por,retirado_em,entregue_por,entregue_em,registrado_por")
+        .eq("plantao_id", plantao.id)
+        .in("item_id", ids)
+        .order("retirado_em", { ascending: false });
+      if (error) throw error;
+      return (data ?? []) as HistoricoMovimento[];
+    },
+  });
+
   const { data: equipe = [] } = useQuery({
     queryKey: ["itens-equipe-ativa"],
     queryFn: async () => {
@@ -82,6 +100,10 @@ export function ItensPlantao({ categoria }: { categoria: ItemCategoria }) {
   });
 
   const movimentoPorItem = new Map(movimentos.map((m) => [m.item_id, m]));
+  const historicoPorItem = new Map<string, HistoricoMovimento>();
+  for (const registro of historicoMovimentos) {
+    if (!historicoPorItem.has(registro.item_id)) historicoPorItem.set(registro.item_id, registro);
+  }
   const nomeEquipe = (id: string | null) => equipe.find((e) => e.id === id)?.nome ?? "—";
   const hora = (value: string | null) => value ? new Date(value).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }) : "—";
 
@@ -114,22 +136,66 @@ export function ItensPlantao({ categoria }: { categoria: ItemCategoria }) {
   }
 
   async function registrarMovimento(item: Item, tipo: "retirada" | "entrega") {
-    if (!plantao?.id) return toast.error("Não há plantão aberto.");
+    if (!plantao?.id || !me) return toast.error("Não há plantão aberto.");
     const pessoa = tipo === "retirada" ? retirados[item.id] : entregues[item.id];
-    if (!pessoa) return toast.error(tipo === "retirada" ? "Selecione quem retirou o item." : "Selecione quem recebeu/entregou o item.");
+    if (!pessoa) return toast.error(tipo === "retirada" ? "Selecione o responsável pela retirada." : "Selecione o responsável pela entrega.");
     setBusy(item.id + tipo);
     const atual = movimentoPorItem.get(item.id);
+    const historicoAtual = historicoPorItem.get(item.id);
     const agora = new Date().toISOString();
-    const payload = tipo === "retirada"
-      ? { status: "retirado" as const, retirado_por: pessoa, retirado_em: agora }
-      : { status: "devolvido" as const, entregue_por: pessoa, entregue_em: agora };
-    const result = atual
-      ? await supabase.from("plantao_itens").update(payload).eq("id", atual.id)
-      : await supabase.from("plantao_itens").insert({ plantao_id: plantao.id, item_id: item.id, ...payload });
+
+    if (tipo === "retirada") {
+      if (historicoAtual && !historicoAtual.entregue_em) {
+        setBusy(null);
+        return toast.error("Este item já está retirado. Registre a entrega antes de uma nova retirada.");
+      }
+      const { error: historicoError } = await supabase.from("plantao_item_movimentos").insert({
+        plantao_id: plantao.id,
+        item_id: item.id,
+        retirado_por: pessoa,
+        retirado_em: agora,
+        registrado_por: me.id,
+      });
+      if (historicoError) {
+        setBusy(null);
+        return toast.error(historicoError.message);
+      }
+      const payload = { status: "retirado" as const, retirado_por: pessoa, retirado_em: agora, entregue_por: null, entregue_em: null };
+      const result = atual
+        ? await supabase.from("plantao_itens").update(payload).eq("id", atual.id)
+        : await supabase.from("plantao_itens").insert({ plantao_id: plantao.id, item_id: item.id, ...payload });
+      if (result.error) {
+        setBusy(null);
+        return toast.error(result.error.message);
+      }
+      toast.success("Retirada registrada com responsável e horário.");
+    } else {
+      if (!historicoAtual || historicoAtual.entregue_em) {
+        setBusy(null);
+        return toast.error("Não há retirada em aberto para este item.");
+      }
+      const { error: historicoError } = await supabase.from("plantao_item_movimentos").update({
+        entregue_por: pessoa,
+        entregue_em: agora,
+      }).eq("id", historicoAtual.id);
+      if (historicoError) {
+        setBusy(null);
+        return toast.error(historicoError.message);
+      }
+      const payload = { status: "devolvido" as const, entregue_por: pessoa, entregue_em: agora };
+      const result = atual
+        ? await supabase.from("plantao_itens").update(payload).eq("id", atual.id)
+        : await supabase.from("plantao_itens").insert({ plantao_id: plantao.id, item_id: item.id, ...payload });
+      if (result.error) {
+        setBusy(null);
+        return toast.error(result.error.message);
+      }
+      toast.success("Entrega registrada com responsável e horário.");
+    }
+
     setBusy(null);
-    if (result.error) return toast.error(result.error.message);
-    toast.success(tipo === "retirada" ? "Retirada registrada." : "Entrega/devolução registrada.");
     qc.invalidateQueries({ queryKey: ["itens-movimentos", plantao.id, categoria] });
+    qc.invalidateQueries({ queryKey: ["itens-historico-movimentos", plantao.id, categoria] });
     return null;
   }
 
@@ -197,6 +263,7 @@ export function ItensPlantao({ categoria }: { categoria: ItemCategoria }) {
               const conferido = mov?.status === "conferido";
               const retirado = mov?.status === "retirado";
               const devolvido = mov?.status === "devolvido";
+              const historico = historicoPorItem.get(item.id);
               const situacao = mov?.situacao ?? "OK";
               return (
                 <article key={item.id} className={`p-4 transition ${!item.ativo ? "opacity-50" : "hover:bg-accent/30"}`}>
@@ -204,16 +271,16 @@ export function ItensPlantao({ categoria }: { categoria: ItemCategoria }) {
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2"><h3 className="font-semibold">{item.nome}</h3>{item.identificacao && <span className="font-mono text-xs text-muted-foreground">#{item.identificacao}</span>}{!item.ativo && <span className="rounded border px-1.5 py-0.5 text-[10px] text-muted-foreground">INATIVO</span>}</div>
                       <div className="mt-1 flex flex-wrap gap-3 text-xs text-muted-foreground"><span>Patrimônio: {item.patrimonio || "—"}</span>{item.observacao && <span>{item.observacao}</span>}</div>
-                      {cfg.movimenta && mov && <div className="mt-2 flex flex-wrap gap-3 text-xs"><span className={retirado ? "text-warning" : devolvido ? "text-success" : "text-muted-foreground"}>{devolvido ? "DEVOLVIDO" : retirado ? "RETIRADO" : "PENDENTE"}</span><span>Retirou: {nomeEquipe(mov.retirado_por)} às {hora(mov.retirado_em)}</span><span>Entregou: {nomeEquipe(mov.entregue_por)} às {hora(mov.entregue_em)}</span></div>}
+                      {cfg.movimenta && (mov || historico) && <div className="mt-2 flex flex-wrap gap-3 text-xs"><span className={retirado ? "text-warning" : devolvido ? "text-success" : "text-muted-foreground"}>{devolvido ? "DEVOLVIDO" : retirado ? "RETIRADO" : "PENDENTE"}</span>{historico ? <><span>Retirada: {nomeEquipe(historico.retirado_por)} às {hora(historico.retirado_em)}</span><span>{historico.entregue_em ? <>Entrega: {nomeEquipe(historico.entregue_por)} às {hora(historico.entregue_em)}</> : "Entrega pendente"}</span></> : <><span>Retirada: {nomeEquipe(mov?.retirado_por ?? null)} às {hora(mov?.retirado_em ?? null)}</span><span>Entrega: {nomeEquipe(mov?.entregue_por ?? null)} às {hora(mov?.entregue_em ?? null)}</span></>}</div>}
                     </div>
                     <div className="flex flex-wrap items-center gap-2 lg:justify-end">
                       {me?.isAdmin && <><Button size="sm" variant="ghost" onClick={() => setForm({ id: item.id, nome: item.nome, identificacao: item.identificacao ?? "", patrimonio: item.patrimonio ?? "", observacao: item.observacao ?? "" })}><Pencil className="h-3.5 w-3.5"/> Editar</Button><Button size="sm" variant="ghost" onClick={() => alternarAtivo(item)}><Power className="h-3.5 w-3.5"/> {item.ativo ? "Desativar" : "Ativar"}</Button></>}
                       {plantao && item.ativo && (cfg.movimenta ? (
                         <>
-                          <select className="h-9 rounded-md border border-input bg-background px-2 text-xs" value={retirados[item.id] ?? mov?.retirado_por ?? ""} onChange={(e) => setRetirados({ ...retirados, [item.id]: e.target.value })}><option value="" className="bg-popover">Quem retirou?</option>{equipe.map((e) => <option key={e.id} value={e.id} className="bg-popover">{e.nome}{e.matricula ? ` · ${e.matricula}` : ""}</option>)}</select>
-                          <Button size="sm" disabled={busy === item.id + "retirada" || !!mov?.retirado_em} onClick={() => registrarMovimento(item, "retirada")}><UserRound className="h-3.5 w-3.5"/> Retirar</Button>
-                          <select className="h-9 rounded-md border border-input bg-background px-2 text-xs" value={entregues[item.id] ?? mov?.entregue_por ?? ""} onChange={(e) => setEntregues({ ...entregues, [item.id]: e.target.value })}><option value="" className="bg-popover">Quem entregou?</option>{equipe.map((e) => <option key={e.id} value={e.id} className="bg-popover">{e.nome}{e.matricula ? ` · ${e.matricula}` : ""}</option>)}</select>
-                          <Button size="sm" variant="outline" disabled={busy === item.id + "entrega" || !mov?.retirado_em || !!mov?.entregue_em} onClick={() => registrarMovimento(item, "entrega")}><RotateCcw className="h-3.5 w-3.5"/> Entregar</Button>
+                          <select className="h-9 rounded-md border border-input bg-background px-2 text-xs" value={retirados[item.id] ?? (historico && !historico.entregue_em ? historico.retirado_por : "")} onChange={(e) => setRetirados({ ...retirados, [item.id]: e.target.value })}><option value="" className="bg-popover">Responsável pela retirada</option>{equipe.map((e) => <option key={e.id} value={e.id} className="bg-popover">{e.nome}{e.matricula ? ` · ${e.matricula}` : ""}</option>)}</select>
+                          <Button size="sm" disabled={busy === item.id + "retirada" || !!(historico && !historico.entregue_em)} onClick={() => registrarMovimento(item, "retirada")}><UserRound className="h-3.5 w-3.5"/> Retirar</Button>
+                          <select className="h-9 rounded-md border border-input bg-background px-2 text-xs" value={entregues[item.id] ?? (historico && !historico.entregue_em ? "" : historico?.entregue_por ?? mov?.entregue_por ?? "")} onChange={(e) => setEntregues({ ...entregues, [item.id]: e.target.value })}><option value="" className="bg-popover">Responsável pela entrega</option>{equipe.map((e) => <option key={e.id} value={e.id} className="bg-popover">{e.nome}{e.matricula ? ` · ${e.matricula}` : ""}</option>)}</select>
+                          <Button size="sm" variant="outline" disabled={busy === item.id + "entrega" || !historico || !!historico.entregue_em} onClick={() => registrarMovimento(item, "entrega")}><RotateCcw className="h-3.5 w-3.5"/> Entregar</Button>
                         </>
                       ) : categoria === "cad" && !me?.isAdmin ? (
                         <select aria-label={"Situação de " + item.nome} className="h-9 min-w-[150px] rounded-md border border-input bg-background px-3 text-xs font-medium" value={situacao} disabled={busy === item.id + "situacao"} onChange={(e) => alterarSituacao(item, e.target.value as Situacao)}>
