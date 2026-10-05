@@ -108,7 +108,7 @@ function BoletimPlantao({ p, operador, matricula }: { p: Plantao; operador: stri
             max-width: none !important;
             margin: 0 !important;
             padding: 0 !important;
-            background: transparent !important;
+            background: #fff !important;
             color: #111 !important;
           }
           .plantao-toolbar { display: none !important; }
