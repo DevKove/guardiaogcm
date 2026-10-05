@@ -63,7 +63,7 @@ type Dados = Awaited<ReturnType<typeof carregarAtividades>>;
 function BoletimPlantao({ p, operador, matricula }: { p: Plantao; operador: string; matricula: string }) {
   const [selecionados, setSelecionados] = useState<Record<string, boolean>>({
     geral: true, alteracoes: true, ocorrencias: true, escalas: true, guarnicoes: true, postos: true,
-    itens: true, movimentacoes: true, registros: true, acoes: true, informacoes: true, assinaturas: true,
+    itens: true, movimentacoes: true, atualizacoesItens: true, registros: true, acoes: true, informacoes: true, assinaturas: true,
   });
   const { data, isLoading, isError, error, refetch } = useQuery({
     queryKey: ["plantao-relatorio-dados", p.id],
@@ -88,7 +88,7 @@ function BoletimPlantao({ p, operador, matricula }: { p: Plantao; operador: stri
   const opcoes = [
     ["geral", "Dados gerais"], ["alteracoes", "Alterações registradas"], ["ocorrencias", "Ocorrências"],
     ["escalas", "Escalas"], ["guarnicoes", "Guarnições"], ["postos", "Postos e conferências"],
-    ["itens", "Itens do plantão"], ["movimentacoes", "Histórico de itens"], ["registros", "Registros operacionais"],
+    ["itens", "Itens do plantão"], ["movimentacoes", "Histórico de itens"], ["atualizacoesItens", "Atualizações dos itens"], ["registros", "Registros operacionais"],
     ["acoes", "Histórico de ações"], ["informacoes", "Informações do plantão"], ["assinaturas", "Assinaturas"],
   ] as const;
   const endereco = (o: Dados["ocorrencias"][number]) => [o.endereco, o.numero ? "nº " + o.numero : null, o.bairro].filter(Boolean).join(", ") || "—";
@@ -229,11 +229,37 @@ function BoletimPlantao({ p, operador, matricula }: { p: Plantao; operador: stri
           {data.itensPlantao.length ? (
             <div className="col-span-2">
               <table className="cad-print-table w-full">
-                <thead><tr><th>Categoria</th><th>Item</th><th>Identificação</th><th>Patrimônio</th><th>Situação</th><th>Status</th><th>Retirada / entrega</th></tr></thead>
-                <tbody>{data.itensPlantao.map((item) => <tr key={item.item_id}><td className="uppercase">{item.categoria}</td><td className="font-semibold">{item.nome}</td><td>{item.identificacao || "—"}</td><td>{item.patrimonio || "—"}</td><td>{item.situacao}</td><td>{item.status}</td><td>{item.retirado_em ? "Retirada: " + dataHora(item.retirado_em) + (item.entregue_em ? " · Entrega: " + dataHora(item.entregue_em) : " · Entrega pendente") : "—"}</td></tr>)}</tbody>
+                <thead><tr><th>Categoria</th><th>Item</th><th>Identificação</th><th>Patrimônio</th><th>Situação</th><th>Status</th><th>Retirada / entrega</th><th>Conferência</th></tr></thead>
+                <tbody>{data.itensPlantao.map((item) => <tr key={item.item_id}><td className="uppercase">{item.categoria}</td><td className="font-semibold">{item.nome}</td><td>{item.identificacao || "—"}</td><td>{item.patrimonio || "—"}</td><td>{item.situacao}</td><td>{item.status}</td><td>{item.retirado_em ? "Retirada: " + dataHora(item.retirado_em) + (item.entregue_em ? " · Entrega: " + dataHora(item.entregue_em) : " · Entrega pendente") : "—"}</td><td>{item.conferido_em ? dataHora(item.conferido_em) + (data.usuarios[item.conferido_por || ""] ? " · " + data.usuarios[item.conferido_por || ""] : "") : "Pendente"}</td></tr>)}</tbody>
               </table>
             </div>
           ) : <G l="Resultado" v="Nenhum item cadastrado no catálogo." />}
+        </Sec>)}
+      {selecionados.atualizacoesItens && (<Sec t="Atualizações dos itens do plantão">
+          {data.itensPlantao.length ? (
+            <div className="col-span-2">
+              <table className="cad-print-table w-full">
+                <thead><tr><th>Data / hora</th><th>Item</th><th>Alteração / situação</th><th>Usuário responsável</th><th>Detalhes</th></tr></thead>
+                <tbody>{data.itensPlantao.map((item) => {
+                  const eventos = [
+                    item.retirado_em ? { data: item.retirado_em, acao: "Retirada", usuario: item.retirado_por, detalhes: "Item retirado para uso no plantão." } : null,
+                    item.entregue_em ? { data: item.entregue_em, acao: "Devolução", usuario: item.entregue_por, detalhes: "Item devolvido após utilização." } : null,
+                    item.conferido_em ? { data: item.conferido_em, acao: "Conferência", usuario: item.conferido_por, detalhes: item.situacao || "Conferido" } : null,
+                  ].filter(Boolean) as { data: string; acao: string; usuario: string | null; detalhes: string }[];
+                  if (!eventos.length) eventos.push({ data: p.iniciado_em, acao: "Vinculado ao plantão", usuario: null, detalhes: `${item.status} · ${item.situacao}` });
+                  return eventos.map((evento, i) => (
+                    <tr key={item.item_id + "-" + evento.acao + "-" + i}>
+                      <td className="whitespace-nowrap">{dataHora(evento.data)}</td>
+                      <td className="font-semibold">{item.nome}<br /><span className="font-normal">{item.identificacao || item.patrimonio || "—"}</span></td>
+                      <td>{evento.acao}</td>
+                      <td>{data.usuarios[evento.usuario || ""] || "—"}</td>
+                      <td>{evento.detalhes}</td>
+                    </tr>
+                  ));
+                })}</tbody>
+              </table>
+            </div>
+          ) : <G l="Resultado" v="Nenhuma atualização de item foi registrada durante o plantão." />}
         </Sec>)}
       {selecionados.movimentacoes && (<Sec t="Histórico de retiradas e devoluções de itens">
           {data.movimentacoesItens.length ? (
