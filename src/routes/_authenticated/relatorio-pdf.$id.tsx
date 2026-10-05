@@ -194,6 +194,16 @@ function BoletimPlantao({ p, operador, matricula }: { p: Plantao; operador: stri
         ) : <G l="Resultado" v="Nenhum posto informado." />}
       </Sec>}
 
+      <Sec t="Itens do plantão">
+        {data.itensPlantao.length ? (
+          <div className="col-span-2">
+            <table className="cad-print-table w-full">
+              <thead><tr><th>Categoria</th><th>Item</th><th>Identificação</th><th>Patrimônio</th><th>Situação</th><th>Status</th><th>Retirada / entrega</th></tr></thead>
+              <tbody>{data.itensPlantao.map((item) => <tr key={item.item_id}><td className="uppercase">{item.categoria}</td><td className="font-semibold">{item.nome}</td><td>{item.identificacao || "—"}</td><td>{item.patrimonio || "—"}</td><td>{item.situacao}</td><td>{item.status}</td><td>{item.retirado_em ? "Retirada: " + dataHora(item.retirado_em) + (item.entregue_em ? " · Entrega: " + dataHora(item.entregue_em) : " · Entrega pendente") : "—"}</td></tr>)}</tbody>
+            </table>
+          </div>
+        ) : <G l="Resultado" v="Nenhum item cadastrado no catálogo." />}
+      </Sec>
       <Sec t="Registros operacionais">
         {data.registros.length ? (
           <div className="col-span-2">
