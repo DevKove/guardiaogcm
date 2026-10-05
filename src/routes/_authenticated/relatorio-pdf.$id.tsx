@@ -88,9 +88,16 @@ function BoletimPlantao({ p, operador, matricula }: { p: Plantao; operador: stri
       <style>{`
         @page { size: A4 portrait; margin: 10mm 12mm 10mm; }
         .plantao-print, .plantao-print * { background-color: #fff; color: #111; }\n        .plantao-print .text-muted-foreground { color: #555 !important; }\n        @media print {
-          html, body, #root,
+          html,
+          body,
+          #root,
+          #root > *,
           .plantao-print,
-          .plantao-print * {
+          .plantao-print *,
+          .plantao-print::before,
+          .plantao-print::after,
+          .plantao-print *::before,
+          .plantao-print *::after {
             background: #fff !important;
             background-color: #fff !important;
             background-image: none !important;
@@ -98,6 +105,30 @@ function BoletimPlantao({ p, operador, matricula }: { p: Plantao; operador: stri
             color-scheme: light !important;
             box-shadow: none !important;
             text-shadow: none !important;
+            filter: none !important;
+            opacity: 1 !important;
+            mix-blend-mode: normal !important;
+          }
+          html::before,
+          html::after,
+          body::before,
+          body::after,
+          #root::before,
+          #root::after,
+          #root > *::before,
+          #root > *::after {
+            background: #fff !important;
+            background-color: #fff !important;
+            background-image: none !important;
+            box-shadow: none !important;
+            content: none !important;
+          }
+          html,
+          body,
+          #root {
+            min-height: 100% !important;
+            background: #fff !important;
+            background-color: #fff !important;
           }
           body {
             -webkit-print-color-adjust: exact !important;
