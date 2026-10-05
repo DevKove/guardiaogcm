@@ -232,6 +232,21 @@ Deno.serve(async (req) => {
       if (!isUuid(id)) return respond({ error: "Usuário inválido." }, 400);
       if (id === actorId) throw new Error("Você não pode excluir a si mesmo.");
 
+      const { data: targetAdmin } = await admin
+        .from("user_roles")
+        .select("user_id")
+        .eq("user_id", id)
+        .eq("role", "admin")
+        .maybeSingle();
+
+      if (targetAdmin) {
+        const { count } = await admin
+          .from("user_roles")
+          .select("user_id", { count: "exact", head: true })
+          .eq("role", "admin");
+        if ((count ?? 0) <= 1) throw new Error("Não é permitido excluir o último administrador.");
+      }
+
       const { error } = await admin.auth.admin.deleteUser(id);
       if (error) throw new Error(error.message);
 
@@ -256,6 +271,7 @@ Deno.serve(async (req) => {
       "Acesso restrito a administradores.",
       "Você não pode remover seu próprio perfil de administrador.",
       "Não é permitido remover o último administrador.",
+      "Não é permitido excluir o último administrador.",
       "Não foi possível salvar perfil e permissões.",
     ];
     const safe = safeMessages.find((item) => message === item || message.startsWith(item));
