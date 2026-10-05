@@ -223,7 +223,7 @@ function BoletimPlantao({ p, operador, matricula }: { p: Plantao; operador: stri
               </table>
             </div>
           ) : <G l="Resultado" v="Nenhum posto informado." />}
-        </Sec>})}
+        </Sec>)}
 
       {selecionados.itens && (<Sec t="Itens do plantão">
           {data.itensPlantao.length ? (
