@@ -88,10 +88,16 @@ function BoletimPlantao({ p, operador, matricula }: { p: Plantao; operador: stri
       <style>{`
         @page { size: A4 portrait; margin: 10mm 12mm 10mm; }
         .plantao-print, .plantao-print * { background-color: #fff; color: #111; }\n        .plantao-print .text-muted-foreground { color: #555 !important; }\n        @media print {
-          html, body, #root {
+          html, body, #root,
+          .plantao-print,
+          .plantao-print * {
             background: #fff !important;
+            background-color: #fff !important;
+            background-image: none !important;
             color: #111 !important;
             color-scheme: light !important;
+            box-shadow: none !important;
+            text-shadow: none !important;
           }
           body {
             -webkit-print-color-adjust: exact !important;
@@ -109,7 +115,11 @@ function BoletimPlantao({ p, operador, matricula }: { p: Plantao; operador: stri
           .plantao-section { break-inside: auto; }
           .plantao-section > h3 { break-after: avoid; }
           .plantao-table { width: 100% !important; font-size: 9px !important; border-collapse: collapse !important; }
-          .plantao-table thead { display: table-header-group; }
+          .plantao-table thead { display: table-header-group; background: #fff !important; }
+          .plantao-table tbody,
+          .plantao-table tr,
+          .plantao-table th,
+          .plantao-table td { background: #fff !important; background-color: #fff !important; color: #111 !important; }
           .plantao-table th, .plantao-table td { padding: 3px 4px !important; border: 1px solid #d1d5db !important; }
           .plantao-signatures { break-inside: avoid; padding-top: 32px !important; }
           .plantao-section, .plantao-signatures { color: #111 !important; }
