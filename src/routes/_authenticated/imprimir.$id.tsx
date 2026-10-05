@@ -72,8 +72,8 @@ function Imprimir() {
   const autor = pm.get(o.criado_por);
 
   return (
-    <div className="mx-auto max-w-3xl space-y-4 bg-card p-8 text-sm print:bg-transparent print:p-0">
-      <div className="flex items-center justify-between border-b-2 border-primary pb-3">
+    <div className="cad-print-document mx-auto max-w-3xl space-y-4 bg-card p-8 text-sm print:bg-transparent print:p-0">
+      <div className="cad-print-header flex items-center justify-between border-b-2 border-primary pb-3">
         <div>
           <div className="text-xs tracking-widest text-muted-foreground">GUARDA CIVIL MUNICIPAL</div>
           <div className="text-lg font-bold">BOLETIM DE ATENDIMENTO DE OCORRÊNCIA</div>
