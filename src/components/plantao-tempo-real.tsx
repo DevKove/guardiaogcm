@@ -42,14 +42,10 @@ export function PlantaoResumoTempoReal({ plantao }: { plantao: Plantao }) {
         .eq("plantao_id", plantaoId)
         .order("created_at", { ascending: false });
       if (error) throw error;
-      const inicioMs = new Date(plantao.iniciado_em).getTime();
-      const fimMs = new Date(plantao.encerrado_em ?? new Date().toISOString()).getTime();
-      return (data ?? []).filter((o) => {
-        const criado = new Date(o.created_at).getTime();
-        const alterado = new Date(o.updated_at).getTime();
-        return (Number.isFinite(criado) && criado >= inicioMs && criado <= fimMs) ||
-          (Number.isFinite(alterado) && alterado >= inicioMs && alterado <= fimMs);
-      });
+      // A relação plantao_id é a fonte de verdade. Não filtrar por timestamp:
+      // ocorrências vinculadas ao plantão podem ter sido criadas antes do início
+      // ou atualizadas após o encerramento e ainda assim pertencem ao plantão.
+      return data ?? [];
     },
     refetchInterval: 10000,
   });
