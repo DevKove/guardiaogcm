@@ -120,6 +120,17 @@ export function PlantaoResumoTempoReal({ plantao }: { plantao: Plantao }) {
     const postRows = postosAtivos.map((p) => `<tr><td>${cell(p.nome)}</td><td>${cell(p.tipo)}</td><td>${cell([p.endereco, p.bairro].filter(Boolean).join(" · "))}</td></tr>`).join("");
     const recordRows = registros.map((r) => `<tr><td>${cell(dataHora(r.hora))}</td><td>${cell(r.texto)}</td><td>${cell(usuarios[r.criado_por] ?? (r.criado_por ? r.criado_por.slice(0, 8) : "—"))}</td></tr>`).join("");
     const actionRows = acoes.map((a) => `<tr><td>${cell(dataHora(a.created_at))}</td><td>${cell(a.protocolo ? fmtProtocolo(a.protocolo, a.created_at) : "—")}</td><td>${cell(a.descricao)}</td><td>${cell(usuarios[a.usuario_id] ?? (a.usuario_id ? a.usuario_id.slice(0, 8) : "—"))}</td></tr>`).join("");
+    const itemRows = (data?.itensPlantao ?? []).flatMap((item) => {
+      const usuario = (id: string | null) => id ? (usuarios[id] ?? id.slice(0, 8)) : "—";
+      const eventos = [
+        item.retirado_em ? { data: item.retirado_em, acao: "Retirada", usuario: usuario(item.retirado_por), detalhes: "Item retirado para uso no plantão." } : null,
+        item.entregue_em ? { data: item.entregue_em, acao: "Devolução", usuario: usuario(item.entregue_por), detalhes: "Item devolvido." } : null,
+        item.conferido_em ? { data: item.conferido_em, acao: "Conferência", usuario: usuario(item.conferido_por), detalhes: item.situacao || "Conferido" } : null,
+      ].filter(Boolean) as { data: string; acao: string; usuario: string; detalhes: string }[];
+      if (!eventos.length) eventos.push({ data: plantao.iniciado_em, acao: "Vinculado ao plantão", usuario: "—", detalhes: `${item.status} · ${item.situacao}` });
+      return eventos.map((evento) => `<tr><td>${cell(dataHora(evento.data))}</td><td>${cell(item.nome)}</td><td>${cell(item.identificacao || "—")}</td><td>${cell(item.patrimonio || "—")}</td><td>${cell(evento.acao)}</td><td>${cell(evento.usuario)}</td><td>${cell(evento.detalhes)}</td></tr>`);
+    }).join("");
+    const itemMovementRows = (data?.movimentacoesItens ?? []).map((m) => `<tr><td>${cell(m.item_nome)}</td><td>${cell(m.item_identificacao || "—")}</td><td>${cell(m.categoria || "—")}</td><td>${cell(usuarios[m.retirado_por] ?? m.retirado_por.slice(0, 8))}</td><td>${cell(dataHora(m.retirado_em))}</td><td>${cell(m.entregue_por ? (usuarios[m.entregue_por] ?? m.entregue_por.slice(0, 8)) : "Pendente")}</td><td>${cell(m.entregue_em ? dataHora(m.entregue_em) : "Pendente")}</td></tr>`).join("");
     const generatedAt = new Date().toLocaleString("pt-BR");
 
       janela.document.open();
@@ -148,6 +159,8 @@ export function PlantaoResumoTempoReal({ plantao }: { plantao: Plantao }) {
       <h2>4. Próprios municipais ativos</h2><table><thead><tr><th>Local</th><th>Tipo</th><th>Endereço</th></tr></thead><tbody>${postRows || '<tr><td colspan="3" class="empty">Nenhum próprio municipal ativo cadastrado.</td></tr>'}</tbody></table>
       <h2>5. Lançamentos do plantão</h2><table><thead><tr><th>Data / hora</th><th>Registro</th><th>Responsável</th></tr></thead><tbody>${recordRows || '<tr><td colspan="3" class="empty">Nenhum lançamento registrado.</td></tr>'}</tbody></table>
       <h2>6. Histórico de ações das ocorrências</h2><table><thead><tr><th>Data / hora</th><th>Protocolo</th><th>Ação registrada</th><th>Usuário</th></tr></thead><tbody>${actionRows || '<tr><td colspan="4" class="empty">Nenhuma ação registrada ou dados indisponíveis.</td></tr>'}</tbody></table>
+      <h2>7. Itens do plantão e atualizações</h2><table><thead><tr><th>Data / hora</th><th>Item</th><th>Identificação</th><th>Patrimônio</th><th>Alteração</th><th>Usuário responsável</th><th>Detalhes</th></tr></thead><tbody>${itemRows || '<tr><td colspan="7" class="empty">Nenhum item vinculado ou nenhuma atualização registrada neste plantão.</td></tr>'}</tbody></table>
+      <h2>8. Histórico de retiradas e devoluções</h2><table><thead><tr><th>Item</th><th>Identificação</th><th>Categoria</th><th>Retirada por</th><th>Retirada</th><th>Devolução por</th><th>Devolução</th></tr></thead><tbody>${itemMovementRows || '<tr><td colspan="7" class="empty">Nenhuma retirada ou devolução de item registrada neste plantão.</td></tr>'}</tbody></table>
       <div class="footer">Documento gerado pelo sistema CAD. Conferir os registros antes de arquivar ou compartilhar.</div>
       <script>window.addEventListener("load", () => setTimeout(() => window.print(), 300));</script>
       </body></html>`);
