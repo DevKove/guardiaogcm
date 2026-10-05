@@ -96,7 +96,7 @@ export function FichaPlantao({ plantao, editavel, operadorNome }: { plantao: Pla
       operador_radio: operadorRadio?.nome ?? null,
       horario: f.horario,
       guarnicoes: f.guarnicoes, postos: f.postos, atividades: f.atividades, materiais: f.materiais,
-      informativo: f.informativo, atividades_verso: f.atividades_verso, turno: f.turno, data_inicio: f.data_inicio,
+      informativo: f.informativo, atividades_verso: f.atividades_verso, observacoes: f.observacoes, turno: f.turno, data_inicio: f.data_inicio,
     } as never).eq("id", f.id);
     if (error) { setSaving(false); toast.error("Erro ao salvar: " + error.message); return; }
 
@@ -186,6 +186,7 @@ export function FichaPlantao({ plantao, editavel, operadorNome }: { plantao: Pla
         <Texto l="Materiais de carga" v={f.materiais} dis={dis} on={(v) => set("materiais", v)} />
         <Texto l="Informativo do plantão" v={f.informativo} dis={dis} on={(v) => set("informativo", v)} />
         <Texto l="Atividades - verso" v={f.atividades_verso} dis={dis} on={(v) => set("atividades_verso", v)} />
+        <Texto l="Observações do plantão" v={f.observacoes} dis={dis} on={(v) => set("observacoes", v)} />
       </div>
 
       {editavel && (
@@ -234,6 +235,76 @@ export function FichaPlantao({ plantao, editavel, operadorNome }: { plantao: Pla
             </tbody>
           </table>
         ) : <div className="text-xs text-muted-foreground">Nenhuma ocorrência ainda.</div>}
+      </section>
+
+      <section className="card-3d animate-rise p-4">
+        <h3 className="mb-2 flex items-center gap-2 font-semibold text-primary"><ClipboardList className="h-4 w-4" /> Detalhamento completo das ocorrências ({atv?.ocorrencias.length ?? 0})</h3>
+        <p className="mb-3 text-xs text-muted-foreground">Todos os dados da ocorrência vinculada a este plantão permanecem disponíveis, incluindo relato, despacho, chegada, encerramento e desfecho.</p>
+        <div className="space-y-2">
+          {atv?.ocorrencias.map((o) => (
+            <details key={o.id} className="rounded-lg border p-3">
+              <summary className="cursor-pointer list-none text-xs font-semibold">
+                <span className="font-mono">{fmtProtocolo(o.protocolo, o.created_at)}</span> · {o.natureza || "Sem natureza"} · {o.status || "sem status"} · {o.endereco || "Sem endereço"}
+              </summary>
+              <div className="mt-3 grid gap-2 text-xs md:grid-cols-2">
+                <div><b>Protocolo:</b> {o.protocolo || "—"}</div>
+                <div><b>Origem:</b> {o.origem || "—"}</div>
+                <div><b>Prioridade:</b> {o.prioridade ?? "—"}</div>
+                <div><b>Viatura:</b> {o.viatura || "—"}</div>
+                <div><b>Solicitante:</b> {o.solicitante_nome || "—"}</div>
+                <div><b>Local:</b> {[o.endereco, o.numero ? "nº " + o.numero : null, o.bairro].filter(Boolean).join(", ") || "—"}</div>
+                <div><b>Registro:</b> {new Date(o.created_at).toLocaleString("pt-BR")}</div>
+                <div><b>Última atualização:</b> {new Date(o.updated_at).toLocaleString("pt-BR")}</div>
+                <div><b>Despacho:</b> {o.despachada_em ? new Date(o.despachada_em).toLocaleString("pt-BR") : "—"}</div>
+                <div><b>Chegada:</b> {o.chegada_em ? new Date(o.chegada_em).toLocaleString("pt-BR") : "—"}</div>
+                <div><b>Encerramento:</b> {o.encerrada_em ? new Date(o.encerrada_em).toLocaleString("pt-BR") : "—"}</div>
+                <div><b>Desfecho:</b> {o.desfecho || "—"}</div>
+                <div className="md:col-span-2 rounded border bg-muted/20 p-2"><b>Relato:</b><div className="mt-1 whitespace-pre-wrap">{o.relato || "—"}</div></div>
+              </div>
+            </details>
+          ))}
+          {!atv?.ocorrencias.length && <div className="text-xs text-muted-foreground">Nenhuma ocorrência vinculada a este plantão.</div>}
+        </div>
+      </section>
+
+      <section className="card-3d animate-rise p-4">
+        <h3 className="mb-2 flex items-center gap-2 font-semibold text-primary">Materiais e movimentações do plantão ({atv?.itensPlantao.length ?? 0})</h3>
+        <p className="mb-3 text-xs text-muted-foreground">Itens efetivamente vinculados ao plantão, inclusive registros de retirada e devolução.</p>
+        <div className="space-y-2 text-xs">
+          {atv?.itensPlantao.map((item) => (
+            <div key={item.id} className="rounded-lg border p-3">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="font-semibold">{item.nome} <span className="font-normal text-muted-foreground">· {item.categoria || "sem categoria"}</span></div>
+                <span className="rounded border px-2 py-0.5">{item.status || "pendente"} · {item.situacao || "OK"}</span>
+              </div>
+              <div className="mt-1 grid gap-1 md:grid-cols-3">
+                <div><b>Identificação:</b> {item.identificacao || "—"}</div>
+                <div><b>Patrimônio:</b> {item.patrimonio || "—"}</div>
+                <div><b>Observação:</b> {item.observacao || "—"}</div>
+              </div>
+              <div className="mt-2 text-muted-foreground">
+                <b>Retirada:</b> {item.retirado_em ? new Date(item.retirado_em).toLocaleString("pt-BR") + " · " + (atv?.usuarios[item.retirado_por || ""] || "responsável não identificado") : "não registrada"}
+                {" · "}
+                <b>Devolução:</b> {item.entregue_em ? new Date(item.entregue_em).toLocaleString("pt-BR") + " · " + (atv?.usuarios[item.entregue_por || ""] || "responsável não identificado") : "não registrada"}
+              </div>
+            </div>
+          ))}
+          {!atv?.itensPlantao.length && <div className="text-xs text-muted-foreground">Nenhum item foi vinculado a este plantão.</div>}
+        </div>
+      </section>
+
+      <section className="card-3d animate-rise p-4">
+        <h3 className="mb-2 font-semibold text-primary">Histórico de movimentações de materiais ({atv?.movimentacoesItens.length ?? 0})</h3>
+        <div className="space-y-1 text-xs">
+          {atv?.movimentacoesItens.map((m) => (
+            <div key={m.id} className="border-b py-2 last:border-0">
+              <b>{m.item_nome}</b> · {m.categoria || "sem categoria"} · retirada por {atv?.usuarios[m.retirado_por] || "—"} em {new Date(m.retirado_em).toLocaleString("pt-BR")}
+              {" · "}
+              {m.entregue_em ? <>devolvido por {atv?.usuarios[m.entregue_por || ""] || "—"} em {new Date(m.entregue_em).toLocaleString("pt-BR")}</> : "devolução pendente"}
+            </div>
+          ))}
+          {!atv?.movimentacoesItens.length && <div className="text-muted-foreground">Nenhuma movimentação registrada.</div>}
+        </div>
       </section>
 
       <section className="card-3d animate-rise p-4">
