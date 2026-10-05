@@ -133,6 +133,32 @@ Deno.serve(async (req) => {
       return respond({ data: result });
     }
 
+    if (action === "create_test_pending") {
+      const input = body?.data;
+      if (!input || typeof input !== "object") return respond({ error: "Dados inválidos." }, 400);
+
+      const email = String(input.email ?? "").trim().toLowerCase();
+      const nome = String(input.nome ?? "").trim();
+      const matricula = String(input.matricula ?? "").trim();
+      const senha = String(input.senha ?? "");
+
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return respond({ error: "E-mail inválido." }, 400);
+      if (!nome || nome.length > 120) return respond({ error: "Nome inválido." }, 400);
+      if (matricula.length > 40) return respond({ error: "Matrícula inválida." }, 400);
+      if (senha.length < 12 || senha.length > 72) return respond({ error: "A senha deve ter entre 12 e 72 caracteres." }, 400);
+
+      const { data, error } = await admin.auth.admin.createUser({
+        email,
+        password: senha,
+        email_confirm: true,
+        app_metadata: { cad_test_pending: true },
+        user_metadata: { nome, matricula },
+      });
+      if (error || !data.user) throw new Error(error?.message ?? "Não foi possível criar o usuário de teste.");
+
+      return respond({ ok: true, id: data.user.id, pending: true });
+    }
+
     if (action === "save") {
       const input = body?.data;
       if (!input || typeof input !== "object") return respond({ error: "Dados inválidos." }, 400);
