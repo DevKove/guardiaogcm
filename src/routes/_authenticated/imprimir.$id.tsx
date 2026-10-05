@@ -105,7 +105,7 @@ function Imprimir() {
       {env.length > 0 && (
         <div>
           <h3 className="mb-1 border-b font-bold uppercase">Envolvidos</h3>
-          <table className="w-full">
+          <table className="cad-print-table w-full">
             <tbody>
               {env.map((e) => (
                 <tr key={e.id} className="border-b"><td className="py-1 pr-2 font-semibold">{e.tipo}</td><td>{e.nome}</td><td>{e.documento}</td><td>{e.telefone}</td></tr>
@@ -118,7 +118,7 @@ function Imprimir() {
         <div>
           <h3 className="mb-1 border-b font-bold uppercase">Histórico</h3>
           {hist.map((h) => (
-            <div key={h.id} className="py-0.5">
+            <div key={h.id} className="py-0.5 cad-print-history-row">
               <span className="font-mono text-xs">{fmtData(h.created_at)}</span> — {pm.get(h.usuario_id)?.nome ?? "Sistema"}: <span className="whitespace-pre-wrap">{descricaoHistorico(h.descricao)}</span>
             </div>
           ))}
