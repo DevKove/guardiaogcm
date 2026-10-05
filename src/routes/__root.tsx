@@ -106,6 +106,12 @@ function RootComponent() {
   const router = useRouter();
 
   useEffect(() => {
+    const saved = window.localStorage.getItem("cad-theme");
+    const validThemes = ["claro", "escuro", "cyberpunk", "oceano", "floresta"];
+    document.documentElement.dataset["theme"] = saved && validThemes.includes(saved) ? saved : "escuro";
+  }, []);
+
+  useEffect(() => {
     const { data } = supabase.auth.onAuthStateChange((event) => {
       if (event !== "SIGNED_IN" && event !== "SIGNED_OUT" && event !== "USER_UPDATED") return;
       router.invalidate();

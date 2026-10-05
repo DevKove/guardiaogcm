@@ -42,7 +42,7 @@ export function QuadroAvisos() {
   return (
     <div className="card-3d animate-rise p-4">
       <div className="mb-2 flex items-center justify-between">
-        <h2 className="flex items-center gap-2 font-mono text-xs tracking-widest text-primary"><Megaphone className="h-4 w-4" /> QUADRO DE AVISOS DO PLANTÃO</h2>
+        <h2 className="flex items-center gap-2 font-mono text-xs tracking-widest text-primary"><img src={`${import.meta.env.BASE_URL}cad-assets/alerta.png`} alt="" aria-hidden="true" className="h-7 w-7 object-contain" /> QUADRO DE AVISOS DO PLANTÃO</h2>
         {me?.isSupervisor && <Button size="sm" variant="ghost" onClick={() => setNovo(!novo)}><Plus className="h-3.5 w-3.5" /> Aviso</Button>}
       </div>
       {novo && (
@@ -60,9 +60,9 @@ export function QuadroAvisos() {
       <div className="space-y-2">
         {data.map((a) => (
           <div key={a.id} className={`flex items-start gap-3 rounded-lg border p-2.5 text-sm ${a.nivel === "alerta" ? "border-destructive/50 bg-destructive/10" : "border-info/40 bg-info/10"}`}>
-            {a.nivel === "alerta" ? <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-destructive" /> : <Info className="mt-0.5 h-4 w-4 shrink-0 text-info" />}
+            {a.nivel === "alerta" ? <img src={`${import.meta.env.BASE_URL}cad-assets/alarme.gif`} alt="Alerta" className="mt-0.5 h-8 w-8 shrink-0 object-contain" /> : <Info className="mt-0.5 h-4 w-4 shrink-0 text-info" />}
             <div className="flex-1"><b>{a.titulo}</b> — {a.mensagem}<div className="text-[10px] text-muted-foreground">{fmtData(a.created_at)}</div></div>
-            {me?.isSupervisor && <button onClick={() => remover(a.id)} className="text-muted-foreground hover:text-foreground"><X className="h-4 w-4" /></button>}
+            {me?.isSupervisor && <button onClick={() => remover(a.id)} aria-label={`Excluir aviso ${a.titulo}`} className="text-muted-foreground hover:text-foreground"><img src={`${import.meta.env.BASE_URL}cad-assets/excluir.gif`} alt="" aria-hidden="true" className="h-6 w-6 object-contain" /></button>}
           </div>
         ))}
       </div>

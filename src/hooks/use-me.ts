@@ -17,6 +17,7 @@ export function useMe() {
         email: u.user.email ?? "",
         nome: profile?.nome || u.user.email || "",
         matricula: profile?.matricula ?? null,
+        aprovado: profile?.aprovado ?? false,
         roles: r,
         isAdmin: r.includes("admin"),
         isSupervisor: r.includes("admin") || r.includes("supervisor"),

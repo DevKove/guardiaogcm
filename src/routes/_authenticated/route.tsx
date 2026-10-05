@@ -1,7 +1,7 @@
 import { createFileRoute, Link, Outlet, redirect, useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
-import { Shield, LogOut, LayoutList, PlusCircle, Users, Car, BarChart3, UserCircle, School, CalendarClock, History, PlayCircle } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Shield, LogOut, LayoutList, PlusCircle, Users, Car, BarChart3, UserCircle, School, History, PlayCircle, Palette, Check, ChevronDown, Package, ChevronRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useMe } from "@/hooks/use-me";
 import { ROLE_LABEL } from "@/lib/cad";
@@ -11,10 +11,20 @@ export const Route = createFileRoute("/_authenticated")({
   beforeLoad: async () => {
     const { data, error } = await supabase.auth.getUser();
     if (error || !data.user) throw redirect({ to: "/auth" });
+    const { data: profile } = await supabase.from("profiles").select("aprovado").eq("id", data.user.id).maybeSingle();
+    if (!profile?.aprovado) throw redirect({ to: "/auth" });
     return { user: data.user };
   },
   component: Layout,
 });
+
+function RadioIcon() {
+  return <span className="inline-flex h-4 w-4 items-center justify-center rounded-sm border border-primary/50 text-[9px] font-bold text-primary">R</span>;
+}
+
+function ClipboardIcon() {
+  return <span className="inline-flex h-4 w-4 items-center justify-center rounded-sm border border-primary/50 text-[9px] font-bold text-primary">C</span>;
+}
 
 function Relogio() {
   const [d, setD] = useState(new Date());
@@ -40,6 +50,46 @@ function Layout() {
   const { data: me } = useMe();
   const qc = useQueryClient();
   const navigate = useNavigate();
+  const [theme, setTheme] = useState("escuro");
+  const [themeOpen, setThemeOpen] = useState(false);
+  const [itensOpen, setItensOpen] = useState(false);
+  const themeMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const saved = window.localStorage.getItem("cad-theme");
+    const validThemes = ["claro", "escuro", "cyberpunk", "oceano", "floresta"];
+    const initial = saved && validThemes.includes(saved) ? saved : "escuro";
+    setTheme(initial);
+    document.documentElement.dataset["theme"] = initial;
+  }, []);
+
+  function changeTheme(value: string) {
+    setTheme(value);
+    document.documentElement.dataset["theme"] = value;
+    window.localStorage.setItem("cad-theme", value);
+    setThemeOpen(false);
+  }
+
+  useEffect(() => {
+    if (!themeOpen) return;
+    function handlePointerDown(event: PointerEvent) {
+      if (themeMenuRef.current && !themeMenuRef.current.contains(event.target as Node)) {
+        setThemeOpen(false);
+      }
+    }
+    document.addEventListener("pointerdown", handlePointerDown);
+    return () => document.removeEventListener("pointerdown", handlePointerDown);
+  }, [themeOpen]);
+
+  const themes = [
+    { value: "escuro", label: "Escuro", description: "Baixa luminosidade" },
+    { value: "claro", label: "Claro", description: "Alta luminosidade" },
+    { value: "cyberpunk", label: "Cyberpunk", description: "Neon e alto contraste" },
+    { value: "oceano", label: "Oceano", description: "Azul profundo" },
+    { value: "floresta", label: "Floresta", description: "Verde operacional" },
+  ] as const;
+
+  const selectedTheme = themes.find((item) => item.value === theme) ?? themes[0];
 
   async function signOut() {
     await qc.cancelQueries();
@@ -49,64 +99,110 @@ function Layout() {
   }
 
   const linkCls =
-    "inline-flex items-center gap-2 rounded-md border border-transparent px-3 py-2 text-[13px] font-medium text-muted-foreground transition-colors hover:border-border hover:bg-accent hover:text-foreground";
+    "inline-flex items-center gap-2 border border-transparent px-3 py-2 text-[12px] font-semibold uppercase tracking-wide text-muted-foreground transition-colors hover:border-cyan-400/30 hover:bg-cyan-400/5 hover:text-cyan-300";
   const activeCls =
-    "!border-primary/25 !bg-primary/10 !text-primary";
+    "!border-cyan-400/35 !bg-cyan-400/10 !text-cyan-300";
 
   const items = [
     { to: "/painel", icon: LayoutList, label: "Ocorrências" },
     { to: "/ocorrencias/nova", icon: PlusCircle, label: "Nova" },
     { to: "/viaturas", icon: Car, label: "Viaturas" },
+    { to: "/equipe", icon: Users, label: "Equipe" },
     { to: "/postos", icon: School, label: "Postos fixos" },
-    { to: "/escalas", icon: CalendarClock, label: "Escalas" },
     { to: "/relatorios", icon: BarChart3, label: "Relatórios" },
     { to: "/historico", icon: History, label: "Histórico" },
     { to: "/plantao", icon: PlayCircle, label: "Plantão" },
   ] as const;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="cad-app-shell min-h-screen bg-transparent text-slate-100">
       <div className="siren-bar print:hidden" />
 
-      <header className="glass sticky top-0 z-40 border-b border-border/90 print:hidden">
-        <div className="mx-auto flex min-h-16 max-w-[1600px] items-center gap-3 px-4 lg:px-6">
+      <header className="sticky top-0 z-40 border-b border-cyan-400/20 bg-[#05090e] print:hidden">
+        <div className="mx-auto flex max-w-[1600px] flex-wrap items-center gap-x-5 gap-y-3 px-3 py-3 sm:px-4 lg:px-6">
           <Link
             to="/painel"
-            className="mr-2 flex shrink-0 items-center gap-3 rounded-md py-1.5 pr-2 transition-colors hover:bg-accent/60"
+            className="group flex min-w-0 flex-1 basis-[280px] items-center border-l-2 border-cyan-400/70 py-1.5 pl-3 pr-2 transition-colors"
             aria-label="CAD Guarda Municipal"
           >
-            <div className="icon-chip h-9 w-9 shrink-0">
-              <Shield className="h-[18px] w-[18px]" strokeWidth={2.2} />
-            </div>
-            <div className="hidden leading-none sm:block">
-              <div className="text-[15px] font-bold tracking-tight text-foreground">CAD Guarda Municipal</div>
-              <div className="mt-1 text-[9px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                Central de Atendimento e Despacho
-              </div>
-            </div>
+            <span className="mr-3 hidden h-10 w-10 shrink-0 items-center justify-center border border-cyan-400/25 bg-cyan-400/5 sm:flex">
+              <img src={`${import.meta.env.BASE_URL}cad-assets/distintivo-de-policia.gif`} alt="" aria-hidden="true" className="h-9 w-9 object-contain" />
+            </span>
+            <span className="min-w-0">
+              <span className="block truncate font-sans text-lg font-black leading-none tracking-[0.08em] text-foreground sm:text-xl lg:text-2xl">
+                CAD <span className="font-semibold tracking-[0.04em] text-primary">GUARDA MUNICIPAL</span>
+              </span>
+              <span className="mt-2 block text-[9px] font-semibold uppercase tracking-[0.16em] text-muted-foreground sm:text-[10px] sm:tracking-[0.22em]">
+                Atendimento <span className="px-1 text-primary/70">/</span> Despacho <span className="px-1 text-primary/70">/</span> Gestão de ocorrências
+              </span>
+              <span className="mt-1.5 block text-[10px] font-medium tracking-wide text-muted-foreground">
+                ARAÇOIABA DA SERRA <span className="px-1 text-primary">·</span> SP
+              </span>
+            </span>
           </Link>
 
-          <nav className="flex min-w-0 flex-1 items-center gap-0.5 overflow-x-auto scrollbar-none" aria-label="Navegação principal">
-            {items.map((i) => (
-              <Link
-                key={i.to}
-                to={i.to}
-                className={linkCls}
-                activeProps={{ className: activeCls }}
+          <div className="ml-auto flex min-w-0 flex-wrap items-center justify-end gap-2 sm:gap-3">
+            <div ref={themeMenuRef} className="relative">
+              <button
+                type="button"
+                aria-label="Tema visual"
+                aria-haspopup="menu"
+                aria-expanded={themeOpen}
+                onClick={() => setThemeOpen((open) => !open)}
+                className="inline-flex h-9 min-w-[142px] items-center justify-between gap-2 rounded-md border border-border bg-background/80 px-2.5 text-left text-foreground shadow-sm transition-colors hover:border-primary/50 hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring"
+                title="Personalizar aparência"
               >
-                <i.icon className="h-4 w-4 shrink-0" strokeWidth={1.9} />
-                <span className="whitespace-nowrap">{i.label}</span>
-              </Link>
-            ))}
-            {me?.isAdmin && (
-              <Link to="/usuarios" className={linkCls} activeProps={{ className: activeCls }}>
-                <Users className="h-4 w-4 shrink-0" strokeWidth={1.9} />
-                <span>Usuários</span>
-              </Link>
-            )}
-          </nav>
+                <span className="flex min-w-0 items-center gap-2">
+                  <Palette className="h-4 w-4 shrink-0 text-primary" />
+                  <span className="min-w-0">
+                    <span className="block truncate text-xs font-semibold">{selectedTheme.label}</span>
+                    <span className="hidden text-[9px] leading-none text-muted-foreground sm:block">{selectedTheme.description}</span>
+                  </span>
+                </span>
+                <ChevronDown className={`h-3.5 w-3.5 shrink-0 text-muted-foreground transition-transform ${themeOpen ? "rotate-180" : ""}`} />
+              </button>
 
-          <div className="ml-auto flex shrink-0 items-center gap-3">
+              {themeOpen && (
+                <div
+                  role="menu"
+                  aria-label="Selecionar tema"
+                  className="absolute right-0 top-[calc(100%+0.45rem)] z-[100] w-64 overflow-hidden rounded-lg border border-border bg-card p-1.5 text-card-foreground shadow-2xl ring-1 ring-black/30 animate-rise"
+                >
+                  <div className="border-b border-border px-2.5 py-2">
+                    <div className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">Tema visual</div>
+                    <div className="mt-0.5 text-[11px] text-muted-foreground">Escolha a aparência do CAD</div>
+                  </div>
+                  <div className="pt-1">
+                    {themes.map((item) => {
+                      const active = theme === item.value;
+                      return (
+                        <button
+                          key={item.value}
+                          type="button"
+                          role="menuitemradio"
+                          aria-checked={active}
+                          onClick={() => changeTheme(item.value)}
+                          className={`flex w-full items-center gap-3 rounded-md px-2.5 py-2 text-left transition-colors ${active ? "ring-1 ring-primary/40" : ""}`}
+                          style={{ backgroundColor: active ? "rgba(59,130,246,.20)" : "transparent", color: "#ffffff" }}
+                          onMouseEnter={(event) => { if (!active) event.currentTarget.style.backgroundColor = "rgba(255,255,255,.10)"; }}
+                          onMouseLeave={(event) => { if (!active) event.currentTarget.style.backgroundColor = "transparent"; }}
+                        >
+                          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border"
+                            style={{ borderColor: active ? "rgba(96,165,250,.70)" : "#475569", backgroundColor: active ? "rgba(59,130,246,.18)" : "#0f172a", color: active ? "#60a5fa" : "#cbd5e1" }}>
+                            <Palette className="h-4 w-4" />
+                          </span>
+                          <span className="min-w-0 flex-1">
+                            <span className="block text-xs font-semibold" style={{ color: "#ffffff" }}>{item.label}</span>
+                            <span className="block truncate text-[10px]" style={{ color: "#94a3b8" }}>{item.description}</span>
+                          </span>
+                          {active && <Check className="h-4 w-4 shrink-0" style={{ color: "#60a5fa" }} aria-hidden="true" />}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
             <Relogio />
             <Link
               to="/perfil"
@@ -130,10 +226,50 @@ function Layout() {
               <LogOut className="h-4 w-4" strokeWidth={1.9} />
             </button>
           </div>
+
+          <nav className="flex w-full basis-full flex-wrap items-center gap-1 border-t border-slate-800 pt-2" aria-label="Navegação principal">
+            {items.map((i) => (
+              <Link
+                key={i.to}
+                to={i.to}
+                className={linkCls}
+                activeProps={{ className: activeCls }}
+              >
+                <i.icon className="h-4 w-4 shrink-0" strokeWidth={1.9} />
+                <span className="whitespace-nowrap">{i.label}</span>
+              </Link>
+            ))}
+            <div className="relative">
+              <button type="button" className={linkCls} aria-haspopup="menu" aria-expanded={itensOpen} onClick={() => setItensOpen((open) => !open)}>
+                <Package className="h-4 w-4 shrink-0" strokeWidth={1.9} />
+                <span className="whitespace-nowrap">Itens</span>
+                <ChevronDown className={itensOpen ? "h-3 w-3 rotate-180 transition-transform" : "h-3 w-3 transition-transform"} />
+              </button>
+              {itensOpen && (
+                <div role="menu" aria-label="Itens operacionais" className="absolute left-0 top-[calc(100%+0.25rem)] z-50 min-w-48 overflow-hidden rounded-md border border-border bg-card p-1 text-card-foreground shadow-xl ring-1 ring-black/10">
+                  <Link to="/itens-armas" role="menuitem" className="flex items-center justify-between gap-3 rounded px-3 py-2 text-xs font-semibold text-foreground hover:bg-accent hover:text-accent-foreground">
+                    <span className="flex items-center gap-2"><Shield className="h-4 w-4 text-primary" />Armas</span><ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
+                  </Link>
+                  <Link to="/itens-radios" role="menuitem" className="flex items-center justify-between gap-3 rounded px-3 py-2 text-xs font-semibold text-foreground hover:bg-accent hover:text-accent-foreground">
+                    <span className="flex items-center gap-2"><RadioIcon />Rádios</span><ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
+                  </Link>
+                  <Link to="/itens-cad" role="menuitem" className="flex items-center justify-between gap-3 rounded px-3 py-2 text-xs font-semibold text-foreground hover:bg-accent hover:text-accent-foreground">
+                    <span className="flex items-center gap-2"><ClipboardIcon />CAD</span><ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
+                  </Link>
+                </div>
+              )}
+            </div>
+            {me?.isAdmin && (
+              <Link to="/usuarios" className={linkCls} activeProps={{ className: activeCls }}>
+                <Users className="h-4 w-4 shrink-0" strokeWidth={1.9} />
+                <span>Usuários</span>
+              </Link>
+            )}
+          </nav>
         </div>
       </header>
 
-      <main className="mx-auto max-w-[1600px] px-4 py-6 lg:px-6 lg:py-7">
+      <main className="mx-auto max-w-[1600px] px-4 py-5 lg:px-6 lg:py-6">
         <Outlet />
       </main>
     </div>

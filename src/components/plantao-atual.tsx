@@ -14,10 +14,13 @@ export function PlantaoAtual() {
   const [busy, setBusy] = useState(false);
 
   const { data: plantao, isLoading } = useQuery({
-    queryKey: ["plantao", "atual", me?.id],
+    queryKey: ["plantao", "atual", me?.id, me?.isAdmin],
     enabled: !!me?.id,
     queryFn: async () => {
-      const { data } = await supabase.from("plantoes").select("*").eq("operador_id", me!.id).eq("status", "aberto").maybeSingle();
+      const query = supabase.from("plantoes").select("*").eq("status", "aberto");
+      const { data } = me!.isAdmin
+        ? await query.maybeSingle()
+        : await query.eq("operador_id", me!.id).maybeSingle();
       return (data as unknown as Plantao) ?? null;
     },
   });
@@ -41,13 +44,13 @@ export function PlantaoAtual() {
   }
 
   async function encerrar() {
-    if (!plantao || !confirm("Encerrar o plantão? Depois disso somente o administrador poderá alterar.")) return;
+    if (!plantao || !confirm(me!.isAdmin ? "Encerrar este plantão em andamento? O encerramento será registrado na auditoria." : "Encerrar o plantão? Depois disso somente o administrador poderá alterar.")) return;
     setBusy(true);
     const atv = await carregarAtividades(plantao);
     const { error } = await supabase.from("plantoes").update({
       status: "encerrado", encerrado_em: new Date().toISOString(),
       resumo: { operador: me!.nome, ...atv },
-    } as never).eq("id", plantao.id);
+    } as never).eq("id", plantao.id).eq("status", "aberto");
     setBusy(false);
     if (error) { toast.error("Erro ao encerrar: " + error.message); return; }
     toast.success("Plantão encerrado e salvo no histórico");
@@ -80,12 +83,12 @@ export function PlantaoAtual() {
           <div>
             <div className="font-mono text-xs tracking-widest text-muted-foreground">PLANTÃO EM ANDAMENTO</div>
             <div className="text-lg font-bold">{plantao.turno} · {fmtDia(plantao.data_inicio)} · {plantao.horario}</div>
-            <div className="text-xs text-muted-foreground">Iniciado às {new Date(plantao.iniciado_em).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })} por {me.nome}</div>
+            <div className="text-xs text-muted-foreground">Iniciado às {new Date(plantao.iniciado_em).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}{me.isAdmin ? " · visão administrativa em tempo real" : " por você"}</div>
           </div>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" onClick={() => window.print()}><Printer className="h-4 w-4" /> Imprimir</Button>
-          <Button variant="destructive" onClick={encerrar} disabled={busy}><Lock className="h-4 w-4" /> Encerrar plantão</Button>
+          <Button variant="destructive" onClick={encerrar} disabled={busy}><Lock className="h-4 w-4" /> {me.isAdmin ? "Encerrar plantão (admin)" : "Encerrar plantão"}</Button>
         </div>
       </div>
       <div className="print:hidden-children">

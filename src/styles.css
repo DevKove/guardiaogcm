@@ -1,3 +1,49 @@
+/* CAD SIREN BACKGROUND */
+@keyframes cad-siren-rotate {
+  0% { transform: rotate(0deg) scale(1.08); }
+  50% { transform: rotate(180deg) scale(1.12); }
+  100% { transform: rotate(360deg) scale(1.08); }
+}
+@keyframes cad-siren-pulse {
+  0%, 100% { opacity: 0.035; }
+  50% { opacity: 0.075; }
+}
+@layer components {
+  body { position: relative; isolation: isolate; overflow-x: hidden; }
+  body::before {
+    content: "";
+    position: fixed;
+    inset: -35%;
+    z-index: -2;
+    pointer-events: none;
+    background: conic-gradient(from 0deg at 50% 50%, transparent 0deg, rgba(255,35,35,.42) 38deg, transparent 78deg, transparent 150deg, rgba(35,105,255,.48) 188deg, transparent 228deg, transparent 300deg, rgba(255,255,255,.20) 322deg, transparent 350deg);
+    filter: blur(58px);
+    opacity: .055;
+    animation: cad-siren-rotate 14s linear infinite;
+    transform-origin: center;
+    will-change: transform;
+  }
+  body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background:
+      radial-gradient(ellipse 42% 34% at 14% 52%, rgba(255,30,30,.10), transparent 72%),
+      radial-gradient(ellipse 42% 34% at 86% 52%, rgba(35,105,255,.11), transparent 72%),
+      radial-gradient(ellipse 24% 20% at 50% 50%, rgba(255,255,255,.035), transparent 75%),
+      linear-gradient(rgba(5,10,15,.82), rgba(5,10,15,.82)),
+      url("/guardiaogcm/cad-assets/siren-light.jpg") center / cover no-repeat;
+    opacity: .55;
+    animation: cad-siren-pulse 4.5s ease-in-out infinite;
+  }
+  #root { position: relative; z-index: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  body::before, body::after { animation: none !important; }
+}
+
 @import "tailwindcss" source(none);
 @source "../src";
 @import "tw-animate-css";
@@ -45,47 +91,217 @@
 }
 
 :root {
-  --radius: 0.55rem;
-  --background: oklch(0.14 0.018 250);
-  --foreground: oklch(0.94 0.008 245);
-  --card: oklch(0.185 0.018 250);
-  --card-foreground: oklch(0.94 0.008 245);
-  --popover: oklch(0.205 0.02 250);
-  --popover-foreground: oklch(0.94 0.008 245);
-  --primary: oklch(0.72 0.12 235);
-  --primary-foreground: oklch(0.12 0.018 250);
-  --secondary: oklch(0.23 0.02 250);
-  --secondary-foreground: oklch(0.92 0.008 245);
-  --muted: oklch(0.22 0.018 250);
-  --muted-foreground: oklch(0.66 0.018 245);
-  --accent: oklch(0.25 0.022 250);
-  --accent-foreground: oklch(0.95 0.008 245);
-  --destructive: oklch(0.64 0.19 25);
-  --destructive-foreground: oklch(0.98 0 0);
-  --success: oklch(0.7 0.13 150);
-  --info: oklch(0.7 0.12 235);
-  --warning: oklch(0.78 0.13 80);
-  --border: oklch(0.30 0.022 250);
-  --input: oklch(0.28 0.022 250);
-  --ring: oklch(0.72 0.12 235);
-  --chart-1: oklch(0.72 0.12 235);
-  --chart-2: oklch(0.7 0.13 150);
-  --chart-3: oklch(0.78 0.13 80);
-  --chart-4: oklch(0.64 0.19 25);
-  --chart-5: oklch(0.62 0.02 245);
-  --sidebar: oklch(0.115 0.018 250);
-  --sidebar-foreground: oklch(0.92 0.008 245);
-  --sidebar-primary: oklch(0.72 0.12 235);
-  --sidebar-primary-foreground: oklch(0.12 0.018 250);
-  --sidebar-accent: oklch(0.22 0.02 250);
-  --sidebar-accent-foreground: oklch(0.94 0.008 245);
-  --sidebar-border: oklch(0.26 0.022 250);
-  --sidebar-ring: oklch(0.72 0.12 235);
+  color-scheme: dark;
+  --radius: 0.35rem;
+  --background: #050a0f;
+  --foreground: #e7f0f5;
+  --card: #070d13;
+  --card-foreground: #e7f0f5;
+  --popover: #091119;
+  --popover-foreground: #e7f0f5;
+  --primary: #36b9ef;
+  --primary-foreground: #031018;
+  --secondary: #0d1720;
+  --secondary-foreground: #dce8ee;
+  --muted: #0b141c;
+  --muted-foreground: #8495a1;
+  --accent: #10202b;
+  --accent-foreground: #e9f6fb;
+  --destructive: #ef5350;
+  --destructive-foreground: #fff;
+  --success: #54d58a;
+  --info: #36b9ef;
+  --warning: #e8b84a;
+  --border: #1c2b36;
+  --input: #213440;
+  --ring: #36b9ef;
+  --chart-1: #36b9ef;
+  --chart-2: #54d58a;
+  --chart-3: #e8b84a;
+  --chart-4: #ef5350;
+  --chart-5: #8495a1;
+  --sidebar: #03080d;
+  --sidebar-foreground: #dce8ee;
+  --sidebar-primary: #36b9ef;
+  --sidebar-primary-foreground: #031018;
+  --sidebar-accent: #0d1720;
+  --sidebar-accent-foreground: #e9f6fb;
+  --sidebar-border: #162631;
+  --sidebar-ring: #36b9ef;
   --font-sans: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
   --font-mono: "JetBrains Mono", "Cascadia Code", ui-monospace, monospace;
-  --surface-1: oklch(0.17 0.018 250);
-  --surface-2: oklch(0.205 0.02 250);
-  --surface-3: oklch(0.235 0.022 250);
+  --surface-1: #070d13;
+  --surface-2: #091119;
+  --surface-3: #0d1720;
+}
+
+/* Temas selecionáveis pelo usuário: todas as cores usam tokens para manter componentes consistentes. */
+:root[data-theme="claro"] {
+  color-scheme: light;
+  --background: oklch(0.985 0.004 250);
+  --foreground: oklch(0.22 0.025 250);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.22 0.025 250);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.22 0.025 250);
+  --primary: oklch(0.48 0.15 245);
+  --primary-foreground: oklch(0.99 0 0);
+  --secondary: oklch(0.94 0.012 250);
+  --secondary-foreground: oklch(0.28 0.025 250);
+  --muted: oklch(0.95 0.008 250);
+  --muted-foreground: oklch(0.48 0.02 250);
+  --accent: oklch(0.93 0.018 245);
+  --accent-foreground: oklch(0.25 0.04 245);
+  --destructive: oklch(0.56 0.22 25);
+  --destructive-foreground: oklch(0.99 0 0);
+  --success: oklch(0.53 0.14 150);
+  --info: oklch(0.5 0.15 245);
+  --warning: oklch(0.62 0.15 75);
+  --border: oklch(0.87 0.012 250);
+  --input: oklch(0.88 0.012 250);
+  --ring: oklch(0.55 0.14 245);
+  --chart-1: oklch(0.55 0.15 245);
+  --chart-2: oklch(0.57 0.15 150);
+  --chart-3: oklch(0.68 0.16 75);
+  --chart-4: oklch(0.58 0.2 25);
+  --chart-5: oklch(0.58 0.06 300);
+  --sidebar: oklch(0.965 0.006 250);
+  --sidebar-foreground: oklch(0.22 0.025 250);
+  --sidebar-primary: oklch(0.48 0.15 245);
+  --sidebar-primary-foreground: oklch(0.99 0 0);
+  --sidebar-accent: oklch(0.92 0.018 245);
+  --sidebar-accent-foreground: oklch(0.25 0.04 245);
+  --sidebar-border: oklch(0.87 0.012 250);
+  --sidebar-ring: oklch(0.55 0.14 245);
+  --surface-1: oklch(1 0 0);
+  --surface-2: oklch(0.97 0.006 250);
+  --surface-3: oklch(0.94 0.01 250);
+}
+
+:root[data-theme="cyberpunk"] {
+  color-scheme: dark;
+  --background: oklch(0.13 0.045 300);
+  --foreground: oklch(0.94 0.035 320);
+  --card: oklch(0.18 0.055 300);
+  --card-foreground: oklch(0.94 0.035 320);
+  --popover: oklch(0.2 0.06 300);
+  --popover-foreground: oklch(0.94 0.035 320);
+  --primary: oklch(0.78 0.23 330);
+  --primary-foreground: oklch(0.14 0.04 300);
+  --secondary: oklch(0.25 0.065 300);
+  --secondary-foreground: oklch(0.93 0.04 320);
+  --muted: oklch(0.23 0.05 300);
+  --muted-foreground: oklch(0.72 0.07 315);
+  --accent: oklch(0.29 0.09 305);
+  --accent-foreground: oklch(0.96 0.05 320);
+  --destructive: oklch(0.67 0.22 25);
+  --destructive-foreground: oklch(0.98 0 0);
+  --success: oklch(0.78 0.19 155);
+  --info: oklch(0.8 0.17 205);
+  --warning: oklch(0.83 0.18 90);
+  --border: oklch(0.36 0.08 310);
+  --input: oklch(0.31 0.07 305);
+  --ring: oklch(0.78 0.23 330);
+  --chart-1: oklch(0.78 0.23 330);
+  --chart-2: oklch(0.8 0.17 205);
+  --chart-3: oklch(0.83 0.18 90);
+  --chart-4: oklch(0.75 0.2 155);
+  --chart-5: oklch(0.72 0.16 285);
+  --sidebar: oklch(0.105 0.045 300);
+  --sidebar-foreground: oklch(0.94 0.035 320);
+  --sidebar-primary: oklch(0.78 0.23 330);
+  --sidebar-primary-foreground: oklch(0.14 0.04 300);
+  --sidebar-accent: oklch(0.23 0.07 305);
+  --sidebar-accent-foreground: oklch(0.96 0.05 320);
+  --sidebar-border: oklch(0.31 0.07 305);
+  --sidebar-ring: oklch(0.78 0.23 330);
+  --surface-1: oklch(0.16 0.05 300);
+  --surface-2: oklch(0.2 0.06 300);
+  --surface-3: oklch(0.25 0.07 305);
+}
+
+:root[data-theme="oceano"] {
+  color-scheme: dark;
+  --background: oklch(0.14 0.035 225);
+  --foreground: oklch(0.93 0.025 210);
+  --card: oklch(0.18 0.04 225);
+  --card-foreground: oklch(0.93 0.025 210);
+  --popover: oklch(0.2 0.045 225);
+  --popover-foreground: oklch(0.93 0.025 210);
+  --primary: oklch(0.77 0.13 195);
+  --primary-foreground: oklch(0.13 0.035 225);
+  --secondary: oklch(0.23 0.04 225);
+  --secondary-foreground: oklch(0.92 0.025 210);
+  --muted: oklch(0.22 0.035 225);
+  --muted-foreground: oklch(0.68 0.035 210);
+  --accent: oklch(0.26 0.055 220);
+  --accent-foreground: oklch(0.95 0.025 200);
+  --destructive: oklch(0.65 0.19 25);
+  --destructive-foreground: oklch(0.98 0 0);
+  --success: oklch(0.72 0.14 155);
+  --info: oklch(0.77 0.13 195);
+  --warning: oklch(0.8 0.14 85);
+  --border: oklch(0.32 0.045 220);
+  --input: oklch(0.28 0.04 220);
+  --ring: oklch(0.77 0.13 195);
+  --chart-1: oklch(0.77 0.13 195);
+  --chart-2: oklch(0.72 0.14 155);
+  --chart-3: oklch(0.8 0.14 85);
+  --chart-4: oklch(0.68 0.16 250);
+  --chart-5: oklch(0.7 0.12 285);
+  --sidebar: oklch(0.11 0.035 225);
+  --sidebar-foreground: oklch(0.92 0.025 210);
+  --sidebar-primary: oklch(0.77 0.13 195);
+  --sidebar-primary-foreground: oklch(0.13 0.035 225);
+  --sidebar-accent: oklch(0.22 0.045 220);
+  --sidebar-accent-foreground: oklch(0.95 0.025 200);
+  --sidebar-border: oklch(0.27 0.04 220);
+  --sidebar-ring: oklch(0.77 0.13 195);
+  --surface-1: oklch(0.16 0.038 225);
+  --surface-2: oklch(0.2 0.045 225);
+  --surface-3: oklch(0.24 0.05 220);
+}
+
+:root[data-theme="floresta"] {
+  color-scheme: dark;
+  --background: oklch(0.15 0.025 150);
+  --foreground: oklch(0.93 0.025 135);
+  --card: oklch(0.19 0.03 150);
+  --card-foreground: oklch(0.93 0.025 135);
+  --popover: oklch(0.21 0.035 150);
+  --popover-foreground: oklch(0.93 0.025 135);
+  --primary: oklch(0.76 0.16 145);
+  --primary-foreground: oklch(0.14 0.025 150);
+  --secondary: oklch(0.24 0.03 150);
+  --secondary-foreground: oklch(0.92 0.025 135);
+  --muted: oklch(0.23 0.025 150);
+  --muted-foreground: oklch(0.69 0.035 140);
+  --accent: oklch(0.27 0.04 150);
+  --accent-foreground: oklch(0.95 0.025 135);
+  --destructive: oklch(0.65 0.19 25);
+  --destructive-foreground: oklch(0.98 0 0);
+  --success: oklch(0.76 0.16 145);
+  --info: oklch(0.72 0.12 220);
+  --warning: oklch(0.8 0.14 85);
+  --border: oklch(0.33 0.035 150);
+  --input: oklch(0.29 0.03 150);
+  --ring: oklch(0.76 0.16 145);
+  --chart-1: oklch(0.76 0.16 145);
+  --chart-2: oklch(0.72 0.12 220);
+  --chart-3: oklch(0.8 0.14 85);
+  --chart-4: oklch(0.7 0.14 35);
+  --chart-5: oklch(0.68 0.1 285);
+  --sidebar: oklch(0.11 0.025 150);
+  --sidebar-foreground: oklch(0.92 0.025 135);
+  --sidebar-primary: oklch(0.76 0.16 145);
+  --sidebar-primary-foreground: oklch(0.14 0.025 150);
+  --sidebar-accent: oklch(0.22 0.03 150);
+  --sidebar-accent-foreground: oklch(0.95 0.025 135);
+  --sidebar-border: oklch(0.28 0.03 150);
+  --sidebar-ring: oklch(0.76 0.16 145);
+  --surface-1: oklch(0.17 0.028 150);
+  --surface-2: oklch(0.21 0.035 150);
+  --surface-3: oklch(0.25 0.04 150);
 }
 
 @theme inline {
@@ -144,15 +360,18 @@
 @utility card-3d {
   background: var(--surface-1);
   border: 1px solid var(--border);
-  border-radius: var(--radius-xl);
-  box-shadow: 0 8px 24px -18px oklch(0 0 0 / 0.9);
+  border-radius: 0.55rem;
+  box-shadow: 0 8px 24px -18px rgba(0,0,0,.95), inset 0 1px 0 rgba(255,255,255,.025);
   transition: border-color 160ms ease, background-color 160ms ease, box-shadow 160ms ease;
 }
 
 @utility lift {
   &:hover {
     border-color: color-mix(in oklab, var(--primary) 45%, var(--border));
-    box-shadow: 0 12px 30px -22px oklch(0 0 0 / 0.95);
+    box-shadow:
+    0 14px 32px -20px oklch(0 0 0 / 0.98),
+    0 3px 7px -3px oklch(0 0 0 / 0.6),
+    inset 0 1px 0 color-mix(in oklab, var(--foreground) 9%, transparent);
   }
 }
 
@@ -170,9 +389,9 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid color-mix(in oklab, var(--primary) 28%, var(--border));
-  border-radius: 0.65rem;
-  background: color-mix(in oklab, var(--primary) 10%, var(--surface-2));
+  border: 1px solid color-mix(in oklab, var(--primary) 30%, var(--border));
+  border-radius: 0.35rem;
+  background: color-mix(in oklab, var(--primary) 8%, var(--surface-2));
   color: var(--primary);
 }
 
@@ -227,9 +446,707 @@
   }
 }
 
-@media print {
+/* Molduras com contorno ligeiramente mais definido, mantendo os temas existentes. */
+.card-3d,
+.icon-chip {
+  border-width: 2px;
+}
+
+.card-3d {
+  transform: translateZ(0);
+}
+
+header.glass {
+  box-shadow: 0 3px 10px -7px oklch(0 0 0 / 0.8);
+}
+
+header.glass {
+  border-bottom-width: 1.5px;
+}
+
+/* Linguagem visual CAD — aplicada aos componentes compartilhados de todo o sistema. */
+@layer components {
+  table {
+    border-collapse: separate;
+    border-spacing: 0;
+  }
+
+  thead {
+    background: #081019;
+  }
+
+  th {
+    color: #718390;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+  }
+
+  tbody tr {
+    border-color: var(--border);
+    transition: background-color 120ms ease;
+  }
+
+  tbody tr:hover {
+    background: rgba(54,185,239,.035);
+  }
+
+  [role="dialog"] {
+    border-color: #223744;
+    background: #070d13;
+    box-shadow: 0 28px 70px rgba(0,0,0,.65);
+  }
+
+  [role="dialog"] input,
+  [role="dialog"] textarea,
+  [role="dialog"] select {
+    background: #050a0f;
+  }
+
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: #050a0f;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #213440;
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #2c4858;
+  }
+}
+
+/* Design System global baseado na referência visual de /postos. */
+@layer components {
+  .cad-section {
+    border: 1px solid #1c2b36;
+    background: #070d13;
+  }
+
+  .cad-page {
+    min-height: 100%;
+    background: #050a0f;
+  }
+
+  .card-3d {
+    border-radius: 0;
+    border-color: #1c2b36;
+    background: #070d13;
+    box-shadow: none;
+  }
+
+  .card-3d:hover {
+    border-color: rgba(54,185,239,.45);
+    background: #091119;
+    box-shadow: none;
+  }
+
+  .icon-chip {
+    border-radius: 0;
+    border-color: rgba(54,185,239,.25);
+    background: rgba(54,185,239,.05);
+  }
+
+  table {
+    background: #070d13;
+  }
+
+  thead {
+    background: #081019;
+  }
+
+  input,
+  textarea,
+  select {
+    border-radius: 0.2rem;
+  }
+
+  [role="dialog"] {
+    border-radius: 0;
+  }
+
+  .cad-nav-link {
+    border-radius: 0;
+  }
+}
+
+@media (max-width: 640px) {
+  .cad-page {
+    width: 100%;
+    overflow-x: hidden;
+  }
+}
+
+/* ==========================================================================
+   Layout global — referência visual oficial: /postos
+   Todas as telas autenticadas devem compartilhar esta mesma linguagem.
+   ========================================================================== */
+@layer components {
   body {
-    background: white;
-    color: black;
+    background: #050a0f;
+  }
+
+  main {
+    background: #050a0f;
+  }
+
+  /* Superfícies de conteúdo: sem o aspecto "dashboard genérico" arredondado. */
+  main .rounded-lg,
+  main .rounded-md,
+  main .rounded-xl {
+    border-radius: 0 !important;
+  }
+
+  /* Cards, painéis, tabelas e blocos operacionais. */
+  main .border {
+    border-color: #1c2b36;
+  }
+
+  main section.border,
+  main article.border,
+  main [class*="card-3d"] {
+    background: #070d13;
+  }
+
+  /* Cabeçalhos de seção no padrão da página Postos. */
+  main section > h2,
+  main section > div > h2 {
+    color: #fff;
+  }
+
+  /* Controles de formulário no mesmo acabamento quadrado. */
+  main input,
+  main textarea,
+  main select {
+    border-radius: 0.2rem !important;
+    background: #050a0f;
+    border-color: #213440;
+  }
+
+  main input:focus,
+  main textarea:focus,
+  main select:focus {
+    border-color: rgba(54,185,239,.55);
+  }
+
+  /* Botões principais seguem o tratamento operacional da /postos. */
+  main button:not([aria-label="Sair"]) {
+    border-radius: 0.2rem;
+  }
+
+  /* Evita sombras 3D e gradientes que destoam da referência. */
+  main .shadow,
+  main .shadow-sm,
+  main .shadow-md,
+  main .shadow-lg,
+  main .shadow-xl,
+  main .shadow-2xl {
+    box-shadow: none !important;
+  }
+
+  /* Badges operacionais retangulares, como na /postos. */
+  main [class*="border"][class*="bg-emerald"],
+  main [class*="border"][class*="bg-cyan"],
+  main [class*="border"][class*="bg-amber"] {
+    box-shadow: none;
+  }
+
+  /* Separadores e áreas de ferramentas. */
+  main .border-b,
+  main .border-t {
+    border-color: #1c2b36;
+  }
+
+  /* Diálogos e menus. */
+  [role="dialog"] {
+    border-radius: 0 !important;
+    background: #070d13 !important;
+    border-color: #223744 !important;
+  }
+}
+
+@media (max-width: 768px) {
+  main {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+}
+
+/* POLICE CAD BACKGROUND */
+@keyframes cad-police-light-left {
+  0%, 100% { opacity: .10; transform: translateX(-4%) scale(1); }
+  50% { opacity: .34; transform: translateX(5%) scale(1.08); }
+}
+@keyframes cad-police-light-right {
+  0%, 100% { opacity: .34; transform: translateX(4%) scale(1.08); }
+  50% { opacity: .10; transform: translateX(-5%) scale(1); }
+}
+@layer components {
+  body {
+    background-color: #050a0f !important;
+    background-image:
+      linear-gradient(rgba(5,10,15,.72), rgba(5,10,15,.78)),
+      url("/guardiaogcm/cad-assets/siren-light.jpg") !important;
+    background-size: cover !important;
+    background-position: center !important;
+    background-attachment: fixed !important;
+    background-repeat: no-repeat !important;
+  }
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(ellipse 46% 80% at -5% 50%, rgba(235,20,35,.30), transparent 68%),
+      radial-gradient(ellipse 46% 80% at 105% 50%, rgba(20,95,255,.34), transparent 68%),
+      linear-gradient(90deg, transparent 0%, rgba(255,255,255,.025) 50%, transparent 100%);
+    animation: cad-police-light-left 5.5s ease-in-out infinite;
+    mix-blend-mode: screen;
+  }
+  body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(ellipse 46% 80% at 105% 50%, rgba(20,95,255,.30), transparent 68%),
+      radial-gradient(ellipse 46% 80% at -5% 50%, rgba(235,20,35,.25), transparent 68%);
+    animation: cad-police-light-right 5.5s ease-in-out infinite;
+    mix-blend-mode: screen;
+  }
+  #root {
+    position: relative;
+    z-index: 1;
+    min-height: 100vh;
+    background: transparent !important;
+  }
+  main,
+  main .cad-page {
+    background: rgba(5,10,15,.64) !important;
+  }
+  main section.border,
+  main article.border,
+  main [class*="card-3d"] {
+    background: rgba(7,13,19,.88) !important;
+  }
+  header.glass {
+    background: rgba(3,8,13,.88) !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body::before { animation: none !important; }
+}
+
+/* FUNDO OPERACIONAL NO SHELL — aplica diretamente ao container visível do CAD. */
+@layer components {
+  .cad-app-shell {
+    position: relative;
+    isolation: isolate;
+    background-color: #050a0f !important;
+    background-image:
+      linear-gradient(rgba(5,10,15,.46), rgba(5,10,15,.60)),
+      url("/guardiaogcm/cad-assets/siren-light.jpg") !important;
+    background-size: cover !important;
+    background-position: center !important;
+    background-attachment: fixed !important;
+    background-repeat: no-repeat !important;
+  }
+
+  .cad-app-shell::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background:
+      radial-gradient(ellipse 42% 75% at 0% 50%, rgba(235,20,35,.28), transparent 70%),
+      radial-gradient(ellipse 42% 75% at 100% 50%, rgba(20,95,255,.30), transparent 70%);
+    mix-blend-mode: screen;
+    animation: cad-police-light-left 5.5s ease-in-out infinite;
+  }
+
+  .cad-app-shell > header,
+  .cad-app-shell > main {
+    position: relative;
+    z-index: 1;
+  }
+
+  .cad-app-shell > main {
+    background: rgba(5,10,15,.48) !important;
+  }
+}
+
+/* Escala visual dos ativos gráficos do CAD: imagens e GIFs 20% maiores em todo o sistema. */
+@layer components {
+  img[src*="cad-assets/"] {
+    transform: scale(1.2);
+    transform-origin: center center;
+  }
+}
+
+/* Ativos visuais locais do repositório: não dependem de serviços externos de imagens. */
+@layer components {
+  .cad-app-shell {
+    background-image:
+      linear-gradient(rgba(5,10,15,.62), rgba(5,10,15,.72)),
+      url("/guardiaogcm/cad-assets/siren-light.jpg") !important;
+    background-size: cover !important;
+    background-position: center !important;
+    background-attachment: fixed !important;
+    background-repeat: no-repeat !important;
+  }
+
+  .cad-auth-shell {
+    background-color: #050a0f;
+    background-image:
+      linear-gradient(90deg, rgba(3,8,13,.90), rgba(3,8,13,.76)),
+      url("/guardiaogcm/cad-assets/siren-light.jpg");
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+  }
+
+  .cad-auth-shell header {
+    background: rgba(3,8,13,.76);
+    backdrop-filter: blur(10px);
+  }
+
+  .cad-auth-shell form {
+    background: rgba(7,13,19,.94);
+    border-color: rgba(54,185,239,.28);
+    box-shadow: 0 18px 60px rgba(0,0,0,.32);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cad-app-shell::before,
+  .cad-auth-shell img[src*=".gif"] {
+    animation: none !important;
+  }
+}
+
+/* ==========================================================================
+   TEMA CLARO — correção global
+   O tema claro deve vencer estilos legados/hardcoded usados nas telas.
+   ========================================================================== */
+@layer components {
+  :root[data-theme="claro"] body,
+  :root[data-theme="claro"] #root {
+    background: var(--background) !important;
+    color: var(--foreground) !important;
+  }
+
+  :root[data-theme="claro"] .cad-app-shell,
+  :root[data-theme="claro"] .cad-auth-shell,
+  :root[data-theme="claro"] main,
+  :root[data-theme="claro"] .cad-page {
+    background-color: var(--background) !important;
+    color: var(--foreground) !important;
+  }
+
+  :root[data-theme="claro"] header,
+  :root[data-theme="claro"] header.glass,
+  :root[data-theme="claro"] .cad-app-shell > header,
+  :root[data-theme="claro"] .cad-auth-shell header,
+  :root[data-theme="claro"] main section,
+  :root[data-theme="claro"] main article,
+  :root[data-theme="claro"] .card-3d,
+  :root[data-theme="claro"] .cad-section,
+  :root[data-theme="claro"] [role="dialog"],
+  :root[data-theme="claro"] .bg-card {
+    background-color: var(--card) !important;
+    color: var(--card-foreground) !important;
+    border-color: var(--border) !important;
+  }
+
+  :root[data-theme="claro"] main section.border,
+  :root[data-theme="claro"] main article.border,
+  :root[data-theme="claro"] main [class*="card-3d"] {
+    background: var(--card) !important;
+  }
+
+  :root[data-theme="claro"] input,
+  :root[data-theme="claro"] textarea,
+  :root[data-theme="claro"] select,
+  :root[data-theme="claro"] [role="dialog"] input,
+  :root[data-theme="claro"] [role="dialog"] textarea,
+  :root[data-theme="claro"] [role="dialog"] select {
+    background: var(--input) !important;
+    color: var(--foreground) !important;
+    border-color: var(--border) !important;
+  }
+
+  :root[data-theme="claro"] input::placeholder,
+  :root[data-theme="claro"] textarea::placeholder {
+    color: var(--muted-foreground) !important;
+    opacity: 1;
+  }
+
+  :root[data-theme="claro"] table {
+    background: var(--card) !important;
+    color: var(--card-foreground) !important;
+  }
+
+  :root[data-theme="claro"] thead {
+    background: var(--surface-3) !important;
+  }
+
+  :root[data-theme="claro"] tbody tr:hover {
+    background: color-mix(in oklab, var(--accent) 70%, transparent) !important;
+  }
+
+  :root[data-theme="claro"] h1,
+  :root[data-theme="claro"] h2,
+  :root[data-theme="claro"] h3,
+  :root[data-theme="claro"] h4,
+  :root[data-theme="claro"] h5,
+  :root[data-theme="claro"] h6 {
+    color: var(--foreground) !important;
+  }
+
+  /* Classes utilitárias que estavam fixando texto escuro/claro. */
+  :root[data-theme="claro"] .text-white,
+  :root[data-theme="claro"] .text-slate-100,
+  :root[data-theme="claro"] .text-slate-200,
+  :root[data-theme="claro"] .text-slate-300 {
+    color: var(--foreground) !important;
+  }
+
+  :root[data-theme="claro"] .text-slate-400,
+  :root[data-theme="claro"] .text-slate-500,
+  :root[data-theme="claro"] .text-slate-600 {
+    color: var(--muted-foreground) !important;
+  }
+
+  :root[data-theme="claro"] .text-slate-700,
+  :root[data-theme="claro"] .text-slate-800,
+  :root[data-theme="claro"] .text-slate-900 {
+    color: var(--foreground) !important;
+  }
+
+  :root[data-theme="claro"] .bg-slate-950,
+  :root[data-theme="claro"] .bg-slate-900,
+  :root[data-theme="claro"] .bg-slate-800 {
+    background-color: var(--card) !important;
+  }
+
+  :root[data-theme="claro"] .border-slate-800,
+  :root[data-theme="claro"] .border-slate-700,
+  :root[data-theme="claro"] .border-slate-600 {
+    border-color: var(--border) !important;
+  }
+
+  :root[data-theme="claro"] .bg-[#05090e],
+  :root[data-theme="claro"] .bg-[#050a0f],
+  :root[data-theme="claro"] .bg-[#070d13],
+  :root[data-theme="claro"] .bg-[#020617] {
+    background-color: var(--card) !important;
+  }
+
+  :root[data-theme="claro"] .border-cyan-400/20,
+  :root[data-theme="claro"] .border-cyan-400/25,
+  :root[data-theme="claro"] .border-cyan-400/30 {
+    border-color: color-mix(in oklab, var(--primary) 30%, var(--border)) !important;
+  }
+
+  /* Select nativo: texto e opções legíveis no modo claro. */
+  :root[data-theme="claro"] option {
+    background: var(--card) !important;
+    color: var(--foreground) !important;
+  }
+
+  :root[data-theme="claro"] [role="menu"] {
+    background: var(--card) !important;
+    color: var(--foreground) !important;
+    border-color: var(--border) !important;
+    box-shadow: 0 20px 40px rgba(15, 23, 42, .16) !important;
+  }
+
+  /* Fundos decorativos permanecem discretos no modo claro. */
+  :root[data-theme="claro"] body::before,
+  :root[data-theme="claro"] body::after,
+  :root[data-theme="claro"] .cad-app-shell::before {
+    opacity: .10 !important;
+  }
+
+  :root[data-theme="claro"] .cad-auth-shell {
+    background-image:
+      linear-gradient(90deg, rgba(255,255,255,.92), rgba(248,250,252,.84)),
+      url("/guardiaogcm/cad-assets/siren-light.jpg") !important;
+  }
+
+  :root[data-theme="claro"] .cad-auth-shell form {
+    background: rgba(255,255,255,.96) !important;
+    border-color: var(--border) !important;
+    color: var(--foreground) !important;
+    box-shadow: 0 18px 60px rgba(15,23,42,.12) !important;
+  }
+}
+
+/* ==========================================================================
+   IMPRESSÃO DOCUMENTAL — camada final e isolada
+   O tema visual do CAD nunca participa da impressão.
+   ========================================================================== */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 10mm 12mm;
+  }
+
+  html:has(.cad-print-document),
+  body:has(.cad-print-document),
+  body:has(.cad-print-document) #root,
+  body:has(.cad-print-document) .cad-app-shell,
+  body:has(.cad-print-document) .cad-app-shell > main {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    background-image: none !important;
+    color: #111111 !important;
+    box-shadow: none !important;
+  }
+
+  body:has(.cad-print-document) {
+    margin: 0 !important;
+    padding: 0 !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+    color-scheme: light !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  body:has(.cad-print-document)::before,
+  body:has(.cad-print-document)::after,
+  body:has(.cad-print-document) .cad-app-shell::before,
+  body:has(.cad-print-document) .cad-app-shell::after {
+    display: none !important;
+    content: none !important;
+    background: none !important;
+    background-image: none !important;
+  }
+
+  body:has(.cad-print-document) .cad-app-shell {
+    min-height: 0 !important;
+    background: #ffffff !important;
+    background-image: none !important;
+  }
+
+  body:has(.cad-print-document) .cad-app-shell > header,
+  body:has(.cad-print-document) .cad-app-shell > .siren-bar,
+  .cad-print-toolbar {
+    display: none !important;
+  }
+
+  body:has(.cad-print-document) .cad-app-shell > main {
+    width: auto !important;
+    max-width: none !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+    background-image: none !important;
+  }
+
+  .cad-print-document {
+    display: block !important;
+    width: 100% !important;
+    max-width: none !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    background-image: none !important;
+    color: #111111 !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+    filter: none !important;
+    mix-blend-mode: normal !important;
+  }
+
+  .cad-print-document,
+  .cad-print-document * {
+    color: #111111 !important;
+    background-image: none !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+    filter: none !important;
+    mix-blend-mode: normal !important;
+  }
+
+  .cad-print-document,
+  .cad-print-document *,
+  .cad-print-document *::before,
+  .cad-print-document *::after {
+    background-color: #ffffff !important;
+  }
+
+  .cad-print-document h1,
+  .cad-print-document h2,
+  .cad-print-document h3,
+  .cad-print-document h4,
+  .cad-print-document h5,
+  .cad-print-document h6,
+  .cad-print-document p,
+  .cad-print-document span,
+  .cad-print-document div,
+  .cad-print-document td,
+  .cad-print-document th {
+    color: #111111 !important;
+  }
+
+  .cad-print-document table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    background: #ffffff !important;
+  }
+
+  .cad-print-document thead,
+  .cad-print-document tbody,
+  .cad-print-document tr,
+  .cad-print-document th,
+  .cad-print-document td {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    color: #111111 !important;
+  }
+
+  .cad-print-document th,
+  .cad-print-document td {
+    border: 1px solid #d1d5db !important;
+    padding: 3px 4px !important;
+  }
+
+  .cad-print-document .cad-print-muted,
+  .cad-print-document .text-muted-foreground {
+    color: #555555 !important;
+  }
+
+  .cad-print-document .cad-print-section {
+    break-inside: auto;
+  }
+
+  .cad-print-document .cad-print-section > h3 {
+    break-after: avoid;
+  }
+
+  .cad-print-document .cad-print-signatures {
+    break-inside: avoid;
+  }
+
+  .cad-print-document .plantao-break {
+    break-before: page;
   }
 }

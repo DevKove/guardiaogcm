@@ -7,7 +7,7 @@ This patch adds database protections, transactional occurrence operations, and s
 1. Back up the database and test this migration in a staging project first:
    `supabase/migrations/20261002120000_security_hardening.sql`.
 2. Apply the migration through the project's normal Supabase migration workflow. Confirm all statements succeed.
-3. In Supabase Dashboard → Authentication → Settings (the exact menu may vary), disable public sign-ups if this is an internal municipal CAD. Create/invite accounts only through the controlled administrator workflow. The database trigger now assigns new accounts the `operador` role; it no longer grants admin based on signup order.
+3. In Supabase Dashboard → Authentication → Settings (the exact menu may vary), disable public sign-ups if this is an internal municipal CAD. Create/invite accounts only through the controlled administrator workflow. The database trigger only assigns the `operador` role when a trusted administrator-created account includes the admin-managed `app_metadata.cad_provisioned=true` marker. Public self-signups receive no application role.
 4. Verify at least one trusted administrator already exists before deploying. If no admin exists after applying the migration, use a controlled, authenticated administrative procedure to bootstrap one; do not re-enable first-user-is-admin behavior.
 5. Configure the deployment's environment variables from `.env.example`. Keep `SUPABASE_SERVICE_ROLE_KEY` and cron secrets only in server-side secret storage. Never prefix secrets with `VITE_`.
 6. The tracked `.env` was removed from the repository and ignored going forward. If any secret key was ever committed, rotate it in the provider dashboard; deleting the file does not remove earlier Git history. The reviewed file contained a project URL and publishable key, not a service-role key, but verify your own environment and commit history.
@@ -15,7 +15,7 @@ This patch adds database protections, transactional occurrence operations, and s
 
 ## What the migration changes
 
-- New auth users receive the least-privileged `operador` role, not administrator based on registration order.
+- Only administrator-provisioned Auth users receive the `operador` role through the trusted `app_metadata.cad_provisioned=true` marker; self-signups receive no application role.
 - Only admins and supervisors may update vehicle rows directly.
 - Operators cannot directly modify protected occurrence fields such as status, assigned vehicle, dispatch/arrival/finalization timestamps, outcome, or plantão association.
 - Dispatch, arrival and finalization use database functions so occurrence and vehicle updates commit or roll back together.

@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedEscalasRouteImport } from './routes/_authenticated/escalas'
+import { Route as AuthenticatedEquipeRouteImport } from './routes/_authenticated/equipe'
 import { Route as AuthenticatedHistoricoRouteImport } from './routes/_authenticated/historico'
 import { Route as AuthenticatedPainelRouteImport } from './routes/_authenticated/painel'
 import { Route as AuthenticatedPerfilRouteImport } from './routes/_authenticated/perfil'
@@ -25,6 +26,10 @@ import { Route as AuthenticatedOcorrenciasIdRouteImport } from './routes/_authen
 import { Route as AuthenticatedOcorrenciasNovaRouteImport } from './routes/_authenticated/ocorrencias.nova'
 import { Route as AuthenticatedPlantaoRouteImport } from './routes/_authenticated/plantao'
 import { Route as AuthenticatedPlantaoIdRouteImport } from './routes/_authenticated/plantao.$id'
+import { Route as AuthenticatedRelatorioPdfIdRouteImport } from './routes/_authenticated/relatorio-pdf.$id'
+import { Route as AuthenticatedItensArmasRouteImport } from './routes/_authenticated/itens-armas'
+import { Route as AuthenticatedItensRadiosRouteImport } from './routes/_authenticated/itens-radios'
+import { Route as AuthenticatedItensCadRouteImport } from './routes/_authenticated/itens-cad'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -43,6 +48,11 @@ const AuthRoute = AuthRouteImport.update({
 const AuthenticatedEscalasRoute = AuthenticatedEscalasRouteImport.update({
   id: '/escalas',
   path: '/escalas',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedEquipeRoute = AuthenticatedEquipeRouteImport.update({
+  id: '/equipe',
+  path: '/equipe',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedHistoricoRoute = AuthenticatedHistoricoRouteImport.update({
@@ -102,9 +112,23 @@ const AuthenticatedPlantaoRoute = AuthenticatedPlantaoRouteImport.update({
   path: '/plantao',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedItensArmasRoute = AuthenticatedItensArmasRouteImport.update({
+  id: '/itens-armas', path: '/itens-armas', getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedItensRadiosRoute = AuthenticatedItensRadiosRouteImport.update({
+  id: '/itens-radios', path: '/itens-radios', getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedItensCadRoute = AuthenticatedItensCadRouteImport.update({
+  id: '/itens-cad', path: '/itens-cad', getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedPlantaoIdRoute = AuthenticatedPlantaoIdRouteImport.update({
   id: '/plantao/$id',
   path: '/plantao/$id',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedRelatorioPdfIdRoute = AuthenticatedRelatorioPdfIdRouteImport.update({
+  id: '/relatorio-pdf/$id',
+  path: '/relatorio-pdf/$id',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 
@@ -112,6 +136,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/escalas': typeof AuthenticatedEscalasRoute
+  '/equipe': typeof AuthenticatedEquipeRoute
   '/historico': typeof AuthenticatedHistoricoRoute
   '/painel': typeof AuthenticatedPainelRoute
   '/perfil': typeof AuthenticatedPerfilRoute
@@ -122,13 +147,18 @@ export interface FileRoutesByFullPath {
   '/imprimir/$id': typeof AuthenticatedImprimirIdRoute
   '/ocorrencias/$id': typeof AuthenticatedOcorrenciasIdRoute
   '/ocorrencias/nova': typeof AuthenticatedOcorrenciasNovaRoute
+  '/itens-armas': typeof AuthenticatedItensArmasRoute
+  '/itens-radios': typeof AuthenticatedItensRadiosRoute
+  '/itens-cad': typeof AuthenticatedItensCadRoute
   '/plantao': typeof AuthenticatedPlantaoRoute
   '/plantao/$id': typeof AuthenticatedPlantaoIdRoute
+  '/relatorio-pdf/$id': typeof AuthenticatedRelatorioPdfIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/escalas': typeof AuthenticatedEscalasRoute
+  '/equipe': typeof AuthenticatedEquipeRoute
   '/historico': typeof AuthenticatedHistoricoRoute
   '/painel': typeof AuthenticatedPainelRoute
   '/perfil': typeof AuthenticatedPerfilRoute
@@ -139,7 +169,11 @@ export interface FileRoutesByTo {
   '/imprimir/$id': typeof AuthenticatedImprimirIdRoute
   '/ocorrencias/$id': typeof AuthenticatedOcorrenciasIdRoute
   '/ocorrencias/nova': typeof AuthenticatedOcorrenciasNovaRoute
+  '/itens-armas': typeof AuthenticatedItensArmasRoute
+  '/itens-radios': typeof AuthenticatedItensRadiosRoute
+  '/itens-cad': typeof AuthenticatedItensCadRoute
   '/plantao/$id': typeof AuthenticatedPlantaoIdRoute
+  '/relatorio-pdf/$id': typeof AuthenticatedRelatorioPdfIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -147,6 +181,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/_authenticated/escalas': typeof AuthenticatedEscalasRoute
+  '/_authenticated/equipe': typeof AuthenticatedEquipeRoute
   '/_authenticated/historico': typeof AuthenticatedHistoricoRoute
   '/_authenticated/painel': typeof AuthenticatedPainelRoute
   '/_authenticated/perfil': typeof AuthenticatedPerfilRoute
@@ -157,8 +192,12 @@ export interface FileRoutesById {
   '/_authenticated/imprimir/$id': typeof AuthenticatedImprimirIdRoute
   '/_authenticated/ocorrencias/$id': typeof AuthenticatedOcorrenciasIdRoute
   '/_authenticated/ocorrencias/nova': typeof AuthenticatedOcorrenciasNovaRoute
+  '/_authenticated/itens-armas': typeof AuthenticatedItensArmasRoute
+  '/_authenticated/itens-radios': typeof AuthenticatedItensRadiosRoute
+  '/_authenticated/itens-cad': typeof AuthenticatedItensCadRoute
   '/_authenticated/plantao': typeof AuthenticatedPlantaoRoute
   '/_authenticated/plantao/$id': typeof AuthenticatedPlantaoIdRoute
+  '/_authenticated/relatorio-pdf/$id': typeof AuthenticatedRelatorioPdfIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -166,6 +205,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/escalas'
+    | '/equipe'
     | '/historico'
     | '/painel'
     | '/perfil'
@@ -176,13 +216,18 @@ export interface FileRouteTypes {
     | '/imprimir/$id'
     | '/ocorrencias/$id'
     | '/ocorrencias/nova'
+    | '/itens-armas'
+    | '/itens-radios'
+    | '/itens-cad'
     | '/plantao'
     | '/plantao/$id'
+    | '/relatorio-pdf/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth'
     | '/escalas'
+    | '/equipe'
     | '/historico'
     | '/painel'
     | '/perfil'
@@ -193,14 +238,19 @@ export interface FileRouteTypes {
     | '/imprimir/$id'
     | '/ocorrencias/$id'
     | '/ocorrencias/nova'
+    | '/itens-armas'
+    | '/itens-radios'
+    | '/itens-cad'
     | '/plantao'
     | '/plantao/$id'
+    | '/relatorio-pdf/$id'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
     | '/auth'
     | '/_authenticated/escalas'
+    | '/_authenticated/equipe'
     | '/_authenticated/historico'
     | '/_authenticated/painel'
     | '/_authenticated/perfil'
@@ -212,6 +262,7 @@ export interface FileRouteTypes {
     | '/_authenticated/ocorrencias/$id'
     | '/_authenticated/ocorrencias/nova'
     | '/_authenticated/plantao/$id'
+    | '/_authenticated/relatorio-pdf/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -242,6 +293,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/auth'
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/equipe': {
+      id: '/_authenticated/equipe'
+      path: '/equipe'
+      fullPath: '/equipe'
+      preLoaderRoute: typeof AuthenticatedEquipeRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/escalas': {
       id: '/_authenticated/escalas'
@@ -327,6 +385,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPlantaoRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/itens-armas': {
+      id: '/_authenticated/itens-armas'
+      path: '/itens-armas'
+      fullPath: '/itens-armas'
+      preLoaderRoute: typeof AuthenticatedItensArmasRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/itens-radios': {
+      id: '/_authenticated/itens-radios'
+      path: '/itens-radios'
+      fullPath: '/itens-radios'
+      preLoaderRoute: typeof AuthenticatedItensRadiosRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/itens-cad': {
+      id: '/_authenticated/itens-cad'
+      path: '/itens-cad'
+      fullPath: '/itens-cad'
+      preLoaderRoute: typeof AuthenticatedItensCadRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/plantao/$id': {
       id: '/_authenticated/plantao/$id'
       path: '/plantao/$id'
@@ -334,11 +413,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPlantaoIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/relatorio-pdf/$id': {
+      id: '/_authenticated/relatorio-pdf/$id'
+      path: '/relatorio-pdf/$id'
+      fullPath: '/relatorio-pdf/$id'
+      preLoaderRoute: typeof AuthenticatedRelatorioPdfIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedEscalasRoute: typeof AuthenticatedEscalasRoute
+  AuthenticatedEquipeRoute: typeof AuthenticatedEquipeRoute
   AuthenticatedHistoricoRoute: typeof AuthenticatedHistoricoRoute
   AuthenticatedPainelRoute: typeof AuthenticatedPainelRoute
   AuthenticatedPerfilRoute: typeof AuthenticatedPerfilRoute
@@ -350,11 +437,16 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedOcorrenciasIdRoute: typeof AuthenticatedOcorrenciasIdRoute
   AuthenticatedOcorrenciasNovaRoute: typeof AuthenticatedOcorrenciasNovaRoute
   AuthenticatedPlantaoRoute: typeof AuthenticatedPlantaoRoute
+  AuthenticatedItensArmasRoute: typeof AuthenticatedItensArmasRoute
+  AuthenticatedItensRadiosRoute: typeof AuthenticatedItensRadiosRoute
+  AuthenticatedItensCadRoute: typeof AuthenticatedItensCadRoute
   AuthenticatedPlantaoIdRoute: typeof AuthenticatedPlantaoIdRoute
+  AuthenticatedRelatorioPdfIdRoute: typeof AuthenticatedRelatorioPdfIdRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedEscalasRoute: AuthenticatedEscalasRoute,
+  AuthenticatedEquipeRoute: AuthenticatedEquipeRoute,
   AuthenticatedHistoricoRoute: AuthenticatedHistoricoRoute,
   AuthenticatedPainelRoute: AuthenticatedPainelRoute,
   AuthenticatedPerfilRoute: AuthenticatedPerfilRoute,
@@ -366,7 +458,11 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedOcorrenciasIdRoute: AuthenticatedOcorrenciasIdRoute,
   AuthenticatedOcorrenciasNovaRoute: AuthenticatedOcorrenciasNovaRoute,
   AuthenticatedPlantaoRoute: AuthenticatedPlantaoRoute,
+  AuthenticatedItensArmasRoute: AuthenticatedItensArmasRoute,
+  AuthenticatedItensRadiosRoute: AuthenticatedItensRadiosRoute,
+  AuthenticatedItensCadRoute: AuthenticatedItensCadRoute,
   AuthenticatedPlantaoIdRoute: AuthenticatedPlantaoIdRoute,
+  AuthenticatedRelatorioPdfIdRoute: AuthenticatedRelatorioPdfIdRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =

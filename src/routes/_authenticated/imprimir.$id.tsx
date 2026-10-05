@@ -4,10 +4,47 @@ import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { PRIORIDADES, STATUS, fmtData, fmtProtocolo, type Status } from "@/lib/cad";
 
+const CAMPOS_HISTORICO: Record<string, string> = {
+  natureza: "Natureza",
+  prioridade: "Prioridade",
+  status: "Situação",
+  origem: "Origem",
+  endereco: "Endereço",
+  numero: "Número",
+  bairro: "Bairro",
+  referencia: "Referência",
+  solicitante_nome: "Solicitante",
+  solicitante_telefone: "Telefone do solicitante",
+  relato: "Relato",
+  viatura: "Viatura",
+  viatura_id: "Vínculo da viatura",
+  despachada_em: "Despacho",
+  chegada_em: "Chegada",
+  encerrada_em: "Finalização",
+  desfecho: "Desfecho",
+  plantao_id: "Plantão",
+  updated_at: "Atualização",
+};
+
 export const Route = createFileRoute("/_authenticated/imprimir/$id")({
   head: () => ({ meta: [{ title: "Boletim de ocorrência · CAD" }] }),
   component: Imprimir,
 });
+
+function descricaoHistorico(descricao: string) {
+  const prefixo = "Alteração registrada pelo banco. Campos:";
+  if (!descricao.trim().toLowerCase().startsWith(prefixo.toLowerCase())) return descricao;
+
+  const campos = descricao
+    .slice(prefixo.length)
+    .split(",")
+    .map((campo) => campo.trim())
+    .filter(Boolean);
+
+  const nomes = [...new Set(campos.map((campo) => CAMPOS_HISTORICO[campo] ?? campo))];
+
+  return nomes.length ? nomes.join(", ") : "Alteração registrada";
+}
 
 function Imprimir() {
   const { id } = Route.useParams();
@@ -35,8 +72,8 @@ function Imprimir() {
   const autor = pm.get(o.criado_por);
 
   return (
-    <div className="mx-auto max-w-3xl space-y-4 bg-card p-8 text-sm print:bg-transparent print:p-0">
-      <div className="flex items-center justify-between border-b-2 border-primary pb-3">
+    <div className="cad-print-document mx-auto max-w-3xl space-y-4 bg-card p-8 text-sm print:bg-transparent print:p-0">
+      <div className="cad-print-header flex items-center justify-between border-b-2 border-primary pb-3">
         <div>
           <div className="text-xs tracking-widest text-muted-foreground">GUARDA CIVIL MUNICIPAL</div>
           <div className="text-lg font-bold">BOLETIM DE ATENDIMENTO DE OCORRÊNCIA</div>
@@ -68,7 +105,7 @@ function Imprimir() {
       {env.length > 0 && (
         <div>
           <h3 className="mb-1 border-b font-bold uppercase">Envolvidos</h3>
-          <table className="w-full">
+          <table className="cad-print-table w-full">
             <tbody>
               {env.map((e) => (
                 <tr key={e.id} className="border-b"><td className="py-1 pr-2 font-semibold">{e.tipo}</td><td>{e.nome}</td><td>{e.documento}</td><td>{e.telefone}</td></tr>
@@ -77,12 +114,16 @@ function Imprimir() {
           </table>
         </div>
       )}
-      <div>
-        <h3 className="mb-1 border-b font-bold uppercase">Histórico</h3>
-        {hist.map((h) => (
-          <div key={h.id} className="py-0.5"><span className="font-mono text-xs">{fmtData(h.created_at)}</span> — {pm.get(h.usuario_id)?.nome}: <span className="whitespace-pre-wrap">{h.descricao}</span></div>
-        ))}
-      </div>
+      {hist.length > 0 && (
+        <div>
+          <h3 className="mb-1 border-b font-bold uppercase">Histórico</h3>
+          {hist.map((h) => (
+            <div key={h.id} className="py-0.5 cad-print-history-row">
+              <span className="font-mono text-xs">{fmtData(h.created_at)}</span> — {pm.get(h.usuario_id)?.nome ?? "Sistema"}: <span className="whitespace-pre-wrap">{descricaoHistorico(h.descricao)}</span>
+            </div>
+          ))}
+        </div>
+      )}
       <div className="grid grid-cols-2 gap-8 pt-12 text-center text-xs">
         <div className="border-t pt-1">{autor?.nome}{autor?.matricula ? ` — Mat. ${autor.matricula}` : ""}<br />Operador responsável</div>
         <div className="border-t pt-1">Supervisor de turno</div>
