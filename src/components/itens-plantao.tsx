@@ -11,6 +11,9 @@ import { useMe } from "@/hooks/use-me";
 
 export type ItemCategoria = "arma" | "radio" | "cad";
 
+const SITUACOES = ["OK", "AVARIADO", "EXTRAVIADO", "AUSENTE"] as const;
+type Situacao = (typeof SITUACOES)[number];
+
 const CONFIG = {
   arma: { label: "Armas", kicker: "CONTROLE DE ARMAMENTO", icon: Shield, asset: "pistola.gif", movimenta: true },
   radio: { label: "Rádios", kicker: "COMUNICAÇÃO OPERACIONAL", icon: Radio, asset: "walkie-talkie.gif", movimenta: true },
@@ -23,6 +26,7 @@ type Item = {
 };
 type Movimento = {
   id: string; item_id: string; status: "pendente" | "retirado" | "devolvido" | "conferido";
+  situacao: Situacao;
   retirado_por: string | null; retirado_em: string | null; entregue_por: string | null;
   entregue_em: string | null; conferido_por: string | null; conferido_em: string | null;
 };
@@ -129,6 +133,25 @@ export function ItensPlantao({ categoria }: { categoria: ItemCategoria }) {
     return null;
   }
 
+  async function alterarSituacao(item: Item, situacao: Situacao) {
+    if (!me || me.isAdmin || categoria !== "cad") return;
+    if (!plantao?.id) return toast.error("Não há plantão aberto.");
+    setBusy(item.id + "situacao");
+    const atual = movimentoPorItem.get(item.id);
+    const payload = {
+      situacao,
+      status: situacao === "OK" ? ("conferido" as const) : ("pendente" as const),
+      conferido_por: me.id,
+      conferido_em: new Date().toISOString(),
+    };
+    const result = atual
+      ? await supabase.from("plantao_itens").update(payload).eq("id", atual.id)
+      : await supabase.from("plantao_itens").insert({ plantao_id: plantao.id, item_id: item.id, ...payload });
+    setBusy(null);
+    if (result.error) return toast.error(result.error.message);
+    toast.success("Situação de " + item.nome + " atualizada para " + situacao + ".");
+    qc.invalidateQueries({ queryKey: ["itens-movimentos", plantao.id, categoria] });
+  }
   async function conferir(item: Item, checked: boolean) {
     if (!plantao?.id) return toast.error("Não há plantão aberto.");
     setBusy(item.id + "conferir");
@@ -174,6 +197,7 @@ export function ItensPlantao({ categoria }: { categoria: ItemCategoria }) {
               const conferido = mov?.status === "conferido";
               const retirado = mov?.status === "retirado";
               const devolvido = mov?.status === "devolvido";
+              const situacao = mov?.situacao ?? "OK";
               return (
                 <article key={item.id} className={`p-4 transition ${!item.ativo ? "opacity-50" : "hover:bg-accent/30"}`}>
                   <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
@@ -191,6 +215,10 @@ export function ItensPlantao({ categoria }: { categoria: ItemCategoria }) {
                           <select className="h-9 rounded-md border border-input bg-background px-2 text-xs" value={entregues[item.id] ?? mov?.entregue_por ?? ""} onChange={(e) => setEntregues({ ...entregues, [item.id]: e.target.value })}><option value="" className="bg-popover">Quem entregou?</option>{equipe.map((e) => <option key={e.id} value={e.id} className="bg-popover">{e.nome}{e.matricula ? ` · ${e.matricula}` : ""}</option>)}</select>
                           <Button size="sm" variant="outline" disabled={busy === item.id + "entrega" || !mov?.retirado_em || !!mov?.entregue_em} onClick={() => registrarMovimento(item, "entrega")}><RotateCcw className="h-3.5 w-3.5"/> Entregar</Button>
                         </>
+                      ) : categoria === "cad" && !me?.isAdmin ? (
+                        <select aria-label={"Situação de " + item.nome} className="h-9 min-w-[150px] rounded-md border border-input bg-background px-3 text-xs font-medium" value={situacao} disabled={busy === item.id + "situacao"} onChange={(e) => alterarSituacao(item, e.target.value as Situacao)}>
+                          {SITUACOES.map((opcao) => <option key={opcao} value={opcao} className="bg-popover">{opcao}</option>)}
+                        </select>
                       ) : (
                         <Button size="sm" variant={conferido ? "outline" : "default"} onClick={() => conferir(item, !conferido)} disabled={busy === item.id + "conferir"}>{conferido ? <><CheckCircle2 className="h-4 w-4"/> Conferido</> : <><ClipboardCheck className="h-4 w-4"/> Conferir</>}</Button>
                       ))}
