@@ -86,74 +86,123 @@ function BoletimPlantao({ p, operador, matricula }: { p: Plantao; operador: stri
   return (
     <div className="plantao-print mx-auto max-w-3xl space-y-4 bg-white p-8 text-sm text-black print:bg-white print:p-0">
       <style>{`
-        @page { size: A4 portrait; margin: 10mm 12mm 10mm; }
-        .plantao-print, .plantao-print * { background-color: #fff; color: #111; }\n        .plantao-print .text-muted-foreground { color: #555 !important; }\n        @media print {
-          html,
-          body,
-          #root,
-          #root > *,
-          .plantao-print,
-          .plantao-print *,
-          .plantao-print::before,
-          .plantao-print::after,
-          .plantao-print *::before,
-          .plantao-print *::after {
+        @page { size: A4 portrait; margin: 10mm 12mm; }
+
+        .plantao-print {
+          background: #fff;
+          color: #111;
+        }
+
+        @media print {
+          /* Isola a folha de impressão do tema escuro do CAD. */
+          html:has(.plantao-print),
+          body:has(.plantao-print),
+          body:has(.plantao-print) #root,
+          body:has(.plantao-print) .cad-app-shell,
+          body:has(.plantao-print) .cad-app-shell > main {
             background: #fff !important;
             background-color: #fff !important;
             background-image: none !important;
             color: #111 !important;
-            color-scheme: light !important;
-            box-shadow: none !important;
-            text-shadow: none !important;
-            filter: none !important;
-            opacity: 1 !important;
-            mix-blend-mode: normal !important;
           }
-          html::before,
-          html::after,
-          body::before,
-          body::after,
-          #root::before,
-          #root::after,
-          #root > *::before,
-          #root > *::after {
-            background: #fff !important;
-            background-color: #fff !important;
-            background-image: none !important;
-            box-shadow: none !important;
+
+          html:has(.plantao-print)::before,
+          html:has(.plantao-print)::after,
+          body:has(.plantao-print)::before,
+          body:has(.plantao-print)::after {
             content: none !important;
+            display: none !important;
+            background: none !important;
           }
-          html,
-          body,
-          #root {
-            min-height: 100% !important;
-            background: #fff !important;
-            background-color: #fff !important;
-          }
-          body {
+
+          body:has(.plantao-print) {
+            margin: 0 !important;
+            padding: 0 !important;
+            min-height: 100vh !important;
+            color-scheme: light !important;
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
           }
-          .plantao-print {
-            width: 100% !important;
+
+          body:has(.plantao-print) .cad-app-shell {
+            min-height: 0 !important;
+          }
+
+          body:has(.plantao-print) .cad-app-shell > main {
             max-width: none !important;
             margin: 0 !important;
             padding: 0 !important;
+          }
+
+          .plantao-print {
+            width: 100% !important;
+            max-width: none !important;
+            min-height: 0 !important;
+            margin: 0 !important;
+            padding: 0 !important;
             background: #fff !important;
+            background-color: #fff !important;
+            background-image: none !important;
             color: #111 !important;
           }
+
+          .plantao-print,
+          .plantao-print * {
+            color: #111 !important;
+            box-shadow: none !important;
+            text-shadow: none !important;
+          }
+
+          .plantao-print,
+          .plantao-print::before,
+          .plantao-print::after {
+            background: #fff !important;
+            background-color: #fff !important;
+            background-image: none !important;
+          }
+
+          .plantao-print *::before,
+          .plantao-print *::after {
+            background-image: none !important;
+            box-shadow: none !important;
+          }
+
           .plantao-toolbar { display: none !important; }
+
           .plantao-section { break-inside: auto; }
           .plantao-section > h3 { break-after: avoid; }
-          .plantao-table { width: 100% !important; font-size: 9px !important; border-collapse: collapse !important; }
-          .plantao-table thead { display: table-header-group; background: #fff !important; }
+
+          .plantao-table {
+            width: 100% !important;
+            font-size: 9px !important;
+            border-collapse: collapse !important;
+          }
+
+          .plantao-table thead { display: table-header-group; }
+
           .plantao-table tbody,
           .plantao-table tr,
           .plantao-table th,
-          .plantao-table td { background: #fff !important; background-color: #fff !important; color: #111 !important; }
-          .plantao-table th, .plantao-table td { padding: 3px 4px !important; border: 1px solid #d1d5db !important; }
-          .plantao-signatures { break-inside: avoid; padding-top: 32px !important; }
-          .plantao-section, .plantao-signatures { color: #111 !important; }
+          .plantao-table td {
+            background: #fff !important;
+            background-color: #fff !important;
+            color: #111 !important;
+          }
+
+          .plantao-table th,
+          .plantao-table td {
+            padding: 3px 4px !important;
+            border: 1px solid #d1d5db !important;
+          }
+
+          .plantao-signatures {
+            break-inside: avoid;
+            padding-top: 32px !important;
+          }
+
+          .plantao-section,
+          .plantao-signatures { color: #111 !important; }
+
           .plantao-muted { color: #555 !important; }
           .plantao-break { break-before: page; }
         }
