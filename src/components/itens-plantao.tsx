@@ -196,6 +196,7 @@ export function ItensPlantao({ categoria }: { categoria: ItemCategoria }) {
     setBusy(null);
     qc.invalidateQueries({ queryKey: ["itens-movimentos", plantao.id, categoria] });
     qc.invalidateQueries({ queryKey: ["itens-historico-movimentos", plantao.id, categoria] });
+    qc.invalidateQueries({ queryKey: ["plantao-home-feed", plantao.id] });
     return null;
   }
 
