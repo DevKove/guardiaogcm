@@ -28,7 +28,7 @@ function Painel() {
   const { data: plantaoAtual, isLoading: carregandoPlantao } = useQuery({
     queryKey: ["plantao-atual"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("plantoes").select("id, operador_id, data_inicio, turno, status, iniciado_em, equipe, supervisor, informativo, atividades, materiais, atividades_verso, encerrado_em").eq("status", "aberto").maybeSingle();
+      const { data, error } = await supabase.from("plantoes").select("id, operador_id, data_inicio, turno, status, iniciado_em, equipe, supervisor, operador_radio, nome_plantao, supervisor_id, operador_radio_id, horario, guarnicoes, postos, atividades, materiais, informativo, atividades_verso, observacoes, encerrado_em").eq("status", "aberto").maybeSingle();
       if (error) throw error;
       return data;
     },
@@ -72,7 +72,7 @@ function Painel() {
 
   useEffect(() => {
     if (!plantaoAtual?.id) return;
-    const tabelas = ["ocorrencias", "ocorrencia_historico", "plantao_historico", "plantao_registros", "plantoes", "escalas", "viaturas", "itens", "plantao_itens", "plantao_item_movimentos"];
+    const tabelas = ["ocorrencias", "ocorrencia_historico", "plantao_historico", "plantao_registros", "plantao_integrantes", "plantoes", "escalas", "viaturas", "itens", "plantao_itens", "plantao_item_movimentos"];
     const channel = supabase.channel("painel-operacional-tempo-real");
     for (const tabela of tabelas) {
       channel.on("postgres_changes", { event: "*", schema: "public", table: tabela }, () => {
@@ -160,12 +160,12 @@ function Painel() {
             <div className="space-y-3">
               <div className="flex items-center gap-2 text-xs font-semibold uppercase text-muted-foreground"><ClipboardList className="h-4 w-4" /> Dados do plantão</div>
               <div className="rounded-lg border p-3 text-sm">
-                <div><b>Equipe:</b> {plantaoAtual.equipe || "Não informada"}</div>
-                <div><b>Supervisor:</b> {plantaoAtual.supervisor || "Não informado"}</div>
-                <div className="mt-2"><b>Informativo:</b><div className="mt-1 whitespace-pre-wrap text-muted-foreground">{plantaoAtual.informativo || "—"}</div></div>
+                <div><b>Nome do plantão:</b> {plantaoAtual.nome_plantao || "Não informado"} · <b>Turno:</b> {plantaoAtual.turno} · <b>Horário:</b> {plantaoAtual.horario || "—"}</div><div><b>Equipe:</b> {plantaoAtual.equipe || "Não informada"}</div>
+                <div><b>Supervisor:</b> {plantaoAtual.supervisor || "Não informado"} · <b>Rádio:</b> {plantaoAtual.operador_radio || "Não informado"}</div>
+                <div className="mt-2"><b>Guarnições:</b><div className="mt-1 space-y-1 text-muted-foreground">{Array.isArray(plantaoAtual.guarnicoes) && plantaoAtual.guarnicoes.length ? plantaoAtual.guarnicoes.map((g: any, i: number) => <div key={i}>{g.viatura || "VTR"} · Encarregado: {g.encarregado || "—"} · Condutor: {g.condutor || "—"} · Aux. 01: {g.aux1 || "—"} · Aux. 02: {g.aux2 || "—"}</div>) : "—"}</div></div><div className="mt-2"><b>Postos e conferências:</b><div className="mt-1 space-y-1 text-muted-foreground">{Array.isArray(plantaoAtual.postos) && plantaoAtual.postos.length ? plantaoAtual.postos.map((p: any, i: number) => <div key={i}>{p.nome || "Posto"} · {p.ok ? "Sem alteração" : `Com alteração: ${p.obs || "não informada"}`}</div>) : "—"}</div></div><div className="mt-2"><b>Informativo:</b><div className="mt-1 whitespace-pre-wrap text-muted-foreground">{plantaoAtual.informativo || "—"}</div></div>
                 <div className="mt-2"><b>Atividades:</b><div className="mt-1 whitespace-pre-wrap text-muted-foreground">{plantaoAtual.atividades || "—"}</div></div>
                 <div className="mt-2"><b>Materiais:</b><div className="mt-1 whitespace-pre-wrap text-muted-foreground">{plantaoAtual.materiais || "—"}</div></div>
-                <div className="mt-2"><b>Atividades — verso:</b><div className="mt-1 whitespace-pre-wrap text-muted-foreground">{plantaoAtual.atividades_verso || "—"}</div></div>
+                <div className="mt-2"><b>Atividades — verso:</b><div className="mt-1 whitespace-pre-wrap text-muted-foreground">{plantaoAtual.atividades_verso || "—"}</div></div><div className="mt-2"><b>Observações:</b><div className="mt-1 whitespace-pre-wrap text-muted-foreground">{plantaoAtual.observacoes || "—"}</div></div>
               </div>
             </div>
             <div className="space-y-3">
