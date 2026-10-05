@@ -194,7 +194,7 @@ function Painel() {
             <div className="space-y-3">
               <div className="flex items-center gap-2 text-xs font-semibold uppercase text-muted-foreground"><ClipboardList className="h-4 w-4" /> ITENS DO PLANTÃO</div>
               <div className="max-h-96 space-y-2 overflow-auto rounded-lg border p-3 text-xs">
-                {feed?.itensPlantao.map((item) => <div key={item.item_id} className="rounded-md border p-2"><b>{item.nome}</b>{item.item_identificacao ? " · #" + item.item_identificacao : ""} · {item.categoria.toUpperCase()}<div className="text-muted-foreground">Patrimônio: {item.patrimonio || "—"} · Situação: <b>{item.situacao}</b> · Status: {item.status}</div>{item.observacao && <div className="text-muted-foreground">{item.observacao}</div>}</div>)}
+                {feed?.itensPlantao.map((item) => <div key={item.item_id} className="rounded-md border p-2"><b>{item.nome}</b>{item.identificacao ? " · #" + item.identificacao : ""} · {item.categoria.toUpperCase()}<div className="text-muted-foreground">Patrimônio: {item.patrimonio || "—"} · Situação: <b>{item.situacao}</b> · Status: {item.status}</div><div className="text-muted-foreground">Retirada: {item.retirado_em ? new Date(item.retirado_em).toLocaleString("pt-BR") : "Não registrada"} · Devolução: {item.entregue_em ? new Date(item.entregue_em).toLocaleString("pt-BR") : item.retirado_em ? "Pendente" : "Não registrada"}</div>{item.observacao && <div className="text-muted-foreground">{item.observacao}</div>}</div>)}
                 {!feed?.itensPlantao.length && <span className="text-muted-foreground">Nenhum item cadastrado para o plantão.</span>}
               </div>
             </div>
