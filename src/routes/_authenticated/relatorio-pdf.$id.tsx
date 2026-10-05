@@ -204,6 +204,25 @@ function BoletimPlantao({ p, operador, matricula }: { p: Plantao; operador: stri
           </div>
         ) : <G l="Resultado" v="Nenhum item cadastrado no catálogo." />}
       </Sec>
+      <Sec t="Histórico de retiradas e devoluções de itens">
+        {data.movimentacoesItens.length ? (
+          <div className="col-span-2">
+            <table className="cad-print-table w-full">
+              <thead><tr><th>Categoria</th><th>Item</th><th>Identificação</th><th>Responsável pela retirada</th><th>Retirada</th><th>Responsável pela devolução</th><th>Devolução</th></tr></thead>
+              <tbody>{data.movimentacoesItens.map((m) => <tr key={m.id}>
+                <td className="uppercase">{m.categoria || "—"}</td>
+                <td className="font-semibold">{m.item_nome || "—"}</td>
+                <td>{m.item_identificacao || "—"}</td>
+                <td>{data.usuarios[m.retirado_por] || "—"}</td>
+                <td className="whitespace-nowrap">{dataHora(m.retirado_em)}</td>
+                <td>{m.entregue_por ? (data.usuarios[m.entregue_por] || "—") : "Pendente"}</td>
+                <td className="whitespace-nowrap">{m.entregue_em ? dataHora(m.entregue_em) : "Pendente"}</td>
+              </tr>)}</tbody>
+            </table>
+          </div>
+        ) : <G l="Resultado" v="Nenhuma retirada ou devolução de item foi registrada durante o plantão." />}
+      </Sec>
+
       <Sec t="Registros operacionais">
         {data.registros.length ? (
           <div className="col-span-2">
