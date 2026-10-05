@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Activity, Car, Clock3, FileDown, MapPin, Users, ClipboardList } from "lucide-react";
+import { Activity, Car, Clock3, FileDown, MapPin, Users, ClipboardList, PackageCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { STATUS, fmtProtocolo, type Status } from "@/lib/cad";
 import { carregarAtividades, fmtDia, type Plantao, type PlantaoAtividade } from "@/lib/plantao";
@@ -60,7 +60,7 @@ export function PlantaoResumoTempoReal({ plantao }: { plantao: Plantao }) {
         void qc.invalidateQueries({ queryKey: ["ocorrencias"] });
       })
       .on("postgres_changes", { event: "*", schema: "public", table: "plantao_registros", filter: `plantao_id=eq.${plantaoId}` }, refresh)
-      .on("postgres_changes", { event: "*", schema: "public", table: "plantao_historico", filter: `plantao_id=eq.${plantaoId}` }, refresh)
+      .on("postgres_changes", { event: "*", schema: "public", table: "plantao_historico", filter: `plantao_id=eq.${plantaoId}` }, refresh)\n      .on("postgres_changes", { event: "*", schema: "public", table: "plantao_itens", filter: `plantao_id=eq.${plantaoId}` }, refresh)\n      .on("postgres_changes", { event: "*", schema: "public", table: "plantao_item_movimentos", filter: `plantao_id=eq.${plantaoId}` }, refresh)
       .on("postgres_changes", { event: "*", schema: "public", table: "ocorrencia_historico" }, refresh)
       .on("postgres_changes", { event: "*", schema: "public", table: "viaturas" }, refresh)
       .on("postgres_changes", { event: "*", schema: "public", table: "escalas" }, refresh)
@@ -233,13 +233,17 @@ export function PlantaoResumoTempoReal({ plantao }: { plantao: Plantao }) {
           </div>
         </section>
 
-        <section className="card-3d overflow-hidden">
-          <div className="flex items-center gap-3 border-b p-4"><div className="rounded-lg bg-primary/10 p-2 text-primary"><ClipboardList className="h-4 w-4" /></div><div><h3 className="font-semibold">Lançamentos do plantão</h3><p className="text-xs text-muted-foreground">Registros inseridos pela equipe</p></div></div>
-          <div className="space-y-3 p-4">
-            {registros.slice(0, 8).map((r) => <div key={r.id} className="border-b pb-3 last:border-0 last:pb-0"><div className="flex flex-wrap justify-between gap-2 text-[11px] text-muted-foreground"><span>{hora(r.hora)}</span><span>{(data?.usuarios ?? {})[r.criado_por] ?? r.criado_por.slice(0, 8)}</span></div><p className="mt-1 whitespace-pre-wrap text-sm">{r.texto}</p></div>)}
-            {!registros.length && <p className="text-sm text-muted-foreground">Nenhum lançamento registrado.</p>}
-            {registros.length > 8 && <p className="text-xs text-muted-foreground">Exibindo os 8 mais recentes. O PDF inclui todos os registros carregados.</p>}
+        <section className="card-3d overflow-hidden xl:col-span-2">
+          <div className="flex items-center gap-3 border-b p-4"><div className="rounded-lg bg-primary/10 p-2 text-primary"><PackageCheck className="h-4 w-4" /></div><div><h3 className="font-semibold">Itens do plantão</h3><p className="text-xs text-muted-foreground">Alterações de retirada, devolução, conferência e situação</p></div><span className="ml-auto rounded-full border px-2.5 py-1 text-xs font-semibold">${data?.itensPlantao.length ?? 0}</span></div>
+          <div className="overflow-x-auto p-4">
+            <table className="w-full min-w-[820px] text-xs"><thead className="bg-muted/40 text-left text-[10px] uppercase tracking-wider text-muted-foreground"><tr><th className="px-3 py-3">Item</th><th className="pr-3">Categoria</th><th className="pr-3">Situação</th><th className="pr-3">Retirada</th><th className="pr-3">Devolução</th><th className="pr-3">Conferência</th></tr></thead>
+              <tbody>{(data?.itensPlantao ?? []).map((item) => {
+                const usuario = (id: string | null) => id ? ((data?.usuarios ?? {})[id] ?? id.slice(0, 8)) : "—";
+                return <tr key={item.id} className="border-b last:border-0 transition-colors hover:bg-accent/30"><td className="px-3 py-3 font-semibold">{item.nome}{item.identificacao ? <span className="ml-2 font-normal text-muted-foreground">#{item.identificacao}</span> : null}{item.patrimonio ? <span className="ml-2 font-normal text-muted-foreground">Patrimônio: {item.patrimonio}</span> : null}</td><td className="pr-3">{item.categoria || "—"}</td><td className="pr-3"><span className="inline-flex rounded-full border bg-muted/30 px-2 py-1">{item.status} · {item.situacao}</span></td><td className="pr-3">{item.retirado_em ? `${dataHora(item.retirado_em)} · ${usuario(item.retirado_por)}` : "—"}</td><td className="pr-3">{item.entregue_em ? `${dataHora(item.entregue_em)} · ${usuario(item.entregue_por)}` : "—"}</td><td className="pr-3">{item.conferido_em ? `${dataHora(item.conferido_em)} · ${usuario(item.conferido_por)}` : "—"}</td></tr>;
+              })}</tbody></table>
+            {!(data?.itensPlantao ?? []).length && <div className="px-2 py-8 text-center text-sm text-muted-foreground">Nenhum item vinculado a este plantão.</div>}
           </div>
+          {!!(data?.movimentacoesItens ?? []).length && <div className="border-t bg-muted/10 p-4"><div className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Histórico de movimentações</div><div className="space-y-2">{(data?.movimentacoesItens ?? []).map((m) => <div key={m.id} className="flex flex-col gap-1 rounded-lg border bg-card/60 p-3 text-xs sm:flex-row sm:items-center sm:justify-between"><div><span className="font-semibold">{m.item_nome}</span>{m.item_identificacao ? <span className="ml-2 text-muted-foreground">#{m.item_identificacao}</span> : null}<span className="ml-2 text-muted-foreground">· {m.categoria || "Sem categoria"}</span></div><div className="text-muted-foreground">Retirado: {dataHora(m.retirado_em)} · {(data?.usuarios ?? {})[m.retirado_por] ?? m.retirado_por.slice(0, 8)}{m.entregue_em ? <> · Devolvido: {dataHora(m.entregue_em)} · {(data?.usuarios ?? {})[m.entregue_por ?? ""] ?? "usuário"}</> : <> · Ainda não devolvido</>}</div></div>)}</div></div>}
         </section>
 
         <section className="card-3d overflow-hidden">
