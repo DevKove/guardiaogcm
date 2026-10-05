@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Users, Pencil, ShieldCheck, ShieldHalf, UserCog, UserCheck, Clock3, FlaskConical } from "lucide-react";
+import { Users, Pencil, ShieldCheck, ShieldHalf, UserCog, UserCheck, UserX, Clock3, FlaskConical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -43,10 +43,16 @@ function Usuarios() {
     } catch (e) { toast.error((e as Error).message); }
   }
 
-  async function remover(id: string, nome: string) {
-    if (!confirm(`Excluir o usuário ${nome}? Esta ação não pode ser desfeita.`)) return;
-    try { await excluirUsuario(id); toast.success("Usuário excluído"); qc.invalidateQueries({ queryKey: ["usuarios"] }); }
-    catch (e) { toast.error((e as Error).message); }
+  async function remover(id: string, nome: string, mode: "negar" | "excluir" = "excluir") {
+    const message = mode === "negar"
+      ? `Negar o acesso de ${nome}? A conta será excluída e não poderá entrar no sistema.`
+      : `Excluir o acesso de ${nome}? Esta ação não pode ser desfeita.`;
+    if (!confirm(message)) return;
+    try {
+      await excluirUsuario(id);
+      toast.success(mode === "negar" ? "Acesso negado e cadastro excluído" : "Acesso excluído");
+      qc.invalidateQueries({ queryKey: ["usuarios"] });
+    } catch (e) { toast.error((e as Error).message); }
   }
 
   if (!me?.isAdmin) return <div className="text-muted-foreground">Acesso restrito a administradores.</div>;
@@ -76,9 +82,19 @@ function Usuarios() {
                   <div className="font-semibold">{u.nome || "Sem nome"}</div>
                   <div className="text-xs text-muted-foreground">{u.email}{u.matricula ? ` · Matrícula ${u.matricula}` : ""}</div>
                 </div>
-                <Button size="sm" onClick={() => aprovar(u.id, u.nome || u.email)}>
-                  <UserCheck className="mr-2 h-4 w-4" /> Aprovar acesso
-                </Button>
+                <div className="flex flex-wrap items-center gap-2">
+                  <Button size="sm" onClick={() => aprovar(u.id, u.nome || u.email)}>
+                    <UserCheck className="mr-2 h-4 w-4" /> Aprovar acesso
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="border-destructive/50 text-destructive hover:bg-destructive/10"
+                    onClick={() => remover(u.id, u.nome || u.email, "negar")}
+                  >
+                    <UserX className="mr-2 h-4 w-4" /> Negar acesso
+                  </Button>
+                </div>
               </div>
             ))}
           </div>
@@ -110,7 +126,7 @@ function Usuarios() {
                 <td className="px-3 py-2 text-xs text-muted-foreground">{fmtData(u.ultimo_acesso)}</td>
                 <td className="px-3 py-2 text-right whitespace-nowrap">
                   {u.aprovado && u.role && <Button size="sm" variant="ghost" onClick={() => setEdit({ id: u.id, email: u.email, senha: "", nome: u.nome, matricula: u.matricula, role: u.role as Role })}><Pencil className="h-3.5 w-3.5" /></Button>}
-                  {u.id !== me.id && <Button size="sm" variant="ghost" className="text-destructive" aria-label={`Excluir usuário ${u.nome || u.email}`} onClick={() => remover(u.id, u.nome || u.email)}><img src={`${import.meta.env.BASE_URL}cad-assets/excluir.gif`} alt="" aria-hidden="true" className="h-6 w-6 object-contain" /></Button>}
+                  {u.id !== me.id && <Button size="sm" variant="ghost" className="text-destructive" aria-label={`Excluir acesso de ${u.nome || u.email}`} title="Excluir acesso" onClick={() => remover(u.id, u.nome || u.email, "excluir")}><img src={`${import.meta.env.BASE_URL}cad-assets/excluir.gif`} alt="" aria-hidden="true" className="h-6 w-6 object-contain" /></Button>}
                 </td>
               </tr>
             ))}
