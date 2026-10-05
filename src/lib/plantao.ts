@@ -298,6 +298,7 @@ export async function carregarAtividades(p: {
     })),
     registros: registrosDoPlantao,
     alteracoes,
+    itensPlantao,
     movimentacoesItens,
     usuarios,
   };
