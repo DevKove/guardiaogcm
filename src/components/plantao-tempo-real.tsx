@@ -60,7 +60,9 @@ export function PlantaoResumoTempoReal({ plantao }: { plantao: Plantao }) {
         void qc.invalidateQueries({ queryKey: ["ocorrencias"] });
       })
       .on("postgres_changes", { event: "*", schema: "public", table: "plantao_registros", filter: `plantao_id=eq.${plantaoId}` }, refresh)
-      .on("postgres_changes", { event: "*", schema: "public", table: "plantao_historico", filter: `plantao_id=eq.${plantaoId}` }, refresh)\n      .on("postgres_changes", { event: "*", schema: "public", table: "plantao_itens", filter: `plantao_id=eq.${plantaoId}` }, refresh)\n      .on("postgres_changes", { event: "*", schema: "public", table: "plantao_item_movimentos", filter: `plantao_id=eq.${plantaoId}` }, refresh)
+      .on("postgres_changes", { event: "*", schema: "public", table: "plantao_historico", filter: `plantao_id=eq.${plantaoId}` }, refresh)
+      .on("postgres_changes", { event: "*", schema: "public", table: "plantao_itens", filter: `plantao_id=eq.${plantaoId}` }, refresh)
+      .on("postgres_changes", { event: "*", schema: "public", table: "plantao_item_movimentos", filter: `plantao_id=eq.${plantaoId}` }, refresh)
       .on("postgres_changes", { event: "*", schema: "public", table: "ocorrencia_historico" }, refresh)
       .on("postgres_changes", { event: "*", schema: "public", table: "viaturas" }, refresh)
       .on("postgres_changes", { event: "*", schema: "public", table: "escalas" }, refresh)
