@@ -37,6 +37,17 @@ export type PlantaoAtividade = {
   acoes: { descricao: string; created_at: string; protocolo: number | null; usuario_id: string }[];
   registros: { id: string; texto: string; hora: string; criado_por: string }[];
   alteracoes: AlteracaoPlantao[];
+  movimentacoesItens: {
+    id: string;
+    item_id: string;
+    item_nome: string;
+    item_identificacao: string | null;
+    categoria: string;
+    retirado_por: string;
+    retirado_em: string;
+    entregue_por: string | null;
+    entregue_em: string | null;
+  }[];
   usuarios: Record<string, string>;
 };
 
@@ -181,7 +192,7 @@ export async function carregarAtividades(p: {
     return Number.isFinite(time) && time >= inicioMs && time <= fimMs;
   };
 
-  const [oc, reg, viaturas, escalas, postosAtivos, plantaoHist] = await Promise.all([
+  const [oc, reg, viaturas, escalas, postosAtivos, plantaoHist, itemMov] = await Promise.all([
     supabase
       .from("ocorrencias")
       .select("id, protocolo, natureza, endereco, bairro, status, prioridade, created_at, updated_at, desfecho, viatura, criado_por, origem, numero, solicitante_nome, relato, despachada_em, chegada_em, encerrada_em")
@@ -196,6 +207,7 @@ export async function carregarAtividades(p: {
     supabase.from("escalas").select("id, agentes, funcao, hora_inicio, hora_fim, observacao, viatura_id, posto_id, criado_por, created_at, updated_at").eq("data", p.data_inicio).eq("turno", p.turno).order("hora_inicio"),
     supabase.from("postos_fixos").select("id, nome, tipo, endereco, bairro").eq("ativo", true).order("nome"),
     supabase.from("plantao_historico").select("acao, created_at, usuario_id, dados").eq("plantao_id", p.id).gte("created_at", p.iniciado_em).lte("created_at", fim).order("created_at", { ascending: true }),
+    supabase.from("plantao_item_movimentos").select("id,item_id,retirado_por,retirado_em,entregue_por,entregue_em,itens!inner(nome,identificacao,categoria)").eq("plantao_id", p.id).order("retirado_em", { ascending: false }),
   ]);
 
   if (oc.error) throw oc.error;
@@ -204,6 +216,7 @@ export async function carregarAtividades(p: {
   if (escalas.error) throw escalas.error;
   if (postosAtivos.error) throw postosAtivos.error;
   if (plantaoHist.error) throw plantaoHist.error;
+  if (itemMov.error) throw itemMov.error;
 
   const { data: rawHist, error: histError } = await supabase
     .from("ocorrencia_historico")
@@ -221,6 +234,17 @@ export async function carregarAtividades(p: {
   const histData = (rawHist ?? []) as unknown as HistoricoRow[];
   const auditoriaData = (plantaoHist.data ?? []) as unknown as PlantaoHistoricoRow[];
   const alteracoes = extrairAlteracoes(auditoriaData);
+  const movimentacoesItens = (itemMov.data ?? []).map((m: any) => ({
+    id: m.id,
+    item_id: m.item_id,
+    item_nome: m.itens?.nome ?? "Item",
+    item_identificacao: m.itens?.identificacao ?? null,
+    categoria: m.itens?.categoria ?? "",
+    retirado_por: m.retirado_por,
+    retirado_em: m.retirado_em,
+    entregue_por: m.entregue_por ?? null,
+    entregue_em: m.entregue_em ?? null,
+  }));
 
   const ids = Array.from(
     new Set([
@@ -229,6 +253,8 @@ export async function carregarAtividades(p: {
       ...registrosDoPlantao.map((x) => x.criado_por),
       ...escalasDoPlantao.map((x) => x.criado_por),
       ...alteracoes.map((x) => x.usuario_id),
+      ...movimentacoesItens.map((x) => x.retirado_por),
+      ...movimentacoesItens.flatMap((x) => x.entregue_por ? [x.entregue_por] : []),
       p.operador_id,
     ]),
   );
@@ -256,6 +282,7 @@ export async function carregarAtividades(p: {
     })),
     registros: registrosDoPlantao,
     alteracoes,
+    movimentacoesItens,
     usuarios,
   };
 }
