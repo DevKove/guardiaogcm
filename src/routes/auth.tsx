@@ -56,20 +56,10 @@ function AuthPage() {
         const { data, error } = await supabase.auth.signUp({
           email: cleanEmail,
           password,
+          options: { data: { nome: cleanNome, matricula: cleanMatricula } },
         });
         if (error) throw error;
         if (!data.user) throw new Error("Não foi possível criar a conta.");
-
-        const { error: profileError } = await supabase.from("profiles").insert({
-          id: data.user.id,
-          nome: cleanNome,
-          matricula: cleanMatricula || null,
-          aprovado: false,
-        });
-        if (profileError) {
-          await supabase.auth.signOut();
-          throw new Error("Não foi possível concluir o cadastro. Tente novamente.");
-        }
 
         setPending(true);
         toast.success("Cadastro enviado para aprovação.");
