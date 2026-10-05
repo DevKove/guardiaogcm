@@ -192,6 +192,13 @@ function Painel() {
               </div>
             </div>
             <div className="space-y-3">
+              <div className="flex items-center gap-2 text-xs font-semibold uppercase text-muted-foreground"><ClipboardList className="h-4 w-4" /> ITENS DO PLANTÃO</div>
+              <div className="max-h-96 space-y-2 overflow-auto rounded-lg border p-3 text-xs">
+                {feed?.itensPlantao.map((item) => <div key={item.item_id} className="rounded-md border p-2"><b>{item.nome}</b>{item.item_identificacao ? " · #" + item.item_identificacao : ""} · {item.categoria.toUpperCase()}<div className="text-muted-foreground">Patrimônio: {item.patrimonio || "—"} · Situação: <b>{item.situacao}</b> · Status: {item.status}</div>{item.observacao && <div className="text-muted-foreground">{item.observacao}</div>}</div>)}
+                {!feed?.itensPlantao.length && <span className="text-muted-foreground">Nenhum item cadastrado para o plantão.</span>}
+              </div>
+            </div>
+            <div className="space-y-3">
               <div className="flex items-center gap-2 text-xs font-semibold uppercase text-muted-foreground"><PackageCheck className="h-4 w-4" /> Armas e rádios — retirada e entrega</div>
               <div className="max-h-80 space-y-2 overflow-auto rounded-lg border p-3 text-xs">
                 {feed?.movimentacoesItens.map((m) => <div key={m.id} className="rounded-md border p-2"><b>{m.item_nome}</b>{m.item_identificacao ? ` · #${m.item_identificacao}` : ""} · {m.categoria.toUpperCase()}<div className="text-muted-foreground">Retirada: {feed.usuarios[m.retirado_por] ?? m.retirado_por.slice(0, 8)} · {new Date(m.retirado_em).toLocaleString("pt-BR")}</div><div className="text-muted-foreground">{m.entregue_em ? `Entrega: ${feed.usuarios[m.entregue_por ?? ""] ?? "Responsável"} · ${new Date(m.entregue_em).toLocaleString("pt-BR")}` : "Entrega pendente"}</div></div>)}
