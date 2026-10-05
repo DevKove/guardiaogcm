@@ -37,6 +37,7 @@ export type PlantaoAtividade = {
   acoes: { descricao: string; created_at: string; protocolo: number | null; usuario_id: string }[];
   registros: { id: string; texto: string; hora: string; criado_por: string }[];
   alteracoes: AlteracaoPlantao[];
+  itensPlantao: { id: string; item_id: string; categoria: string; nome: string; identificacao: string | null; patrimonio: string | null; observacao: string | null; ativo: boolean; status: string; situacao: string; retirado_por: string | null; retirado_em: string | null; entregue_por: string | null; entregue_em: string | null; conferido_por: string | null; conferido_em: string | null }[];
   movimentacoesItens: {
     id: string;
     item_id: string;
@@ -192,7 +193,7 @@ export async function carregarAtividades(p: {
     return Number.isFinite(time) && time >= inicioMs && time <= fimMs;
   };
 
-  const [oc, reg, viaturas, escalas, postosAtivos, plantaoHist, itemMov] = await Promise.all([
+  const [oc, reg, viaturas, escalas, postosAtivos, plantaoHist, itemMov, catalogoItens, plantaoItens] = await Promise.all([
     supabase
       .from("ocorrencias")
       .select("id, protocolo, natureza, endereco, bairro, status, prioridade, created_at, updated_at, desfecho, viatura, criado_por, origem, numero, solicitante_nome, relato, despachada_em, chegada_em, encerrada_em")
@@ -208,6 +209,8 @@ export async function carregarAtividades(p: {
     supabase.from("postos_fixos").select("id, nome, tipo, endereco, bairro").eq("ativo", true).order("nome"),
     supabase.from("plantao_historico").select("acao, created_at, usuario_id, dados").eq("plantao_id", p.id).gte("created_at", p.iniciado_em).lte("created_at", fim).order("created_at", { ascending: true }),
     supabase.from("plantao_item_movimentos").select("id,item_id,retirado_por,retirado_em,entregue_por,entregue_em,itens!inner(nome,identificacao,categoria)").eq("plantao_id", p.id).order("retirado_em", { ascending: false }),
+    supabase.from("itens").select("id,categoria,nome,identificacao,patrimonio,observacao,ativo").eq("ativo", true).order("categoria").order("nome"),
+    supabase.from("plantao_itens").select("id,item_id,status,situacao,retirado_por,retirado_em,entregue_por,entregue_em,conferido_por,conferido_em").eq("plantao_id", p.id),
   ]);
 
   if (oc.error) throw oc.error;
@@ -217,6 +220,8 @@ export async function carregarAtividades(p: {
   if (postosAtivos.error) throw postosAtivos.error;
   if (plantaoHist.error) throw plantaoHist.error;
   if (itemMov.error) throw itemMov.error;
+  if (catalogoItens.error) throw catalogoItens.error;
+  if (plantaoItens.error) throw plantaoItens.error;
 
   const { data: rawHist, error: histError } = await supabase
     .from("ocorrencia_historico")
@@ -234,6 +239,12 @@ export async function carregarAtividades(p: {
   const histData = (rawHist ?? []) as unknown as HistoricoRow[];
   const auditoriaData = (plantaoHist.data ?? []) as unknown as PlantaoHistoricoRow[];
   const alteracoes = extrairAlteracoes(auditoriaData);
+  const situacaoPorItem = new Map((plantaoItens.data ?? []).map((m: any) => [m.item_id, m]));
+  const itensPlantao = (catalogoItens.data ?? []).map((item: any) => {
+    const mov = situacaoPorItem.get(item.id) ?? {};
+    return { id: item.id, item_id: item.id, categoria: item.categoria, nome: item.nome, identificacao: item.identificacao ?? null, patrimonio: item.patrimonio ?? null, observacao: item.observacao ?? null, ativo: item.ativo, status: mov.status ?? "pendente", situacao: mov.situacao ?? "OK", retirado_por: mov.retirado_por ?? null, retirado_em: mov.retirado_em ?? null, entregue_por: mov.entregue_por ?? null, entregue_em: mov.entregue_em ?? null, conferido_por: mov.conferido_por ?? null, conferido_em: mov.conferido_em ?? null };
+  });
+
   const movimentacoesItens = (itemMov.data ?? []).map((m: any) => ({
     id: m.id,
     item_id: m.item_id,
