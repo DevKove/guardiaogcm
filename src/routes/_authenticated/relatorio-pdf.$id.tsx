@@ -141,7 +141,7 @@ function BoletimPlantao({ p, operador, matricula }: { p: Plantao; operador: stri
       <Sec t="Ocorrências lançadas ou alteradas">
         {data.ocorrencias.length ? (
           <div className="col-span-2">
-            <table className="plantao-table w-full">
+            <table className="cad-print-table w-full">
               <thead><tr><th>Protocolo</th><th>Natureza</th><th>Local</th><th>Situação</th><th>Registro / alteração</th></tr></thead>
               <tbody>
                 {data.ocorrencias.map((o, i) => (
@@ -162,7 +162,7 @@ function BoletimPlantao({ p, operador, matricula }: { p: Plantao; operador: stri
       <Sec t="Escalas lançadas ou alteradas">
         {data.escalas.length ? (
           <div className="col-span-2">
-            <table className="plantao-table w-full">
+            <table className="cad-print-table w-full">
               <thead><tr><th>Agentes</th><th>Função</th><th>Horário</th><th>Observações</th></tr></thead>
               <tbody>
                 {data.escalas.map((e, i) => <tr key={e.id ?? i}><td>{e.agentes || "—"}</td><td>{e.funcao || "—"}</td><td>{e.hora_inicio || "—"} – {e.hora_fim || "—"}</td><td>{e.observacao || "—"}</td></tr>)}
@@ -175,7 +175,7 @@ function BoletimPlantao({ p, operador, matricula }: { p: Plantao; operador: stri
       {camposAlterados.has("guarnicoes") && <Sec t="Guarnições">
         {p.guarnicoes?.length ? (
           <div className="col-span-2">
-            <table className="plantao-table w-full">
+            <table className="cad-print-table w-full">
               <thead><tr><th>VTR</th><th>Encarregado</th><th>Condutor</th><th>Aux. 01</th><th>Aux. 02</th></tr></thead>
               <tbody>{p.guarnicoes.map((g, i) => <tr key={i}><td>{g.viatura || "—"}</td><td>{g.encarregado || "—"}</td><td>{g.condutor || "—"}</td><td>{g.aux1 || "—"}</td><td>{g.aux2 || "—"}</td></tr>)}</tbody>
             </table>
@@ -186,7 +186,7 @@ function BoletimPlantao({ p, operador, matricula }: { p: Plantao; operador: stri
       {camposAlterados.has("postos") && <Sec t="Postos e conferências">
         {p.postos?.length ? (
           <div className="col-span-2">
-            <table className="plantao-table w-full">
+            <table className="cad-print-table w-full">
               <thead><tr><th>Posto</th><th>Conferência</th><th>Observação</th></tr></thead>
               <tbody>{p.postos.map((x, i) => <tr key={i}><td>{x.nome || "—"}</td><td>{x.ok ? "Conferido" : "Alteração / pendência"}</td><td>{x.obs || "—"}</td></tr>)}</tbody>
             </table>
@@ -197,7 +197,7 @@ function BoletimPlantao({ p, operador, matricula }: { p: Plantao; operador: stri
       <Sec t="Registros operacionais">
         {data.registros.length ? (
           <div className="col-span-2">
-            <table className="plantao-table w-full">
+            <table className="cad-print-table w-full">
               <thead><tr><th>Data / hora</th><th>Operador</th><th>Registro</th></tr></thead>
               <tbody>{data.registros.map((r, i) => <tr key={r.id ?? i}><td className="whitespace-nowrap">{dataHora(r.hora)}</td><td>{data.usuarios[r.criado_por] || "Operador"}</td><td className="whitespace-pre-wrap">{r.texto}</td></tr>)}</tbody>
             </table>
@@ -208,7 +208,7 @@ function BoletimPlantao({ p, operador, matricula }: { p: Plantao; operador: stri
       <Sec t="Histórico de ações">
         {data.acoes.length ? (
           <div className="col-span-2">
-            <table className="plantao-table w-full">
+            <table className="cad-print-table w-full">
               <thead><tr><th>Data / hora</th><th>Usuário</th><th>Protocolo</th><th>Ação</th></tr></thead>
               <tbody>{data.acoes.map((a, i) => <tr key={i}><td className="whitespace-nowrap">{dataHora(a.created_at)}</td><td>{data.usuarios[a.usuario_id] || "Sistema"}</td><td>{a.protocolo ? "#" + a.protocolo : "—"}</td><td className="whitespace-pre-wrap">{a.descricao}</td></tr>)}</tbody>
             </table>
