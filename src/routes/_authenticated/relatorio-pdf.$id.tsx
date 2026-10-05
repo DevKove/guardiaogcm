@@ -81,6 +81,7 @@ function BoletimPlantao({ p, operador, matricula }: { p: Plantao; operador: stri
   const status = p.status === "aberto" ? "Em andamento" : "Encerrado";
   const imprimir = () => window.print();
   const endereco = (o: Dados["ocorrencias"][number]) => [o.endereco, o.numero ? "nº " + o.numero : null, o.bairro].filter(Boolean).join(", ") || "—";
+  const camposAlterados = new Set(data.alteracoes.map((a) => a.campo));
 
   return (
     <div className="plantao-print mx-auto max-w-3xl space-y-4 bg-card p-8 text-sm print:bg-transparent print:p-0">
@@ -204,7 +205,7 @@ function BoletimPlantao({ p, operador, matricula }: { p: Plantao; operador: stri
         ) : <G l="Resultado" v="Nenhuma escala foi lançada ou alterada durante o plantão." />}
       </Sec>
 
-      <Sec t="Guarnições">
+      {camposAlterados.has("guarnicoes") && <Sec t="Guarnições">
         {p.guarnicoes?.length ? (
           <div className="col-span-2">
             <table className="plantao-table w-full">
