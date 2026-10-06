@@ -186,7 +186,7 @@ export function FichaPlantao({ plantao, editavel, operadorNome }: { plantao: Pla
         <Texto l="Materiais de carga" v={f.materiais} dis={dis} on={(v) => set("materiais", v)} />
         <Texto l="Informativo do plantão" v={f.informativo} dis={dis} on={(v) => set("informativo", v)} />
         <Texto l="Atividades - verso" v={f.atividades_verso} dis={dis} on={(v) => set("atividades_verso", v)} />
-        <Texto l="Observações do plantão" v={f.observacoes} dis={dis} on={(v) => set("observacoes", v)} />
+        <Texto l="Outras observações" v={f.observacoes} dis={dis} on={(v) => set("observacoes", v)} />
       </div>
 
       {editavel && (
