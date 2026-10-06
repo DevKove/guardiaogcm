@@ -28,10 +28,6 @@ function Painel() {
   const [observacoes, setObservacoes] = useState("");
   const [salvandoObservacoes, setSalvandoObservacoes] = useState(false);
 
-  useEffect(() => {
-    setObservacoes(plantaoAtual?.observacoes ?? "");
-  }, [plantaoAtual?.id, plantaoAtual?.observacoes]);
-
   const { data: plantaoAtual, isLoading: carregandoPlantao } = useQuery({
     queryKey: ["plantao-atual"],
     queryFn: async () => {
@@ -41,6 +37,10 @@ function Painel() {
     },
     refetchInterval: 15000,
   });
+
+  useEffect(() => {
+    setObservacoes(plantaoAtual?.observacoes ?? "");
+  }, [plantaoAtual?.id, plantaoAtual?.observacoes]);
 
   async function salvarObservacoes() {
     if (!plantaoAtual?.id) return;
