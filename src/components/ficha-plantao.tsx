@@ -2,7 +2,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Car, CheckCircle2, ClipboardList, Clock, MapPin, Radio, Save, Trash2, AlertTriangle, Users } from "lucide-react";
+import { Car, CheckCircle2, ClipboardList, Clock, MapPin, Radio, Save, Trash2, AlertTriangle, Users, NotebookPen } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -340,10 +340,22 @@ function Campo({ l, children }: { l: string; children: React.ReactNode }) {
   return <div className="space-y-1"><Label className="text-[10px] uppercase text-muted-foreground">{l}</Label>{children}</div>;
 }
 function Texto({ l, v, dis, on }: { l: string; v: string | null; dis: boolean; on: (v: string) => void }) {
+  const observacao = l === "Outras observações";
   return (
     <section className="card-3d animate-rise space-y-2 p-4">
-      <h3 className="font-semibold text-primary">{l}</h3>
-      <Textarea rows={4} disabled={dis} value={v ?? ""} onChange={(e) => on(e.target.value)} />
+      <h3 className="flex items-center gap-2 font-semibold text-primary">
+        {observacao && <NotebookPen className="h-4 w-4" aria-hidden="true" />}
+        {l}
+      </h3>
+      <Textarea
+        rows={observacao ? 6 : 4}
+        disabled={dis}
+        value={v ?? ""}
+        onChange={(e) => on(e.target.value)}
+        placeholder={observacao ? "Digite aqui outras observações, orientações e informações complementares do plantão..." : undefined}
+        maxLength={observacao ? 5000 : undefined}
+      />
+      {observacao && <div className="text-right text-[11px] text-muted-foreground">{(v ?? "").length}/5000 caracteres</div>}
     </section>
   );
 }
