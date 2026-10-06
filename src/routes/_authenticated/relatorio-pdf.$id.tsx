@@ -97,8 +97,10 @@ function BoletimPlantao({ p, operador, matricula }: { p: Plantao; operador: stri
   return (
     <>
       {assinaturaCodigo && (
-        <div className="cad-print-signature-side" aria-label={`Assinatura digital externa ${assinaturaCodigo}`}>
-          <span>ASSINATURA DIGITAL · {assinaturaCodigo}</span>
+        <div className="cad-print-page-edge" aria-hidden="true">
+          <div className="cad-print-signature-side" aria-label={`Assinatura digital externa ${assinaturaCodigo}`}>
+            <span>ASSINATURA DIGITAL · {assinaturaCodigo}</span>
+          </div>
         </div>
       )}
       <div className="cad-print-document mx-auto max-w-3xl space-y-4 bg-card p-8 text-sm print:bg-transparent print:p-0">
