@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { CheckCircle2, PlayCircle, NotebookPen } from "lucide-react";
+import { CheckCircle2, PlayCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -25,9 +25,6 @@ function Painel() {
   // Exibe o histórico completo por padrão; os cartões permitem filtrar somente as ativas.
   const [filtro, setFiltro] = useState<Status | "ativas" | "todas">("todas");
   const [busca, setBusca] = useState("");
-  const [observacoes, setObservacoes] = useState("");
-  const [observacoesAlteradas, setObservacoesAlteradas] = useState(false);
-  const [salvandoObservacoes, setSalvandoObservacoes] = useState(false);
 
   const { data: plantaoAtual, isLoading: carregandoPlantao } = useQuery({
     queryKey: ["plantao-atual"],
@@ -39,38 +36,6 @@ function Painel() {
     refetchInterval: 15000,
   });
 
-  useEffect(() => {
-    if (!observacoesAlteradas) {
-      setObservacoes(plantaoAtual?.observacoes ?? "");
-    }
-  }, [plantaoAtual?.id, plantaoAtual?.observacoes, observacoesAlteradas]);
-
-  async function salvarObservacoes() {
-    if (!plantaoAtual?.id) {
-      toast.error("Inicie um plantão antes de salvar as observações.");
-      return;
-    }
-
-    const texto = observacoes.trim();
-    setSalvandoObservacoes(true);
-
-    const { error } = await supabase
-      .from("plantoes")
-      .update({ observacoes: texto || null })
-      .eq("id", plantaoAtual.id);
-
-    setSalvandoObservacoes(false);
-
-    if (error) {
-      toast.error("Não foi possível salvar as observações: " + error.message);
-      return;
-    }
-
-    setObservacoes(texto);
-    setObservacoesAlteradas(false);
-    toast.success("Outras observações salvas no plantão.");
-    await qc.invalidateQueries({ queryKey: ["plantao-atual"] });
-  }
 
   async function iniciarPlantao() {
     if (!me) return;
@@ -152,44 +117,6 @@ function Painel() {
               <button onClick={iniciarPlantao} disabled={carregandoPlantao || !me} className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90"><PlayCircle className="h-4 w-4" /> Iniciar plantão</button>
             )}
           </div>
-        </div>
-      </section>
-      <section className="card-3d animate-rise border-primary/30 bg-background p-4" aria-labelledby="outras-observacoes-titulo">
-        <div className="mb-3 flex items-center gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-primary/30 bg-primary/10 text-primary" aria-hidden="true">
-            <NotebookPen className="h-5 w-5" />
-          </div>
-          <div className="min-w-0">
-            <h2 id="outras-observacoes-titulo" className="text-base font-semibold">Outras observações</h2>
-            <p className="text-xs text-muted-foreground">
-              Registre livremente informações complementares relevantes para o plantão.
-              {!plantaoAtual && " Inicie um plantão para habilitar o salvamento."}
-            </p>
-          </div>
-        </div>
-
-        <Textarea
-          value={observacoes}
-          onChange={(e) => {
-            setObservacoes(e.target.value);
-            setObservacoesAlteradas(true);
-          }}
-          placeholder="Digite aqui outras observações, informações complementares, orientações ou registros gerais do plantão..."
-          className="min-h-36 w-full resize-y"
-          maxLength={5000}
-          aria-label="Outras observações"
-        />
-
-        <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
-          <span className="text-xs text-muted-foreground">{observacoes.length}/5000 caracteres</span>
-          <button
-            type="button"
-            onClick={salvarObservacoes}
-            disabled={salvandoObservacoes || !plantaoAtual || !observacoesAlteradas}
-            className="inline-flex items-center rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {salvandoObservacoes ? "Salvando..." : "Salvar observações"}
-          </button>
         </div>
       </section>
       <div className="flex flex-wrap items-end justify-end gap-4">
