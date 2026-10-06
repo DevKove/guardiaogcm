@@ -1,5 +1,7 @@
 name: Deploy to GitHub Pages
 
+# Redeploya automaticamente cada alteração publicada em main.
+
 on:
   push:
     branches:
