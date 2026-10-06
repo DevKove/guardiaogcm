@@ -26,6 +26,8 @@ function PlantaoControle() {
   const qc = useQueryClient();
   const [saving, setSaving] = useState(false);
   const [mostrarInicio, setMostrarInicio] = useState(false);
+  const [mostrarAssinatura, setMostrarAssinatura] = useState(false);
+  const [senhaAssinatura, setSenhaAssinatura] = useState("");
   const atual = turnoAtual();
 
   const { data: efetivo = [] } = useQuery({
@@ -141,7 +143,7 @@ function PlantaoControle() {
     navigate({ to: "/plantao/$id", params: { id: plantaoId } });
   }
 
-  async function finalizar() {
+  async function finalizar(senha: string) {
     if (!plantao || !me) return;
     setSaving(true);
     const encerradoEm = new Date().toISOString();
@@ -153,20 +155,37 @@ function PlantaoControle() {
       toast.error("Não foi possível consolidar o relatório completo. O plantão continua aberto: " + (e instanceof Error ? e.message : "erro desconhecido"));
       return;
     }
-    const updateQuery = supabase
-      .from("plantoes")
-      .update({ status: "encerrado", encerrado_em: encerradoEm, resumo: { operador: me.nome, ...resumo } } as never)
-      .eq("id", plantao.id)
-      .eq("status", "aberto");
-    const { error } = me.isAdmin ? await updateQuery : await updateQuery.eq("operador_id", me.id);
-    setSaving(false);
-    if (error) {
-      toast.error("Não foi possível finalizar: " + error.message);
+
+    const { error: authError } = await supabase.auth.signInWithPassword({
+      email: me.email,
+      password: senha,
+    });
+    if (authError) {
+      setSaving(false);
+      toast.error("Senha incorreta. O plantão permanece aberto.");
       return;
     }
-    toast.success("Plantão finalizado e bloqueado para novos lançamentos.");
+
+    const { data, error } = await supabase.rpc("finalizar_plantao_assinado", {
+      p_plantao_id: plantao.id,
+      p_resumo: resumo,
+    });
+
+    setSaving(false);
+    if (error) {
+      toast.error(error.message.includes("Reautenticação por senha")
+        ? "Confirme novamente sua senha para assinar o documento."
+        : "Não foi possível assinar e finalizar: " + error.message);
+      return;
+    }
+
+    setSenhaAssinatura("");
+    setMostrarAssinatura(false);
+    toast.success("Documento assinado e plantão finalizado com sucesso.");
     qc.invalidateQueries({ queryKey: ["plantao-atual"] });
     qc.invalidateQueries({ queryKey: ["ocorrencias"] });
+    qc.invalidateQueries({ queryKey: ["plantao-historico-detalhe"] });
+    void data;
   }
 
   if (isLoading || !me) return <div className="text-muted-foreground">Carregando controle de plantão...</div>;
@@ -195,10 +214,52 @@ function PlantaoControle() {
             <div className="flex flex-wrap gap-2">
               <Button variant="outline" onClick={() => navigate({ to: "/plantao/$id", params: { id: plantao.id } })}><FileText className="h-4 w-4" /> Abrir relatório</Button>
               {(plantao.operador_id === me.id || me.isAdmin) && (
-                <Button variant="destructive" onClick={finalizar} disabled={saving}><Square className="h-4 w-4" /> {saving ? "Finalizando..." : me.isAdmin && plantao.operador_id !== me.id ? "Finalizar plantão (admin)" : "Finalizar plantão"}</Button>
+                <Button variant="destructive" onClick={() => setMostrarAssinatura(true)} disabled={saving}><LockKeyhole className="h-4 w-4" /> Assinar e finalizar</Button>
               )}
             </div>
           </div>
+          <Dialog open={mostrarAssinatura} onOpenChange={(open) => {
+            setMostrarAssinatura(open);
+            if (!open) setSenhaAssinatura("");
+          }}>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2"><LockKeyhole className="h-5 w-5 text-primary" /> Assinatura digital interna</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div className="rounded-lg border border-primary/20 bg-primary/5 p-4 text-sm">
+                  <div className="font-semibold">Confirmação obrigatória para encerrar</div>
+                  <p className="mt-1 text-muted-foreground">Ao confirmar, sua senha será validada pelo sistema. A senha não é armazenada pelo CAD. O documento recebe um registro de assinatura, data, usuário e hash de integridade.</p>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="senha-assinatura">Senha da sua conta</Label>
+                  <input
+                    id="senha-assinatura"
+                    type="password"
+                    autoComplete="current-password"
+                    value={senhaAssinatura}
+                    onChange={(e) => setSenhaAssinatura(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === "Enter" && senhaAssinatura && !saving) void finalizar(senhaAssinatura); }}
+                    className={selectCls}
+                    placeholder="Digite sua senha para assinar"
+                    disabled={saving}
+                  />
+                </div>
+                <div className="rounded border p-3 text-xs text-muted-foreground">
+                  <div><strong>Assinante:</strong> {me.nome}</div>
+                  <div><strong>Função:</strong> Operador do CAD</div>
+                  <div><strong>Documento:</strong> Relatório operacional do plantão</div>
+                </div>
+                <div className="flex justify-end gap-2">
+                  <Button type="button" variant="outline" onClick={() => setMostrarAssinatura(false)} disabled={saving}>Cancelar</Button>
+                  <Button type="button" variant="destructive" disabled={!senhaAssinatura || saving} onClick={() => void finalizar(senhaAssinatura)}>
+                    <LockKeyhole className="h-4 w-4" /> {saving ? "Validando e assinando..." : "Confirmar assinatura"}
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+
           {plantao.operador_id !== me.id && (
             <div className={`flex items-center gap-2 rounded-lg border p-3 text-sm ${me.isAdmin ? "border-primary/30 bg-primary/5 text-primary" : "border-warning/40 bg-warning/5 text-warning"}`}>
               <LockKeyhole className="h-4 w-4" /> {me.isAdmin ? "Acesso administrativo: você pode acompanhar este plantão em tempo real e encerrá-lo a qualquer momento." : "Este plantão foi iniciado por outro usuário. Você pode consultar o andamento, mas o encerramento pertence ao operador que o iniciou."}

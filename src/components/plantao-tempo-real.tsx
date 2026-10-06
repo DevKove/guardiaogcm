@@ -110,6 +110,8 @@ export function PlantaoResumoTempoReal({ plantao }: { plantao: Plantao }) {
     }
 
     try {
+    const { data: plantaoPdf, error: plantaoPdfError } = await supabase.from("plantoes").select("*, assinatura_codigo, assinatura_nome, assinatura_em, assinatura_hash, assinatura_metodo").eq("id", plantaoId).single();
+    if (plantaoPdfError) throw plantaoPdfError;
     // O PDF consulta os vínculos diretamente no banco no momento da geração.
     // Isso evita que um resumo em cache/atualização atrasada produza um PDF sem os itens.
     const [{ data: itensPdf, error: itensPdfError }, { data: movimentosPdf, error: movimentosPdfError }] = await Promise.all([
@@ -170,6 +172,8 @@ export function PlantaoResumoTempoReal({ plantao }: { plantao: Plantao }) {
     }).join("");
     const itemMovementRows = movimentosDiretos.map((m) => `<tr><td>${cell(m.itens?.nome ?? "Item")}</td><td>${cell(m.itens?.identificacao || "—")}</td><td>${cell(m.itens?.categoria || "—")}</td><td>${cell(nomeUsuarioPdf(m.retirado_por))}</td><td>${cell(dataHora(m.retirado_em))}</td><td>${cell(m.entregue_por ? nomeUsuarioPdf(m.entregue_por) : "Pendente")}</td><td>${cell(m.entregue_em ? dataHora(m.entregue_em) : "Pendente")}</td></tr>`).join("");
     const generatedAt = new Date().toLocaleString("pt-BR");
+    const pdfPlantao = plantaoPdf as Plantao;
+    const assinaturaCodigo = pdfPlantao.assinatura_codigo ?? "";
 
       janela.document.open();
       janela.document.write(`<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>Relatório de Plantão - ${cell(fmtDia(plantao.data_inicio))}</title>
@@ -182,11 +186,11 @@ export function PlantaoResumoTempoReal({ plantao }: { plantao: Plantao }) {
         .stat { border: 1px solid #cbd5e1; border-radius: 5px; padding: 9px; } .stat b { display:block; font-size: 18px; margin-top: 3px; }
         table { width:100%; border-collapse: collapse; table-layout: auto; } th { background:#eaf0f7; text-align:left; color:#17365d; }
         th,td { border:1px solid #cbd5e1; padding:5px; vertical-align:top; overflow-wrap:anywhere; } tr { break-inside: avoid; }
-        .empty { color:#64748b; font-style:italic; } .footer { margin-top:18px; padding-top:8px; border-top:1px solid #cbd5e1; color:#64748b; font-size:9px; }
+        .empty { color:#64748b; font-style:italic; } .signature-side { display:none; } .footer { margin-top:18px; padding-top:8px; border-top:1px solid #cbd5e1; color:#64748b; font-size:9px; }
         @media screen { body { max-width: 1200px; margin: 24px auto; padding: 24px; } .print-button { padding: 10px 16px; margin-bottom: 16px; } }
-        @media print { .print-button { display: none !important; } }
+        @media print { .print-button { display: none !important; } .signature-side { display:flex !important; position:fixed; right:0; top:0; width:7mm; height:100vh; align-items:center; justify-content:center; z-index:9999; font-size:7px; font-weight:700; letter-spacing:.55px; color:#17365d; background:#fff; border-left:1px solid #94a3b8; white-space:nowrap; writing-mode:vertical-rl; transform:rotate(180deg); } }
       </style></head><body>
-      <button class="print-button" onclick="window.print()">Salvar como PDF / Imprimir</button>
+      <button class="print-button" onclick="window.print()">Salvar como PDF / Imprimir</button>\n      ${assinaturaCodigo ? `<div class="signature-side">ASSINATURA DIGITAL · ${cell(assinaturaCodigo)}</div>` : ""}
       <header><h1>GUARDA CIVIL MUNICIPAL · CAD</h1><div style="font-size:15px;font-weight:bold">Relatório operacional de plantão</div>
       <div class="meta">Turno: ${cell(plantao.turno)} · Data: ${cell(fmtDia(plantao.data_inicio))} · Horário previsto: ${cell(plantao.horario)}<br>
       Início: ${cell(dataHora(plantao.iniciado_em))} · Situação: ${cell(plantao.status === "aberto" ? "Em andamento" : "Encerrado")} · Emitido em: ${cell(generatedAt)}</div></header>
@@ -199,7 +203,8 @@ export function PlantaoResumoTempoReal({ plantao }: { plantao: Plantao }) {
       <h2>6. Histórico de ações das ocorrências</h2><table><thead><tr><th>Data / hora</th><th>Protocolo</th><th>Ação registrada</th><th>Usuário</th></tr></thead><tbody>${actionRows || '<tr><td colspan="4" class="empty">Nenhuma ação registrada ou dados indisponíveis.</td></tr>'}</tbody></table>
       <h2>7. Itens do plantão e atualizações</h2><table><thead><tr><th>Data / hora</th><th>Item</th><th>Identificação</th><th>Patrimônio</th><th>Alteração</th><th>Usuário responsável</th><th>Detalhes</th></tr></thead><tbody>${itemRows || '<tr><td colspan="7" class="empty">Nenhum item vinculado ou nenhuma atualização registrada neste plantão.</td></tr>'}</tbody></table>
       <h2>8. Histórico de retiradas e devoluções</h2><table><thead><tr><th>Item</th><th>Identificação</th><th>Categoria</th><th>Retirada por</th><th>Retirada</th><th>Devolução por</th><th>Devolução</th></tr></thead><tbody>${itemMovementRows || '<tr><td colspan="7" class="empty">Nenhuma retirada ou devolução de item registrada neste plantão.</td></tr>'}</tbody></table>
-      <div class="footer">Documento gerado pelo sistema CAD. Conferir os registros antes de arquivar ou compartilhar.</div>
+      <h2>9. Assinatura digital interna</h2><div style="border:1px solid #cbd5e1;border-radius:5px;padding:10px;">${pdfPlantao.assinatura_em ? `<strong>Documento assinado digitalmente no CAD</strong><br>Assinante: ${cell(pdfPlantao.assinatura_nome)} · Data/hora: ${cell(dataHora(pdfPlantao.assinatura_em))}<br>Método: ${cell(pdfPlantao.assinatura_metodo || "senha")}<br>Código único: <strong>${cell(pdfPlantao.assinatura_codigo || "—")}</strong><br>Hash de integridade SHA-256: <span style="font-family:monospace;word-break:break-all">${cell(pdfPlantao.assinatura_hash)}</span>` : '<span class="empty">Este documento ainda não possui assinatura digital interna.</span>'}</div>
+<div class="footer">Documento gerado pelo sistema CAD. Conferir os registros antes de arquivar ou compartilhar.</div>
       <script>window.addEventListener("load", () => setTimeout(() => window.print(), 300));</script>
       </body></html>`);
       janela.document.close();

@@ -496,6 +496,12 @@ export type Database = {
       }
       plantoes: {
         Row: {
+          assinatura_em: string | null
+          assinatura_hash: string | null
+          assinatura_metodo: string | null
+          assinatura_codigo: string | null
+          assinatura_nome: string | null
+          assinatura_usuario_id: string | null
           atividades: string | null
           atividades_verso: string | null
           created_at: string
@@ -522,6 +528,18 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          assinatura_em?: string | null
+          assinatura_hash?: string | null
+          assinatura_metodo?: string | null
+          assinatura_codigo?: string | null
+          assinatura_nome?: string | null
+          assinatura_usuario_id?: string | null
+          assinatura_em?: string | null
+          assinatura_hash?: string | null
+          assinatura_metodo?: string | null
+          assinatura_codigo?: string | null
+          assinatura_nome?: string | null
+          assinatura_usuario_id?: string | null
           atividades?: string | null
           atividades_verso?: string | null
           created_at?: string
@@ -548,6 +566,12 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          assinatura_em?: string | null
+          assinatura_hash?: string | null
+          assinatura_metodo?: string | null
+          assinatura_codigo?: string | null
+          assinatura_nome?: string | null
+          assinatura_usuario_id?: string | null
           atividades?: string | null
           atividades_verso?: string | null
           created_at?: string
@@ -730,6 +754,13 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      finalizar_plantao_assinado: {
+        Args: {
+          p_plantao_id: string
+          p_resumo: Json
+        }
+        Returns: Json
+      }
       iniciar_plantao: {
         Args: {
           p_nome_plantao: string
