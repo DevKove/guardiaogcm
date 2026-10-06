@@ -409,6 +409,7 @@ function RelatorioImpresso({ p, operadorNome, atv }: { p: Plantao; operadorNome:
         </div>
       </div>
       <div className="mt-1 border border-black"><div className="border-b border-black text-center font-bold">ATIVIDADES VERSO</div><div className="min-h-8 whitespace-pre-wrap p-1">{p.atividades_verso}</div></div>
+      <div className="mt-1 border border-black"><div className="border-b border-black text-center font-bold">OUTRAS OBSERVAÇÕES</div><div className="min-h-8 whitespace-pre-wrap p-1">{p.observacoes || "—"}</div></div>
       <div className="mt-8 grid grid-cols-2 gap-8 text-center">
         <div className="border-t border-black pt-1">{p.operador_radio || operadorNome}<br />OPERADOR(A) DE RÁDIO</div>
         <div className="border-t border-black pt-1">{p.supervisor}<br />SUPERVISOR</div>
