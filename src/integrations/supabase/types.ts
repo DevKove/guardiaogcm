@@ -566,6 +566,12 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          assinatura_em?: string | null
+          assinatura_hash?: string | null
+          assinatura_metodo?: string | null
+          assinatura_codigo?: string | null
+          assinatura_nome?: string | null
+          assinatura_usuario_id?: string | null
           atividades?: string | null
           atividades_verso?: string | null
           created_at?: string
