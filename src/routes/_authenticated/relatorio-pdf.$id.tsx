@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ArrowLeft, Printer, RefreshCw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -86,6 +86,20 @@ function BoletimPlantao({ p, operador, matricula }: { p: Plantao; operador: stri
   const status = p.status === "aberto" ? "Em andamento" : "Encerrado";
   const imprimir = () => window.print();
   const assinaturaCodigo = p.assinatura_codigo || (p.assinatura_hash && p.assinatura_em ? "CAD-" + new Date(p.assinatura_em).toISOString().replace(/[-:TZ.]/g, "").slice(0, 14) + "-" + p.assinatura_hash.slice(0, 10).toUpperCase() : "");
+
+  // A assinatura lateral é instalada diretamente no <body> para que o motor de impressão
+  // do Chromium a trate como elemento fixo da página, sem ficar sujeita ao overflow,
+  // transform ou paginação do conteúdo do relatório.
+  useEffect(() => {
+    const body = document.body;
+    const previous = body.getAttribute("data-cad-assinatura");
+    if (assinaturaCodigo) body.setAttribute("data-cad-assinatura", assinaturaCodigo);
+    else body.removeAttribute("data-cad-assinatura");
+    return () => {
+      if (previous !== null) body.setAttribute("data-cad-assinatura", previous);
+      else body.removeAttribute("data-cad-assinatura");
+    };
+  }, [assinaturaCodigo]);
   const opcoes = [
     ["geral", "Dados gerais"], ["alteracoes", "Alterações registradas"], ["ocorrencias", "Ocorrências"],
     ["escalas", "Escalas"], ["guarnicoes", "Guarnições"], ["postos", "Postos e conferências"],
@@ -121,8 +135,6 @@ function BoletimPlantao({ p, operador, matricula }: { p: Plantao; operador: stri
           ))}
         </div>
       </div>
-
-      {assinaturaCodigo && <div className="cad-print-signature-side" aria-label={`Assinatura digital interna ${assinaturaCodigo}`}><span>ASSINATURA DIGITAL · {assinaturaCodigo}</span></div>}
 
       <div className="flex items-center justify-between border-b-2 border-primary pb-3">
         <div>
