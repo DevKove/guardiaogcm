@@ -1158,7 +1158,7 @@ header.glass {
     display: flex !important;
     position: fixed !important;
     top: 50% !important;
-    right: -9mm !important;
+    right: -12mm !important;
     z-index: 2147483647 !important;
     width: 6mm !important;
     height: 55mm !important;
