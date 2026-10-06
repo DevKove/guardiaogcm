@@ -499,6 +499,7 @@ export type Database = {
           assinatura_em: string | null
           assinatura_hash: string | null
           assinatura_metodo: string | null
+          assinatura_codigo: string | null
           assinatura_nome: string | null
           assinatura_usuario_id: string | null
           atividades: string | null
@@ -530,11 +531,13 @@ export type Database = {
           assinatura_em?: string | null
           assinatura_hash?: string | null
           assinatura_metodo?: string | null
+          assinatura_codigo?: string | null
           assinatura_nome?: string | null
           assinatura_usuario_id?: string | null
           assinatura_em?: string | null
           assinatura_hash?: string | null
           assinatura_metodo?: string | null
+          assinatura_codigo?: string | null
           assinatura_nome?: string | null
           assinatura_usuario_id?: string | null
           atividades?: string | null
