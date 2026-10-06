@@ -1156,31 +1156,29 @@ header.glass {
   .cad-print-signature-side {
     display: flex !important;
     position: fixed !important;
-    top: 10mm !important;
-    right: 1mm !important;
+    top: 50% !important;
+    right: 2mm !important;
     z-index: 2147483647 !important;
-    width: 8mm !important;
-    height: 277mm !important;
+    width: 10mm !important;
+    height: 70mm !important;
     box-sizing: border-box !important;
     margin: 0 !important;
     padding: 2mm 1mm !important;
     overflow: visible !important;
     align-items: center !important;
     justify-content: center !important;
-    border: 0.35mm solid #17365d !important;
+    border: 0.45mm solid #17365d !important;
     background: #ffffff !important;
     color: #17365d !important;
     font-family: Arial, sans-serif !important;
-    font-size: 6px !important;
+    font-size: 6.5px !important;
     font-weight: 700 !important;
-    line-height: 1 !important;
+    line-height: 1.1 !important;
     white-space: nowrap !important;
     writing-mode: vertical-rl !important;
-    transform: rotate(180deg) !important;
+    transform: translateY(-50%) rotate(180deg) !important;
     opacity: 1 !important;
     visibility: visible !important;
-    break-inside: avoid !important;
-    page-break-inside: avoid !important;
     pointer-events: none !important;
   }
 
@@ -1189,9 +1187,9 @@ header.glass {
     color: #17365d !important;
     background: #ffffff !important;
     font-family: Arial, sans-serif !important;
-    font-size: 6px !important;
+    font-size: 6.5px !important;
     font-weight: 700 !important;
-    line-height: 1 !important;
+    line-height: 1.1 !important;
     white-space: nowrap !important;
     writing-mode: vertical-rl !important;
   }
