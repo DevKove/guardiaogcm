@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { CheckCircle2, PlayCircle } from "lucide-react";
+import { Activity, CheckCircle2, PlayCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -105,8 +105,13 @@ function Painel() {
               {plantaoAtual ? <CheckCircle2 className="h-4 w-4 text-success" /> : <PlayCircle className="h-4 w-4 text-warning" />}
               {plantaoAtual ? "Plantão em andamento" : "Nenhum plantão aberto"}
             </div>
-            <div className="mt-1 text-xs text-muted-foreground">
+            <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
               {plantaoAtual ? `${plantaoAtual.turno} · iniciado em ${new Date(plantaoAtual.iniciado_em).toLocaleString("pt-BR")}` : `${atual.turno} · ${fmtDia(atual.data)} · ${atual.horario}`}
+              {plantaoAtual && (
+                <Link to="/plantao" className="inline-flex items-center gap-1 font-semibold text-success hover:underline">
+                  <Activity className="h-3.5 w-3.5" /> Atualização em tempo real
+                </Link>
+              )}
             </div>
             </div>
           </div>
