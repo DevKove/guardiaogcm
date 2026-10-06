@@ -79,6 +79,11 @@ export type Plantao = {
   status: string;
   iniciado_em: string;
   encerrado_em: string | null;
+  assinatura_usuario_id: string | null;
+  assinatura_nome: string | null;
+  assinatura_em: string | null;
+  assinatura_hash: string | null;
+  assinatura_metodo: string | null;
   equipe: string | null;
   supervisor: string | null;
   operador_radio: string | null;
