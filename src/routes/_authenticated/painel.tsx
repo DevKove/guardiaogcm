@@ -140,13 +140,12 @@ function Painel() {
           </div>
         </div>
       </section>
-      {plantaoAtual && (
-        <section className="card-3d animate-rise border-primary/30 p-4">
+      <section className="card-3d animate-rise border-primary/30 p-4">
           <div className="mb-3 flex items-center gap-3">
             <img src={`${import.meta.env.BASE_URL}cad-assets/notepad.gif`} alt="" aria-hidden="true" className="h-10 w-10 shrink-0 object-contain" />
             <div>
               <h2 className="text-sm font-semibold">Outras observações</h2>
-              <p className="text-xs text-muted-foreground">Registre livremente informações complementares relevantes para o plantão.</p>
+              <p className="text-xs text-muted-foreground">Registre livremente informações complementares relevantes para o plantão.{!plantaoAtual && " Inicie um plantão para poder salvar."}</p>
             </div>
           </div>
           <Textarea
@@ -161,14 +160,13 @@ function Painel() {
             <button
               type="button"
               onClick={salvarObservacoes}
-              disabled={salvandoObservacoes}
+              disabled={salvandoObservacoes || !plantaoAtual}
               className="inline-flex items-center rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {salvandoObservacoes ? "Salvando..." : "Salvar observações"}
+              {salvandoObservacoes ? "Salvando..." : plantaoAtual ? "Salvar observações" : "Inicie um plantão"}
             </button>
           </div>
         </section>
-      )}
       <div className="flex flex-wrap items-end justify-end gap-4">
         <div className="flex gap-2">
           <Input
