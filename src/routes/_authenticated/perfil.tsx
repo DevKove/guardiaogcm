@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useMe } from "@/hooks/use-me";
-import { ROLE_LABEL } from "@/lib/cad";
 
 export const Route = createFileRoute("/_authenticated/perfil")({
   head: () => ({ meta: [{ title: "Meu perfil · CAD" }] }),
@@ -52,7 +51,7 @@ function Perfil() {
         <div className="font-mono text-xs tracking-widest text-muted-foreground">CONTA</div>
         <h1 className="text-2xl font-bold">Meu perfil</h1>
         <p className="text-sm text-muted-foreground">
-          {me?.email} · {me?.roles.map((r) => ROLE_LABEL[r]).join(", ")}
+          {me?.email} · Operador do CAD
         </p>
       </div>
       <form onSubmit={salvar} className="space-y-3 card-3d animate-rise p-5">
