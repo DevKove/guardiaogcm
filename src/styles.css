@@ -1001,7 +1001,7 @@ header.glass {
 @media print {
   @page {
     size: A4 portrait;
-    margin: 10mm 12mm;
+    margin: 10mm 0 10mm 12mm;
   }
 
   html:has(.cad-print-document),
@@ -1065,7 +1065,7 @@ header.glass {
     max-width: none !important;
     min-height: 0 !important;
     margin: 0 !important;
-    padding: 0 !important;
+    padding: 0 12mm 0 0 !important;
     background: #ffffff !important;
     background-color: #ffffff !important;
     background-image: none !important;
@@ -1158,7 +1158,7 @@ header.glass {
     display: flex !important;
     position: fixed !important;
     top: 50% !important;
-    right: -12mm !important;
+    right: 0 !important;
     z-index: 2147483647 !important;
     width: 6mm !important;
     height: 55mm !important;
