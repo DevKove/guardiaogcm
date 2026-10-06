@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from "react";
 import { Shield, LogOut, LayoutList, PlusCircle, Users, Car, BarChart3, UserCircle, School, History, PlayCircle, Palette, Check, ChevronDown, Package, ChevronRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useMe } from "@/hooks/use-me";
-import { ROLE_LABEL } from "@/lib/cad";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
@@ -213,7 +212,7 @@ function Layout() {
               <div className="max-w-32 leading-tight">
                 <div className="truncate text-xs font-semibold text-foreground">{me?.nome}</div>
                 <div className="truncate text-[10px] text-muted-foreground">
-                  {me?.roles.map((r) => ROLE_LABEL[r]).join(", ") || "Sem perfil"}
+                  {"Operador do CAD"}
                 </div>
               </div>
             </Link>
