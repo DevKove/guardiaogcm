@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { STATUS, fmtProtocolo, type Status } from "@/lib/cad";
 import { carregarAtividades, fmtDia, type Plantao, type PlantaoAtividade } from "@/lib/plantao";
 import { Button } from "@/components/ui/button";
+import { useNavigate } from "@tanstack/react-router";
 
 const hora = (value: string) => new Date(value).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
 const dataHora = (value: string) => new Date(value).toLocaleString("pt-BR");
@@ -20,6 +21,7 @@ const cell = (value: unknown) => escapeHtml(value == null || value === "" ? "—
 
 export function PlantaoResumoTempoReal({ plantao }: { plantao: Plantao }) {
   const plantaoId = plantao.id;
+  const navigate = useNavigate();
   const qc = useQueryClient();
   const { data, isLoading, error } = useQuery<PlantaoAtividade>({
     queryKey: ["plantao-live-summary", plantaoId],
@@ -101,124 +103,10 @@ export function PlantaoResumoTempoReal({ plantao }: { plantao: Plantao }) {
   const postosAtivos = (data?.postosAtivos ?? []).filter((p) => idsPostosEscalados.has(p.id));
   const viaturasAtivas = viaturas.filter((v) => v.ativa).length;
 
-  async function gerarPdf() {
-    // PDF do plantão: consultar itens e movimentações diretamente no banco antes de montar o documento.
-    const janela = window.open("", "_blank");
-    if (!janela) {
-      window.alert("O navegador bloqueou a janela do relatório. Permita pop-ups para este site e tente novamente.");
-      return;
-    }
-
-    try {
-    const { data: plantaoPdf, error: plantaoPdfError } = await supabase.from("plantoes").select("*, assinatura_codigo, assinatura_nome, assinatura_em, assinatura_hash, assinatura_metodo").eq("id", plantaoId).single();
-    if (plantaoPdfError) throw plantaoPdfError;
-    // O PDF consulta os vínculos diretamente no banco no momento da geração.
-    // Isso evita que um resumo em cache/atualização atrasada produza um PDF sem os itens.
-    const [{ data: itensPdf, error: itensPdfError }, { data: movimentosPdf, error: movimentosPdfError }] = await Promise.all([
-      supabase
-        .from("plantao_itens")
-        .select("id,item_id,status,situacao,retirado_por,retirado_em,entregue_por,entregue_em,conferido_por,conferido_em,itens!inner(id,categoria,nome,identificacao,patrimonio,observacao,ativo)")
-        .eq("plantao_id", plantaoId)
-        .order("created_at", { ascending: true }),
-      supabase
-        .from("plantao_item_movimentos")
-        .select("id,item_id,retirado_por,retirado_em,entregue_por,entregue_em,itens!inner(nome,identificacao,categoria)")
-        .eq("plantao_id", plantaoId)
-        .order("retirado_em", { ascending: true }),
-    ]);
-    if (itensPdfError) throw itensPdfError;
-    if (movimentosPdfError) throw movimentosPdfError;
-
-    const usuarios = data?.usuarios ?? {};
-    const itensDiretos = (itensPdf ?? []) as any[];
-    const movimentosDiretos = (movimentosPdf ?? []) as any[];
-
-    // Complementa os nomes dos responsáveis que não estejam no resumo em memória.
-    const idsItens = Array.from(new Set([
-      ...itensDiretos.flatMap((item) => [item.retirado_por, item.entregue_por, item.conferido_por].filter(Boolean)),
-      ...movimentosDiretos.flatMap((mov) => [mov.retirado_por, mov.entregue_por].filter(Boolean)),
-    ]));
-    const { data: perfisItens, error: perfisItensError } = idsItens.length
-      ? await supabase.from("profiles").select("id,nome").in("id", idsItens)
-      : { data: [], error: null };
-    if (perfisItensError) throw perfisItensError;
-    const usuariosPdf: Record<string, string> = {
-      ...usuarios,
-      ...Object.fromEntries((perfisItens ?? []).map((p: any) => [p.id, p.nome || p.id.slice(0, 8)])),
-    };
-    const nomeUsuarioPdf = (id: string | null | undefined) => id ? (usuariosPdf[id] ?? id.slice(0, 8)) : "—";
-
-    const occurrenceRows = ocorrencias.map((o) => `<tr>
-      <td>${cell(hora(o.created_at))}</td><td>${cell(fmtProtocolo(o.protocolo, o.created_at))}</td>
-      <td>${cell(o.natureza)}</td><td>${cell([o.endereco, o.numero, o.bairro].filter(Boolean).join(", "))}</td>
-      <td>${cell(o.prioridade)}</td><td>${cell(o.viatura)}</td><td>${cell(statusOcorrencia(o.status))}</td>
-    </tr>`).join("");
-    const fleetRows = viaturas.map((v) => `<tr><td>${cell(v.prefixo)}</td><td>${cell(v.tipo + (v.modelo ? " · " + v.modelo : ""))}</td><td>${cell(v.guarnicao)}</td><td>${cell(v.km_atual == null ? "—" : v.km_atual.toLocaleString("pt-BR") + " km")}</td><td>${cell(v.ativa ? (situacaoViatura[v.status] ?? v.status) : "Inativa")}</td></tr>`).join("");
-    const scaleRows = escalas.map((e) => `<tr><td>${cell(e.funcao)}</td><td>${cell(e.hora_inicio.slice(0, 5) + "–" + e.hora_fim.slice(0, 5))}</td><td>${cell(e.agentes)}</td><td>${cell(e.observacao)}</td></tr>`).join("");
-    const postRows = postosAtivos.map((p) => `<tr><td>${cell(p.nome)}</td><td>${cell(p.tipo)}</td><td>${cell([p.endereco, p.bairro].filter(Boolean).join(" · "))}</td></tr>`).join("");
-    const recordRows = registros.map((r) => `<tr><td>${cell(dataHora(r.hora))}</td><td>${cell(r.texto)}</td><td>${cell(usuarios[r.criado_por] ?? (r.criado_por ? r.criado_por.slice(0, 8) : "—"))}</td></tr>`).join("");
-    const actionRows = acoes.map((a) => `<tr><td>${cell(dataHora(a.created_at))}</td><td>${cell(a.protocolo ? fmtProtocolo(a.protocolo, a.created_at) : "—")}</td><td>${cell(a.descricao)}</td><td>${cell(usuarios[a.usuario_id] ?? (a.usuario_id ? a.usuario_id.slice(0, 8) : "—"))}</td></tr>`).join("");
-    const itemRows = itensDiretos.flatMap((row) => {
-      const item = row.itens ?? {};
-      const eventos = [
-        row.retirado_em ? { data: row.retirado_em, acao: "Retirada", usuario: nomeUsuarioPdf(row.retirado_por), detalhes: "Item retirado para uso no plantão." } : null,
-        row.entregue_em ? { data: row.entregue_em, acao: "Devolução", usuario: nomeUsuarioPdf(row.entregue_por), detalhes: "Item devolvido." } : null,
-        row.conferido_em ? { data: row.conferido_em, acao: "Conferência", usuario: nomeUsuarioPdf(row.conferido_por), detalhes: row.situacao || "Conferido" } : null,
-      ].filter(Boolean) as { data: string; acao: string; usuario: string; detalhes: string }[];
-      if (!eventos.length) {
-        eventos.push({ data: plantao.iniciado_em, acao: "Vinculado ao plantão", usuario: "—", detalhes: `${row.status ?? "pendente"} · ${row.situacao ?? "OK"}` });
-      }
-      return eventos.map((evento) => `<tr><td>${cell(dataHora(evento.data))}</td><td>${cell(item.nome)}</td><td>${cell(item.identificacao || "—")}</td><td>${cell(item.patrimonio || "—")}</td><td>${cell(evento.acao)}</td><td>${cell(evento.usuario)}</td><td>${cell(evento.detalhes)}</td></tr>`);
-    }).join("");
-    const itemMovementRows = movimentosDiretos.map((m) => `<tr><td>${cell(m.itens?.nome ?? "Item")}</td><td>${cell(m.itens?.identificacao || "—")}</td><td>${cell(m.itens?.categoria || "—")}</td><td>${cell(nomeUsuarioPdf(m.retirado_por))}</td><td>${cell(dataHora(m.retirado_em))}</td><td>${cell(m.entregue_por ? nomeUsuarioPdf(m.entregue_por) : "Pendente")}</td><td>${cell(m.entregue_em ? dataHora(m.entregue_em) : "Pendente")}</td></tr>`).join("");
-    const generatedAt = new Date().toLocaleString("pt-BR");
-    const pdfPlantao = plantaoPdf as Plantao;
-    const assinaturaCodigo = pdfPlantao.assinatura_codigo ?? (pdfPlantao.assinatura_hash ? "CAD-" + new Date(pdfPlantao.assinatura_em ?? plantao.iniciado_em).toISOString().replace(/[-:TZ.]/g, "").slice(0, 14) + "-" + pdfPlantao.assinatura_hash.slice(0, 10).toUpperCase() : "");
-
-      janela.document.open();
-      janela.document.write(`<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>Relatório de Plantão - ${cell(fmtDia(plantao.data_inicio))}</title>
-      <style>
-        @page { size: A4 landscape; margin: 12mm 14mm 12mm 12mm; }
-        * { box-sizing: border-box; } body { font: 10px Arial, sans-serif; color: #172033; margin: 0; }
-        header { border-bottom: 3px solid #17365d; padding-bottom: 12px; margin-bottom: 14px; }
-        h1 { margin: 0 0 5px; color: #17365d; font-size: 21px; } h2 { font-size: 13px; margin: 18px 0 7px; color: #17365d; }
-        .meta { color: #475569; font-size: 10px; line-height: 1.6; } .stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; margin: 12px 0; }
-        .stat { border: 1px solid #cbd5e1; border-radius: 5px; padding: 9px; } .stat b { display:block; font-size: 18px; margin-top: 3px; }
-        table { width:100%; border-collapse: collapse; table-layout: auto; } th { background:#eaf0f7; text-align:left; color:#17365d; }
-        th,td { border:1px solid #cbd5e1; padding:5px; vertical-align:top; overflow-wrap:anywhere; } tr { break-inside: avoid; }
-        .empty { color:#64748b; font-style:italic; } .signature-side { display:none; } .footer { margin-top:18px; padding-top:8px; border-top:1px solid #cbd5e1; color:#64748b; font-size:9px; }
-        @media screen { body { max-width: 1200px; margin: 24px auto; padding: 24px; } .print-button { padding: 10px 16px; margin-bottom: 16px; } }
-        @media print { .print-button { display:none !important; } .signature-side { display:flex !important; position:fixed; z-index:9999; right:0; top:0; width:6mm; height:100vh; align-items:center; justify-content:center; padding:2mm 1mm; border-left:0.4mm solid #17365d; background:#fff; color:#17365d; font-size:6.5px; font-weight:700; letter-spacing:.35px; line-height:1.1; white-space:nowrap; writing-mode:vertical-rl; transform:rotate(180deg); } }
-      </style></head><body>
-      <button class="print-button" onclick="window.print()">Salvar como PDF / Imprimir</button>\n      ${assinaturaCodigo ? `<div class="signature-side" aria-hidden="true">ASSINATURA DIGITAL · ${cell(assinaturaCodigo)}</div>` : ""}
-      <header><h1>GUARDA CIVIL MUNICIPAL · CAD</h1><div style="font-size:15px;font-weight:bold">Relatório operacional de plantão</div>
-      <div class="meta">Turno: ${cell(plantao.turno)} · Data: ${cell(fmtDia(plantao.data_inicio))} · Horário previsto: ${cell(plantao.horario)}<br>
-      Início: ${cell(dataHora(plantao.iniciado_em))} · Situação: ${cell(plantao.status === "aberto" ? "Em andamento" : "Encerrado")} · Emitido em: ${cell(generatedAt)}</div></header>
-      <div class="stats"><div class="stat">Total de ocorrências<b>${ocorrencias.length}</b></div><div class="stat">Abertas<b>${abertas}</b></div><div class="stat">Em atendimento<b>${atendimento}</b></div><div class="stat">Viaturas ativas<b>${viaturasAtivas}</b></div></div>
-      <h2>1. Ocorrências do plantão</h2><table><thead><tr><th>Hora</th><th>Protocolo</th><th>Natureza</th><th>Local</th><th>Prioridade</th><th>Viatura</th><th>Status</th></tr></thead><tbody>${occurrenceRows || '<tr><td colspan="7" class="empty">Nenhuma ocorrência vinculada a este plantão.</td></tr>'}</tbody></table>
-      <h2>2. Viaturas utilizadas ou alteradas neste plantão</h2><table><thead><tr><th>Prefixo</th><th>Tipo / modelo</th><th>Guarnição</th><th>Odômetro</th><th>Situação</th></tr></thead><tbody>${fleetRows || '<tr><td colspan="5" class="empty">Nenhuma viatura utilizada ou alterada neste plantão.</td></tr>'}</tbody></table>
-      <h2>3. Equipes e escalas do turno</h2><table><thead><tr><th>Função</th><th>Horário</th><th>Equipe / agentes</th><th>Observação</th></tr></thead><tbody>${scaleRows || '<tr><td colspan="4" class="empty">Nenhuma escala cadastrada ou dados indisponíveis.</td></tr>'}</tbody></table>
-      <h2>4. Próprios municipais ativos</h2><table><thead><tr><th>Local</th><th>Tipo</th><th>Endereço</th></tr></thead><tbody>${postRows || '<tr><td colspan="3" class="empty">Nenhum próprio municipal ativo cadastrado.</td></tr>'}</tbody></table>
-      <h2>5. Lançamentos do plantão</h2><table><thead><tr><th>Data / hora</th><th>Registro</th><th>Responsável</th></tr></thead><tbody>${recordRows || '<tr><td colspan="3" class="empty">Nenhum lançamento registrado.</td></tr>'}</tbody></table>
-      <h2>6. Histórico de ações das ocorrências</h2><table><thead><tr><th>Data / hora</th><th>Protocolo</th><th>Ação registrada</th><th>Usuário</th></tr></thead><tbody>${actionRows || '<tr><td colspan="4" class="empty">Nenhuma ação registrada ou dados indisponíveis.</td></tr>'}</tbody></table>
-      <h2>7. Itens do plantão e atualizações</h2><table><thead><tr><th>Data / hora</th><th>Item</th><th>Identificação</th><th>Patrimônio</th><th>Alteração</th><th>Usuário responsável</th><th>Detalhes</th></tr></thead><tbody>${itemRows || '<tr><td colspan="7" class="empty">Nenhum item vinculado ou nenhuma atualização registrada neste plantão.</td></tr>'}</tbody></table>
-      <h2>8. Histórico de retiradas e devoluções</h2><table><thead><tr><th>Item</th><th>Identificação</th><th>Categoria</th><th>Retirada por</th><th>Retirada</th><th>Devolução por</th><th>Devolução</th></tr></thead><tbody>${itemMovementRows || '<tr><td colspan="7" class="empty">Nenhuma retirada ou devolução de item registrada neste plantão.</td></tr>'}</tbody></table>
-      <h2>9. Assinatura digital interna</h2><div style="border:1px solid #cbd5e1;border-radius:5px;padding:10px;">${pdfPlantao.assinatura_em ? `<strong>Documento assinado digitalmente no CAD</strong><br>Assinante: ${cell(pdfPlantao.assinatura_nome)} · Data/hora: ${cell(dataHora(pdfPlantao.assinatura_em))}<br>Método: ${cell(pdfPlantao.assinatura_metodo || "senha")}<br>Código único: <strong>${cell(pdfPlantao.assinatura_codigo || "—")}</strong><br>Hash de integridade SHA-256: <span style="font-family:monospace;word-break:break-all">${cell(pdfPlantao.assinatura_hash)}</span>` : '<span class="empty">Este documento ainda não possui assinatura digital interna.</span>'}</div>
-<div class="footer">Documento gerado pelo sistema CAD. Conferir os registros antes de arquivar ou compartilhar.</div>
-      
-      <script>window.addEventListener("load", () => setTimeout(() => window.print(), 300));</script>
-      </body></html>`);
-      janela.document.close();
-      janela.focus();
-    } catch (e) {
-      try {
-        janela.document.open();
-        janela.document.write(`<!doctype html><html lang="pt-BR"><meta charset="utf-8"><title>Erro ao gerar relatório</title><body style="font:16px Arial;padding:24px;color:#172033"><h1>Não foi possível gerar o relatório</h1><p>${cell(e instanceof Error ? e.message : "Erro inesperado")}</p><p>Feche esta janela e tente novamente.</p></body></html>`);
-        janela.document.close();
-      } catch {
-        window.alert("Não foi possível montar o relatório. Atualize a página e tente novamente.");
-      }
-    }
+  function gerarPdf() {
+    // Há um único gerador oficial de PDF para evitar divergência entre relatórios.
+    // A rota dedicada consulta novamente o plantão assinado e aplica a assinatura em cada folha.
+    void navigate({ to: "/relatorio-pdf/$id", params: { id: plantaoId } });
   }
 
   return (
