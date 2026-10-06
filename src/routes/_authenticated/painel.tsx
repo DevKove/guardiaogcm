@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { CheckCircle2, PlayCircle } from "lucide-react";
+import { CheckCircle2, PlayCircle, NotebookPen } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -26,6 +26,7 @@ function Painel() {
   const [filtro, setFiltro] = useState<Status | "ativas" | "todas">("todas");
   const [busca, setBusca] = useState("");
   const [observacoes, setObservacoes] = useState("");
+  const [observacoesAlteradas, setObservacoesAlteradas] = useState(false);
   const [salvandoObservacoes, setSalvandoObservacoes] = useState(false);
 
   const { data: plantaoAtual, isLoading: carregandoPlantao } = useQuery({
@@ -39,23 +40,36 @@ function Painel() {
   });
 
   useEffect(() => {
-    setObservacoes(plantaoAtual?.observacoes ?? "");
-  }, [plantaoAtual?.id, plantaoAtual?.observacoes]);
+    if (!observacoesAlteradas) {
+      setObservacoes(plantaoAtual?.observacoes ?? "");
+    }
+  }, [plantaoAtual?.id, plantaoAtual?.observacoes, observacoesAlteradas]);
 
   async function salvarObservacoes() {
-    if (!plantaoAtual?.id) return;
+    if (!plantaoAtual?.id) {
+      toast.error("Inicie um plantão antes de salvar as observações.");
+      return;
+    }
+
+    const texto = observacoes.trim();
     setSalvandoObservacoes(true);
+
     const { error } = await supabase
       .from("plantoes")
-      .update({ observacoes: observacoes.trim() || null })
+      .update({ observacoes: texto || null })
       .eq("id", plantaoAtual.id);
+
     setSalvandoObservacoes(false);
+
     if (error) {
       toast.error("Não foi possível salvar as observações: " + error.message);
       return;
     }
-    toast.success("Observações salvas no plantão.");
-    qc.invalidateQueries({ queryKey: ["plantao-atual"] });
+
+    setObservacoes(texto);
+    setObservacoesAlteradas(false);
+    toast.success("Outras observações salvas no plantão.");
+    await qc.invalidateQueries({ queryKey: ["plantao-atual"] });
   }
 
   async function iniciarPlantao() {
@@ -140,33 +154,44 @@ function Painel() {
           </div>
         </div>
       </section>
-      <section className="card-3d animate-rise border-primary/30 p-4">
-          <div className="mb-3 flex items-center gap-3">
-            <img src={`${import.meta.env.BASE_URL}cad-assets/notepad.gif`} alt="" aria-hidden="true" className="h-10 w-10 shrink-0 object-contain" />
-            <div>
-              <h2 className="text-sm font-semibold">Outras observações</h2>
-              <p className="text-xs text-muted-foreground">Registre livremente informações complementares relevantes para o plantão.{!plantaoAtual && " Inicie um plantão para poder salvar."}</p>
-            </div>
+      <section className="card-3d animate-rise border-primary/30 bg-background p-4" aria-labelledby="outras-observacoes-titulo">
+        <div className="mb-3 flex items-center gap-3">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-primary/30 bg-primary/10 text-primary" aria-hidden="true">
+            <NotebookPen className="h-5 w-5" />
           </div>
-          <Textarea
-            value={observacoes}
-            onChange={(e) => setObservacoes(e.target.value)}
-            placeholder="Digite aqui outras observações, informações complementares, ocorrências gerais ou orientações do plantão..."
-            className="min-h-32 resize-y"
-            maxLength={5000}
-          />
-          <div className="mt-3 flex items-center justify-between gap-3">
-            <span className="text-xs text-muted-foreground">{observacoes.length}/5000 caracteres</span>
-            <button
-              type="button"
-              onClick={salvarObservacoes}
-              disabled={salvandoObservacoes || !plantaoAtual}
-              className="inline-flex items-center rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              {salvandoObservacoes ? "Salvando..." : plantaoAtual ? "Salvar observações" : "Inicie um plantão"}
-            </button>
+          <div className="min-w-0">
+            <h2 id="outras-observacoes-titulo" className="text-base font-semibold">Outras observações</h2>
+            <p className="text-xs text-muted-foreground">
+              Registre livremente informações complementares relevantes para o plantão.
+              {!plantaoAtual && " Inicie um plantão para habilitar o salvamento."}
+            </p>
           </div>
-        </section>
+        </div>
+
+        <Textarea
+          value={observacoes}
+          onChange={(e) => {
+            setObservacoes(e.target.value);
+            setObservacoesAlteradas(true);
+          }}
+          placeholder="Digite aqui outras observações, informações complementares, orientações ou registros gerais do plantão..."
+          className="min-h-36 w-full resize-y"
+          maxLength={5000}
+          aria-label="Outras observações"
+        />
+
+        <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
+          <span className="text-xs text-muted-foreground">{observacoes.length}/5000 caracteres</span>
+          <button
+            type="button"
+            onClick={salvarObservacoes}
+            disabled={salvandoObservacoes || !plantaoAtual || !observacoesAlteradas}
+            className="inline-flex items-center rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {salvandoObservacoes ? "Salvando..." : "Salvar observações"}
+          </button>
+        </div>
+      </section>
       <div className="flex flex-wrap items-end justify-end gap-4">
         <div className="flex gap-2">
           <Input
