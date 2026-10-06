@@ -85,6 +85,7 @@ function BoletimPlantao({ p, operador, matricula }: { p: Plantao; operador: stri
   const fim = p.encerrado_em ?? new Date().toISOString();
   const status = p.status === "aberto" ? "Em andamento" : "Encerrado";
   const imprimir = () => window.print();
+  const assinaturaCodigo = p.assinatura_codigo || (p.assinatura_hash && p.assinatura_em ? "CAD-" + new Date(p.assinatura_em).toISOString().replace(/[-:TZ.]/g, "").slice(0, 14) + "-" + p.assinatura_hash.slice(0, 10).toUpperCase() : "");
   const opcoes = [
     ["geral", "Dados gerais"], ["alteracoes", "Alterações registradas"], ["ocorrencias", "Ocorrências"],
     ["escalas", "Escalas"], ["guarnicoes", "Guarnições"], ["postos", "Postos e conferências"],
@@ -120,6 +121,8 @@ function BoletimPlantao({ p, operador, matricula }: { p: Plantao; operador: stri
           ))}
         </div>
       </div>
+
+      {assinaturaCodigo && <div className="cad-print-signature-side" aria-label={`Assinatura digital interna ${assinaturaCodigo}`}><span>ASSINATURA DIGITAL · {assinaturaCodigo}</span></div>}
 
       <div className="flex items-center justify-between border-b-2 border-primary pb-3">
         <div>
@@ -313,9 +316,21 @@ function BoletimPlantao({ p, operador, matricula }: { p: Plantao; operador: stri
       )}
 
       {selecionados.assinaturas && (
-      <div className="cad-print-signatures grid grid-cols-2 gap-8 pt-12 text-center text-xs">
-        <div className="border-t pt-1">{operador || " "}{matricula ? " — Mat. " + matricula : ""}<br />Operador responsável</div>
-        <div className="border-t pt-1">{p.supervisor || " "}<br />Supervisor de turno</div>
+      <div className="cad-print-signatures space-y-4 pt-12 text-xs">
+        <div className="grid grid-cols-2 gap-8 text-center">
+          <div className="border-t pt-1">{operador || " "}{matricula ? " — Mat. " + matricula : ""}<br />Operador responsável</div>
+          <div className="border-t pt-1">{p.supervisor || " "}<br />Supervisor de turno</div>
+        </div>
+        <div className="rounded border p-3 text-left text-[10px]">
+          <div className="font-bold">ASSINATURA DIGITAL INTERNA DO CAD</div>
+          {p.assinatura_em ? (<>
+            <div>Assinante: {p.assinatura_nome || operador || "—"}</div>
+            <div>Data/hora: {dataHora(p.assinatura_em)}</div>
+            <div>Método: {p.assinatura_metodo || "senha"}</div>
+            <div>Código único: <strong className="font-mono">{assinaturaCodigo || "—"}</strong></div>
+            <div className="break-all font-mono">Hash SHA-256: {p.assinatura_hash || "—"}</div>
+          </>) : <div>Este documento ainda não possui assinatura digital interna.</div>}
+        </div>
       </div>
       )}
       <div className="text-center text-xs text-muted-foreground">Emitido em {new Date().toLocaleString("pt-BR")}</div>
