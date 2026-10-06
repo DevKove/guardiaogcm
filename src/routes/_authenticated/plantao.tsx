@@ -33,23 +33,6 @@ function PlantaoControle() {
   const [salvandoObservacoes, setSalvandoObservacoes] = useState(false);
   const atual = turnoAtual();
 
-  useEffect(() => {
-    setObservacoes(plantao?.observacoes ?? "");
-  }, [plantao?.id, plantao?.observacoes]);
-
-  async function salvarObservacoes() {
-    if (!plantao) return;
-    setSalvandoObservacoes(true);
-    const { error } = await supabase.from("plantoes").update({ observacoes }).eq("id", plantao.id);
-    setSalvandoObservacoes(false);
-    if (error) {
-      toast.error("Não foi possível salvar as outras observações: " + error.message);
-      return;
-    }
-    qc.setQueryData(["plantao-atual"], { ...plantao, observacoes });
-    toast.success("Outras observações salvas.");
-  }
-
   const { data: efetivo = [] } = useQuery({
     queryKey: ["equipe-plantao-inicio"],
     queryFn: async () => {
@@ -76,6 +59,23 @@ function PlantaoControle() {
     },
     refetchInterval: 15000,
   });
+
+  useEffect(() => {
+    setObservacoes(plantao?.observacoes ?? "");
+  }, [plantao?.id, plantao?.observacoes]);
+
+  async function salvarObservacoes() {
+    if (!plantao) return;
+    setSalvandoObservacoes(true);
+    const { error } = await supabase.from("plantoes").update({ observacoes }).eq("id", plantao.id);
+    setSalvandoObservacoes(false);
+    if (error) {
+      toast.error("Não foi possível salvar as outras observações: " + error.message);
+      return;
+    }
+    qc.setQueryData(["plantao-atual"], { ...plantao, observacoes });
+    toast.success("Outras observações salvas.");
+  }
 
   const { data: plantaoHistorico, isLoading: isLoadingHistorico, isError: isErrorHistorico, error: errorHistorico } = useQuery({
     queryKey: ["plantao-historico-detalhe", historico],
