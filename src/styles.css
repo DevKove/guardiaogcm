@@ -1152,41 +1152,57 @@ header.glass {
 }
 
 
-/* Assinatura digital do relatório oficial: elemento fixo dentro da área física da folha.
-   A posição usa milímetros da página para não depender do layout do conteúdo. */
+/* Assinatura digital do relatório oficial: selo fixo repetido pelo motor de impressão. */
 @media print {
   .cad-print-signature-side {
     display: flex !important;
     position: fixed !important;
-    z-index: 2147483647 !important;
-    top: 10mm !important;
+    top: 50% !important;
     right: 2mm !important;
-    width: 7mm !important;
-    height: 277mm !important;
+    z-index: 2147483647 !important;
+    width: 10mm !important;
+    height: 70mm !important;
+    box-sizing: border-box !important;
     margin: 0 !important;
     padding: 2mm 1mm !important;
     align-items: center !important;
     justify-content: center !important;
-    overflow: hidden !important;
-    border: 0.4mm solid #17365d !important;
+    overflow: visible !important;
+    border: 0.45mm solid #17365d !important;
     background: #ffffff !important;
     color: #17365d !important;
     font-family: Arial, sans-serif !important;
     font-size: 6.5px !important;
     font-weight: 700 !important;
-    line-height: 1.05 !important;
-    letter-spacing: .35px !important;
+    line-height: 1.1 !important;
     white-space: nowrap !important;
     writing-mode: vertical-rl !important;
-    transform: rotate(180deg) !important;
+    transform: translateY(-50%) rotate(180deg) !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    pointer-events: none !important;
   }
 
   .cad-print-signature-side span {
     display: block !important;
     color: #17365d !important;
     background: #ffffff !important;
+    font-family: Arial, sans-serif !important;
     font-size: 6.5px !important;
     font-weight: 700 !important;
+    line-height: 1.1 !important;
     white-space: nowrap !important;
+    writing-mode: vertical-rl !important;
+  }
+
+  .cad-print-signature-proof {
+    display: flex !important;
+    color: #17365d !important;
+    background: #ffffff !important;
+    border-color: #17365d !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
 }
