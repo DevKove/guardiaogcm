@@ -745,6 +745,13 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      finalizar_plantao_assinado: {
+        Args: {
+          p_plantao_id: string
+          p_resumo: Json
+        }
+        Returns: Json
+      }
       iniciar_plantao: {
         Args: {
           p_nome_plantao: string
