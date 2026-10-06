@@ -1152,22 +1152,35 @@ header.glass {
 }
 
 
-/* Assinatura digital do relatório oficial: selo fixo repetido pelo motor de impressão. */
+/* Assinatura digital: camada física independente da área útil do documento. */
 @media print {
+  .cad-print-page-edge {
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    pointer-events: none !important;
+    z-index: 2147483647 !important;
+    background: transparent !important;
+  }
+
   .cad-print-signature-side {
     display: flex !important;
-    position: fixed !important;
+    position: absolute !important;
     top: 50% !important;
     right: 0 !important;
     z-index: 2147483647 !important;
-    width: 6mm !important;
+    width: 5mm !important;
     height: 55mm !important;
     box-sizing: border-box !important;
     margin: 0 !important;
-    padding: 1mm 0.5mm !important;
+    padding: 1mm 0.35mm !important;
     align-items: center !important;
     justify-content: center !important;
-    overflow: visible !important;
+    overflow: hidden !important;
     border: 0.3mm solid #17365d !important;
     background: #ffffff !important;
     color: #17365d !important;
@@ -1190,7 +1203,7 @@ header.glass {
     color: #17365d !important;
     background: #ffffff !important;
     font-family: Arial, sans-serif !important;
-    font-size: 6.5px !important;
+    font-size: 6px !important;
     font-weight: 700 !important;
     line-height: 1.1 !important;
     white-space: nowrap !important;
