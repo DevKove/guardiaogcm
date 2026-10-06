@@ -2,11 +2,12 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { CheckCircle2, Clock3, FileText, LockKeyhole, PlayCircle, Square } from "lucide-react";
+import { CheckCircle2, Clock3, FileText, LockKeyhole, NotebookPen, PlayCircle, Square } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { selectCls } from "@/lib/cad";
 import { useMe } from "@/hooks/use-me";
 import { carregarAtividades, fmtDia, turnoAtual, type Plantao } from "@/lib/plantao";
@@ -28,7 +29,26 @@ function PlantaoControle() {
   const [mostrarInicio, setMostrarInicio] = useState(false);
   const [mostrarAssinatura, setMostrarAssinatura] = useState(false);
   const [senhaAssinatura, setSenhaAssinatura] = useState("");
+  const [observacoes, setObservacoes] = useState("");
+  const [salvandoObservacoes, setSalvandoObservacoes] = useState(false);
   const atual = turnoAtual();
+
+  useEffect(() => {
+    setObservacoes(plantao?.observacoes ?? "");
+  }, [plantao?.id, plantao?.observacoes]);
+
+  async function salvarObservacoes() {
+    if (!plantao) return;
+    setSalvandoObservacoes(true);
+    const { error } = await supabase.from("plantoes").update({ observacoes }).eq("id", plantao.id);
+    setSalvandoObservacoes(false);
+    if (error) {
+      toast.error("Não foi possível salvar as outras observações: " + error.message);
+      return;
+    }
+    qc.setQueryData(["plantao-atual"], { ...plantao, observacoes });
+    toast.success("Outras observações salvas.");
+  }
 
   const { data: efetivo = [] } = useQuery({
     queryKey: ["equipe-plantao-inicio"],
@@ -218,6 +238,31 @@ function PlantaoControle() {
               )}
             </div>
           </div>
+          <section className="card-3d animate-rise space-y-2 p-4">
+            <div className="flex items-center justify-between gap-3">
+              <h3 className="flex items-center gap-2 font-semibold text-primary"><NotebookPen className="h-4 w-4" /> Outras observações</h3>
+              <span className="text-[11px] text-muted-foreground">{observacoes.length}/5000</span>
+            </div>
+            <Label htmlFor="plantao-outras-observacoes" className="sr-only">Outras observações</Label>
+            <Textarea
+              id="plantao-outras-observacoes"
+              rows={6}
+              maxLength={5000}
+              value={observacoes}
+              disabled={!plantao || (!me?.isAdmin && plantao.operador_id !== me?.id) || salvandoObservacoes}
+              onChange={(e) => setObservacoes(e.target.value)}
+              placeholder="Digite aqui outras observações, orientações e informações complementares do plantão..."
+            />
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-[11px] text-muted-foreground">Este campo pertence ao plantão e permanece no relatório.</p>
+              {(plantao.operador_id === me?.id || me?.isAdmin) && (
+                <Button type="button" variant="outline" onClick={() => void salvarObservacoes()} disabled={salvandoObservacoes || observacoes === (plantao.observacoes ?? "")}>
+                  {salvandoObservacoes ? "Salvando..." : "Salvar observações"}
+                </Button>
+              )}
+            </div>
+          </section>
+
           <Dialog open={mostrarAssinatura} onOpenChange={(open) => {
             setMostrarAssinatura(open);
             if (!open) setSenhaAssinatura("");
