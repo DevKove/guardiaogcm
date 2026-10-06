@@ -178,7 +178,7 @@ export function PlantaoResumoTempoReal({ plantao }: { plantao: Plantao }) {
       janela.document.open();
       janela.document.write(`<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>Relatório de Plantão - ${cell(fmtDia(plantao.data_inicio))}</title>
       <style>
-        @page { size: A4 landscape; margin: 12mm; }
+        @page { size: A4 landscape; margin: 12mm 14mm 12mm 12mm; }
         * { box-sizing: border-box; } body { font: 10px Arial, sans-serif; color: #172033; margin: 0; }
         header { border-bottom: 3px solid #17365d; padding-bottom: 12px; margin-bottom: 14px; }
         h1 { margin: 0 0 5px; color: #17365d; font-size: 21px; } h2 { font-size: 13px; margin: 18px 0 7px; color: #17365d; }
@@ -186,11 +186,11 @@ export function PlantaoResumoTempoReal({ plantao }: { plantao: Plantao }) {
         .stat { border: 1px solid #cbd5e1; border-radius: 5px; padding: 9px; } .stat b { display:block; font-size: 18px; margin-top: 3px; }
         table { width:100%; border-collapse: collapse; table-layout: auto; } th { background:#eaf0f7; text-align:left; color:#17365d; }
         th,td { border:1px solid #cbd5e1; padding:5px; vertical-align:top; overflow-wrap:anywhere; } tr { break-inside: avoid; }
-        .empty { color:#64748b; font-style:italic; } .signature-side { display:none; } .footer { margin-top:18px; padding-top:8px; border-top:1px solid #cbd5e1; color:#64748b; font-size:9px; }
+        .empty { color:#64748b; font-style:italic; } .print-frame { width:100%; border-collapse:collapse; border:0; } .print-frame > thead { display:table-header-group; } .print-frame > thead > tr > th { height:0; padding:0; border:0; background:transparent; font-size:0; line-height:0; } .signature-repeat { display:none; } .signature-side { display:none; } .footer { margin-top:18px; padding-top:8px; border-top:1px solid #cbd5e1; color:#64748b; font-size:9px; }
         @media screen { body { max-width: 1200px; margin: 24px auto; padding: 24px; } .print-button { padding: 10px 16px; margin-bottom: 16px; } }
-        @media print { .print-button { display: none !important; } .signature-side { display:flex !important; position:fixed; right:0; top:0; width:7mm; height:100vh; align-items:center; justify-content:center; z-index:9999; font-size:7px; font-weight:700; letter-spacing:.55px; color:#17365d; background:#fff; border-left:1px solid #94a3b8; white-space:nowrap; writing-mode:vertical-rl; transform:rotate(180deg); } }
+        @media print { .print-button { display:none !important; } .signature-repeat { display:block !important; position:relative; height:0; width:100%; overflow:visible; } .signature-repeat span { position:absolute; right:-11mm; top:0; width:8mm; min-height:255mm; display:flex; align-items:center; justify-content:center; padding:2mm 1mm; border-left:1px solid #94a3b8; background:#fff; color:#17365d; font-size:7px; font-weight:700; letter-spacing:.45px; line-height:1.1; white-space:nowrap; writing-mode:vertical-rl; transform:rotate(180deg); } .signature-side { display:none !important; } }
       </style></head><body>
-      <button class="print-button" onclick="window.print()">Salvar como PDF / Imprimir</button>\n      ${assinaturaCodigo ? `<div class="signature-side">ASSINATURA DIGITAL · ${cell(assinaturaCodigo)}</div>` : ""}
+      <button class="print-button" onclick="window.print()">Salvar como PDF / Imprimir</button>\n      ${assinaturaCodigo ? `<table class="print-frame" aria-hidden="true"><thead><tr><th><div class="signature-repeat"><span>ASSINATURA DIGITAL · ${cell(assinaturaCodigo)}</span></div></th></tr></thead><tbody><tr><td style="padding:0;border:0;">` : ""}
       <header><h1>GUARDA CIVIL MUNICIPAL · CAD</h1><div style="font-size:15px;font-weight:bold">Relatório operacional de plantão</div>
       <div class="meta">Turno: ${cell(plantao.turno)} · Data: ${cell(fmtDia(plantao.data_inicio))} · Horário previsto: ${cell(plantao.horario)}<br>
       Início: ${cell(dataHora(plantao.iniciado_em))} · Situação: ${cell(plantao.status === "aberto" ? "Em andamento" : "Encerrado")} · Emitido em: ${cell(generatedAt)}</div></header>
@@ -205,6 +205,7 @@ export function PlantaoResumoTempoReal({ plantao }: { plantao: Plantao }) {
       <h2>8. Histórico de retiradas e devoluções</h2><table><thead><tr><th>Item</th><th>Identificação</th><th>Categoria</th><th>Retirada por</th><th>Retirada</th><th>Devolução por</th><th>Devolução</th></tr></thead><tbody>${itemMovementRows || '<tr><td colspan="7" class="empty">Nenhuma retirada ou devolução de item registrada neste plantão.</td></tr>'}</tbody></table>
       <h2>9. Assinatura digital interna</h2><div style="border:1px solid #cbd5e1;border-radius:5px;padding:10px;">${pdfPlantao.assinatura_em ? `<strong>Documento assinado digitalmente no CAD</strong><br>Assinante: ${cell(pdfPlantao.assinatura_nome)} · Data/hora: ${cell(dataHora(pdfPlantao.assinatura_em))}<br>Método: ${cell(pdfPlantao.assinatura_metodo || "senha")}<br>Código único: <strong>${cell(pdfPlantao.assinatura_codigo || "—")}</strong><br>Hash de integridade SHA-256: <span style="font-family:monospace;word-break:break-all">${cell(pdfPlantao.assinatura_hash)}</span>` : '<span class="empty">Este documento ainda não possui assinatura digital interna.</span>'}</div>
 <div class="footer">Documento gerado pelo sistema CAD. Conferir os registros antes de arquivar ou compartilhar.</div>
+      ${assinaturaCodigo ? `</td></tr></tbody></table>` : ""}
       <script>window.addEventListener("load", () => setTimeout(() => window.print(), 300));</script>
       </body></html>`);
       janela.document.close();
