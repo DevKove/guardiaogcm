@@ -1152,6 +1152,40 @@ header.glass {
 }
 
 
+/* Assinatura lateral: renderizada no BODY para garantir repetição em cada página
+   no diálogo de impressão/PDF do Chromium. Não depende da paginação do relatório. */
+@media print {
+  body:has(.cad-print-document)[data-cad-assinatura]::after {
+    content: "ASSINATURA DIGITAL · " attr(data-cad-assinatura) !important;
+    display: flex !important;
+    position: fixed !important;
+    z-index: 2147483647 !important;
+    top: 10mm !important;
+    right: 2mm !important;
+    width: 8mm !important;
+    height: 277mm !important;
+    box-sizing: border-box !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 2mm 1mm !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+    border: 0.4mm solid #17365d !important;
+    border-radius: 1mm !important;
+    background: #ffffff !important;
+    color: #17365d !important;
+    font-family: Arial, sans-serif !important;
+    font-size: 6.5px !important;
+    font-weight: 700 !important;
+    line-height: 1.05 !important;
+    letter-spacing: .35px !important;
+    white-space: nowrap !important;
+    writing-mode: vertical-rl !important;
+    transform: rotate(180deg) !important;
+    pointer-events: none !important;
+  }
+}
+
 /* Assinatura digital do relatório oficial: elemento fixo dentro da área física da folha.
    A posição usa milímetros da página para não depender do layout do conteúdo. */
 @media print {
