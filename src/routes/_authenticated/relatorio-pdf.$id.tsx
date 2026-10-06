@@ -110,6 +110,11 @@ function BoletimPlantao({ p, operador, matricula }: { p: Plantao; operador: stri
 
   return (
     <div className="cad-print-document mx-auto max-w-3xl space-y-4 bg-card p-8 text-sm print:bg-transparent print:p-0">
+      {assinaturaCodigo && (
+        <div className="cad-print-signature-side" aria-label={`Assinatura digital interna ${assinaturaCodigo}`}>
+          <span>ASSINATURA DIGITAL · {assinaturaCodigo}</span>
+        </div>
+      )}
       <div className="cad-print-toolbar mb-4 flex items-center justify-between gap-3">
         <Button asChild variant="outline"><Link to="/historico"><ArrowLeft className="mr-2 h-4 w-4" /> Voltar</Link></Button>
         <Button onClick={imprimir}><Printer className="mr-2 h-4 w-4" /> Imprimir / Salvar PDF</Button>
