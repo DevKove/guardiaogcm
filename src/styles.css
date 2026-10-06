@@ -1151,37 +1151,48 @@ header.glass {
   }
 }
 
-
-/* Assinatura lateral: renderizada no BODY para garantir repetição em cada página
-   no diálogo de impressão/PDF do Chromium. Não depende da paginação do relatório. */
+/* Assinatura digital do documento: elemento HTML real, fora do fluxo do conteúdo. */
 @media print {
-  body:has(.cad-print-document)[data-cad-assinatura]::after {
-    content: "ASSINATURA DIGITAL · " attr(data-cad-assinatura) !important;
+  .cad-print-signature-side {
     display: flex !important;
     position: fixed !important;
-    z-index: 2147483647 !important;
     top: 10mm !important;
-    right: 2mm !important;
+    right: 1mm !important;
+    z-index: 2147483647 !important;
     width: 8mm !important;
     height: 277mm !important;
     box-sizing: border-box !important;
+    margin: 0 !important;
+    padding: 2mm 1mm !important;
+    overflow: visible !important;
     align-items: center !important;
     justify-content: center !important;
-    padding: 2mm 1mm !important;
-    margin: 0 !important;
-    overflow: hidden !important;
-    border: 0.4mm solid #17365d !important;
-    border-radius: 1mm !important;
+    border: 0.35mm solid #17365d !important;
     background: #ffffff !important;
     color: #17365d !important;
     font-family: Arial, sans-serif !important;
-    font-size: 6.5px !important;
+    font-size: 6px !important;
     font-weight: 700 !important;
-    line-height: 1.05 !important;
-    letter-spacing: .35px !important;
+    line-height: 1 !important;
     white-space: nowrap !important;
     writing-mode: vertical-rl !important;
     transform: rotate(180deg) !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
     pointer-events: none !important;
+  }
+
+  .cad-print-signature-side span {
+    display: block !important;
+    color: #17365d !important;
+    background: #ffffff !important;
+    font-family: Arial, sans-serif !important;
+    font-size: 6px !important;
+    font-weight: 700 !important;
+    line-height: 1 !important;
+    white-space: nowrap !important;
+    writing-mode: vertical-rl !important;
   }
 }
