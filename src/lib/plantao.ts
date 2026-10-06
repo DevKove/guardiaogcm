@@ -84,6 +84,7 @@ export type Plantao = {
   assinatura_em: string | null;
   assinatura_hash: string | null;
   assinatura_metodo: string | null;
+  assinatura_codigo: string | null;
   equipe: string | null;
   supervisor: string | null;
   operador_radio: string | null;
