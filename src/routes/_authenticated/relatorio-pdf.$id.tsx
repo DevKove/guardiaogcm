@@ -141,6 +141,13 @@ function BoletimPlantao({ p, operador, matricula }: { p: Plantao; operador: stri
         </div>
       </div>
 
+      {assinaturaCodigo && (
+        <div className="cad-print-signature-proof mb-3 flex items-center justify-between border border-[#17365d] bg-white px-3 py-2 text-[9px] font-bold text-[#17365d] print:flex" aria-label="Código de assinatura digital">
+          <span>ASSINATURA DIGITAL INTERNA</span>
+          <span className="font-mono">{assinaturaCodigo}</span>
+        </div>
+      )}
+
       <div className="flex items-center justify-between border-b-2 border-primary pb-3">
         <div>
           <div className="text-xs tracking-widest text-muted-foreground">GUARDA CIVIL MUNICIPAL</div>
