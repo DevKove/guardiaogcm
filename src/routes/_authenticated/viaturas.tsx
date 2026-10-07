@@ -304,66 +304,51 @@ function ViaturaDialog({ f: init, onClose, podeTudo, podeEditarGuarnicao }: { f:
           </div>
           <div className="col-span-2 space-y-2">
             <Label>Integrantes da guarnição</Label>
-            <div className="flex gap-2">
-              <select
-                className={`${selectCls} flex-1`}
-                value={integranteSelecionado}
-                disabled={!podeEditarGuarnicao || !plantao?.id}
-                onChange={(e) => setIntegranteSelecionado(e.target.value)}
-              >
-                <option value="" className="bg-popover">Selecione um integrante...</option>
-                {efetivo.map((m) => (
-                  <option key={m.id} value={m.id} disabled={equipeIds.includes(m.id)} className="bg-popover">
-                    {m.nome}{m.matricula ? ` · Matrícula ${m.matricula}` : ""}{m.funcao ? ` · ${m.funcao}` : ""}
-                  </option>
-                ))}
-              </select>
-              <Button
-                type="button"
-                variant="outline"
-                disabled={!integranteSelecionado || equipeIds.includes(integranteSelecionado) || !podeEditarGuarnicao || !plantao?.id}
-                onClick={() => {
-                  if (!integranteSelecionado || equipeIds.includes(integranteSelecionado)) return;
-                  setEquipeIds((ids) => [...ids, integranteSelecionado]);
-                  setIntegranteSelecionado("");
-                }}
-              >
-                Adicionar
-              </Button>
-            </div>
-            {equipeIds.length > 0 ? (
-              <div className="space-y-1.5 rounded-md border bg-muted/30 p-2">
-                <div className="text-xs font-medium text-muted-foreground">Integrantes selecionados ({equipeIds.length})</div>
-                {equipeIds.map((id, index) => {
-                  const m = efetivo.find((x) => x.id === id);
-                  if (!m) return null;
-                  return (
-                    <div key={id} className="flex items-center justify-between rounded-md border bg-background px-3 py-2 text-sm">
-                      <div className="min-w-0">
-                        <span className="block font-medium">{index + 1}. {m.nome}</span>
-                        <span className="block text-xs text-muted-foreground">
-                          {m.tipo}{m.matricula ? ` · Matrícula ${m.matricula}` : ""}{m.funcao ? ` · ${m.funcao}` : ""}
-                        </span>
+            <div className="rounded-md border bg-background p-2">
+              {equipeIds.length === 0 ? (
+                <Button type="button" variant="ghost" className="w-full justify-start gap-2" disabled={!podeEditarGuarnicao || !plantao?.id} onClick={() => setIntegranteSelecionado("__abrir__")}>
+                  <Plus className="h-4 w-4" /> Adicionar integrante
+                </Button>
+              ) : (
+                <div className="space-y-1.5">
+                  {equipeIds.map((id, index) => {
+                    const m = efetivo.find((x) => x.id === id);
+                    if (!m) return null;
+                    return (
+                      <div key={id} className="flex items-center justify-between rounded-md border bg-muted/30 px-3 py-2 text-sm">
+                        <div className="min-w-0">
+                          <span className="block font-medium">{index + 1}. {m.nome}</span>
+                          <span className="block text-xs text-muted-foreground">{m.tipo}{m.matricula ? ` · Matrícula ${m.matricula}` : ""}{m.funcao ? ` · ${m.funcao}` : ""}</span>
+                        </div>
+                        <Button type="button" size="sm" variant="ghost" className="text-destructive" disabled={!podeEditarGuarnicao || !plantao?.id} onClick={() => setEquipeIds((ids) => ids.filter((item) => item !== id))}>Remover</Button>
                       </div>
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="ghost"
-                        className="text-destructive"
-                        disabled={!podeEditarGuarnicao || !plantao?.id}
-                        onClick={() => setEquipeIds((ids) => ids.filter((item) => item !== id))}
-                      >
-                        Remover
-                      </Button>
-                    </div>
-                  );
-                })}
+                    );
+                  })}
+                  <Button type="button" variant="ghost" className="w-full justify-start gap-2" disabled={!podeEditarGuarnicao || !plantao?.id} onClick={() => setIntegranteSelecionado("__abrir__")}>
+                    <Plus className="h-4 w-4" /> Adicionar integrante
+                  </Button>
+                </div>
+              )}
+            </div>
+            {integranteSelecionado === "__abrir__" && (
+              <div className="flex gap-2">
+                <select autoFocus className={selectCls + " flex-1"} value="" disabled={!podeEditarGuarnicao || !plantao?.id} onChange={(e) => {
+                  if (!e.target.value) return;
+                  setEquipeIds((ids) => ids.includes(e.target.value) ? ids : [...ids, e.target.value]);
+                  setIntegranteSelecionado("");
+                }}>
+                  <option value="" className="bg-popover">Selecione um integrante...</option>
+                  {efetivo.map((m) => (
+                    <option key={m.id} value={m.id} disabled={equipeIds.includes(m.id)} className="bg-popover">
+                      {m.nome}{m.matricula ? ` · Matrícula ${m.matricula}` : ""}{m.funcao ? ` · ${m.funcao}` : ""}
+                    </option>
+                  ))}
+                </select>
+                <Button type="button" variant="outline" onClick={() => setIntegranteSelecionado("")}>Cancelar</Button>
               </div>
-            ) : (
-              <p className="rounded-md border border-dashed p-3 text-xs text-muted-foreground">Nenhum integrante selecionado. Escolha um guarda no campo acima e clique em Adicionar.</p>
             )}
             {!plantao?.id && <p className="text-xs text-warning">Inicie um plantão para vincular integrantes à viatura.</p>}
-            <p className="text-xs text-muted-foreground">Selecione um guarda por vez. Clique em Adicionar para montar a guarnição com vários integrantes.</p>
+            <p className="text-xs text-muted-foreground">Use + para adicionar cada integrante individualmente.</p>
           </div>
           <div className="space-y-1"><Label>Quilometragem atual</Label><Input type="number" min={0} value={f.km_atual} onChange={set("km_atual")} /></div>
           <div className="col-span-2 space-y-1"><Label>Observações</Label><Textarea rows={2} value={f.observacao} onChange={set("observacao")} /></div>
