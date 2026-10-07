@@ -104,7 +104,7 @@ function Painel() {
             {plantaoAtual ? (
               <Link to="/plantao/$id" params={{ id: plantaoAtual.id }} className="inline-flex items-center rounded-md border px-4 py-2 text-sm font-semibold hover:bg-accent">Abrir plantão / relatório</Link>
             ) : (
-              <Link to="/plantao" search={() => ({} as never)} className={`inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90 ${carregandoPlantao || !me ? "pointer-events-none opacity-50" : ""}`} aria-disabled={carregandoPlantao || !me}><PlayCircle className="h-4 w-4" /> Iniciar plantão</Link>
+              <a href={`${import.meta.env.BASE_URL}plantao`} className={`inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90 ${carregandoPlantao || !me ? "pointer-events-none opacity-50" : ""}`} aria-disabled={carregandoPlantao || !me}><PlayCircle className="h-4 w-4" /> Iniciar plantão</Link>
             )}
           </div>
         </div>
