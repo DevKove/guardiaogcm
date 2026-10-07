@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { CheckCircle2, Clock3, FileText, LockKeyhole, NotebookPen, PlayCircle, Square } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import type { Json } from "@/integrations/supabase/types";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
@@ -188,7 +189,7 @@ function PlantaoControle() {
 
     const { data, error } = await supabase.rpc("finalizar_plantao_assinado", {
       p_plantao_id: plantao.id,
-      p_resumo: resumo,
+      p_resumo: JSON.parse(JSON.stringify(resumo)) as Json,
     });
 
     setSaving(false);
