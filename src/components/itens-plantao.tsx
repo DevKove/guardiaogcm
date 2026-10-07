@@ -218,6 +218,7 @@ export function ItensPlantao({ categoria }: { categoria: ItemCategoria }) {
     if (result.error) return toast.error(result.error.message);
     toast.success("Situação de " + item.nome + " atualizada para " + situacao + ".");
     qc.invalidateQueries({ queryKey: ["itens-movimentos", plantao.id, categoria] });
+    return null;
   }
   async function conferir(item: Item, checked: boolean) {
     if (!plantao?.id) return toast.error("Não há plantão aberto.");
