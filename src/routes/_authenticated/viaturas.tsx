@@ -1,4 +1,4 @@
-// Deploy marker: viatura crew selector fix — current plantão members only.\nimport { createFileRoute, Link } from "@tanstack/react-router";
+// Deploy marker: viatura crew selector fix — show all active Equipe members.\nimport { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -320,26 +320,46 @@ function ViaturaDialog({ f: init, onClose, podeTudo, podeEditarGuarnicao }: { f:
               )}
             </div>
             {integranteSelecionado === "__abrir__" && (
-              <div className="flex gap-2">
-                <select autoFocus className={selectCls + " flex-1"} value="" disabled={!podeEditarGuarnicao || !plantao?.id} onChange={(e) => {
-                  const id = e.target.value;
-                  if (!id) return;
-                  if (!plantaoIntegranteIds.has(id)) {
-                    const m = efetivo.find((item) => item.id === id);
-                    toast.warning(`${m?.nome ?? "Integrante"} está cadastrado em Equipe, mas não está selecionado no plantão atual. Selecione-o no plantão antes de vinculá-lo à viatura.`);
-                    return;
-                  }
-                  setEquipeIds((ids) => ids.includes(id) ? ids : [...ids, id]);
-                  setIntegranteSelecionado("");
-                }}>
-                  <option value="" className="bg-popover">Selecione um integrante...</option>
-                  {efetivo.map((m) => (
-                    <option key={m.id} value={m.id} disabled={equipeIds.includes(m.id)} className="bg-popover">
-                      {m.nome}{m.matricula ? ` · Matrícula ${m.matricula}` : ""}{m.funcao ? ` · ${m.funcao}` : ""}{!plantaoIntegranteIds.has(m.id) ? " · fora do plantão atual" : ""}
-                    </option>
-                  ))}
-                </select>
-                <Button type="button" variant="outline" onClick={() => setIntegranteSelecionado("")}>Cancelar</Button>
+              <div className="space-y-2 rounded-md border bg-background p-2">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-xs font-semibold text-muted-foreground">Efetivo cadastrado em Equipe · {efetivo.length} ativo(s)</span>
+                  <Button type="button" size="sm" variant="outline" onClick={() => setIntegranteSelecionado("")}>Fechar</Button>
+                </div>
+                {efetivo.length === 0 ? (
+                  <div className="rounded-md bg-muted/40 p-3 text-center text-xs text-muted-foreground">Nenhum integrante ativo foi retornado do cadastro Equipe.</div>
+                ) : (
+                  <div className="max-h-56 space-y-1 overflow-y-auto pr-1">
+                    {efetivo.map((m) => {
+                      const selecionado = equipeIds.includes(m.id);
+                      const noPlantao = plantaoIntegranteIds.has(m.id);
+                      return (
+                        <button
+                          key={m.id}
+                          type="button"
+                          disabled={selecionado || !podeEditarGuarnicao || !plantao?.id}
+                          onClick={() => {
+                            if (selecionado) return;
+                            if (!noPlantao) {
+                              toast.warning(`${m.nome} está cadastrado em Equipe, mas não está selecionado no plantão atual. Selecione-o no plantão antes de vinculá-lo à viatura.`);
+                              return;
+                            }
+                            setEquipeIds((ids) => ids.includes(m.id) ? ids : [...ids, m.id]);
+                            setIntegranteSelecionado("");
+                          }}
+                          className={`flex w-full items-center justify-between rounded-md border px-3 py-2 text-left text-sm transition hover:bg-accent disabled:cursor-not-allowed disabled:opacity-50 ${selecionado ? "bg-muted/50" : ""}`}
+                        >
+                          <span className="min-w-0">
+                            <span className="block font-medium">{m.nome}</span>
+                            <span className="block text-xs text-muted-foreground">{m.tipo}{m.matricula ? ` · Matrícula ${m.matricula}` : ""}{m.funcao ? ` · ${m.funcao}` : ""}</span>
+                          </span>
+                          <span className="ml-2 shrink-0 text-[10px] font-medium text-muted-foreground">
+                            {selecionado ? "ADICIONADO" : noPlantao ? "ADICIONAR" : "FORA DO PLANTÃO"}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             )}
             {!plantao?.id && <p className="text-xs text-warning">Inicie um plantão para vincular integrantes à viatura.</p>}
