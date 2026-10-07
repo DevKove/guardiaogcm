@@ -143,7 +143,22 @@ function Viaturas() {
               )}
               <div className="mt-3 flex gap-1 border-t pt-3">
                 {me && (
-                  <Button size="sm" variant="ghost" onClick={() => setEdit({ id: v.id, prefixo: v.prefixo, placa: v.placa ?? "", modelo: v.modelo ?? "", tipo: v.tipo, guarnicao: v.guarnicao ?? "", equipe_ids: [], km_atual: v.km_atual?.toString() ?? "", observacao: v.observacao ?? "" })}>
+                  <Button size="sm" variant="ghost" onClick={() => setEdit({
+  id: v.id,
+  prefixo: v.prefixo,
+  placa: v.placa ?? "",
+  modelo: v.modelo ?? "",
+  tipo: v.tipo,
+  guarnicao: v.guarnicao ?? "",
+  equipe_ids: Array.isArray(v.viatura_integrantes)
+    ? v.viatura_integrantes
+        .filter((x: { plantao_id?: string }) => x.plantao_id === plantaoAtual?.id)
+        .map((x: { equipe?: { id?: string } | null }) => x.equipe?.id)
+        .filter((id): id is string => !!id)
+    : [],
+  km_atual: v.km_atual?.toString() ?? "",
+  observacao: v.observacao ?? ""
+})}>
                     <Pencil className="h-3.5 w-3.5" /> Editar
                   </Button>
                 )}
@@ -216,13 +231,11 @@ function ViaturaDialog({ f: init, onClose, podeTudo, podeEditarGuarnicao }: { f:
   }, [init]);
 
   useEffect(() => {
-    if (!init?.id) return;
-    if (plantao?.id) {
+    if (!init?.id || !plantao?.id) return;
+    if (integrantesViaturaAtual.length > 0 || init.equipe_ids.length === 0) {
       setEquipeIds(integrantesViaturaAtual);
-    } else {
-      setEquipeIds([]);
     }
-  }, [init?.id, plantao?.id, integrantesViaturaAtual]);
+  }, [init?.id, init?.equipe_ids, plantao?.id, integrantesViaturaAtual]);
 
   // Ao editar uma viatura, os integrantes vinculados ao plantão aberto são carregados automaticamente.
   // Eles permanecem vinculados até o usuário alterar a guarnição ou o plantão ser encerrado.
