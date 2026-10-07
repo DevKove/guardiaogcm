@@ -69,10 +69,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "description", content: "Sistema de registro de ocorrências da Guarda Municipal." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
+      { name: "theme-color", content: "#0b1220" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
       { rel: "icon", href: "/guardiaogcm/favicon.ico", type: "image/x-icon" },
+      { rel: "manifest", href: "/guardiaogcm/manifest.webmanifest" },
+      { rel: "apple-touch-icon", href: "/guardiaogcm/pwa-192.svg" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
