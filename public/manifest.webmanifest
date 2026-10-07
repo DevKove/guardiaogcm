@@ -1,0 +1,29 @@
+{
+  "name": "Guardião GCM — CAD",
+  "short_name": "Guardião GCM",
+  "description": "Central de Atendimento e Despacho da Guarda Civil Municipal.",
+  "lang": "pt-BR",
+  "dir": "ltr",
+  "id": "/guardiaogcm/",
+  "start_url": "/guardiaogcm/",
+  "scope": "/guardiaogcm/",
+  "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone"],
+  "orientation": "any",
+  "background_color": "#0b1220",
+  "theme_color": "#0b1220",
+  "icons": [
+    {
+      "src": "/guardiaogcm/pwa-192.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/guardiaogcm/pwa-512.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
