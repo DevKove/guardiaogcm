@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+// Deploy marker: viatura crew selector fix — current plantão members only.\nimport { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
