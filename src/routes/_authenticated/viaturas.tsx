@@ -26,12 +26,20 @@ function Viaturas() {
   const { data: me } = useMe();
   const [edit, setEdit] = useState<Form | null>(null);
   const [q, setQ] = useState("");
+  const { data: plantaoAtual } = useQuery({
+    queryKey: ["plantao-atual-viaturas"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("plantoes").select("id").eq("status", "aberto").maybeSingle();
+      if (error) throw error;
+      return data as { id: string } | null;
+    },
+  });
   const { data = [] } = useQuery({
-    queryKey: ["viaturas"],
+    queryKey: ["viaturas", plantaoAtual?.id],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("viaturas")
-        .select("*, ocorrencias!viaturas_ocorrencia_id_fkey(id, protocolo, natureza, created_at), viatura_integrantes(equipe:equipe_id(id, nome, matricula, tipo))")
+        .select("*, ocorrencias!viaturas_ocorrencia_id_fkey(id, protocolo, natureza, created_at), viatura_integrantes(plantao_id, equipe:equipe_id(id, nome, matricula, tipo))")
         .order("prefixo");
       if (error) throw error;
       return data;
@@ -42,6 +50,11 @@ function Viaturas() {
     const ch = supabase
       .channel("viaturas-live")
       .on("postgres_changes", { event: "*", schema: "public", table: "viaturas" }, () => qc.invalidateQueries({ queryKey: ["viaturas"] }))
+      .on("postgres_changes", { event: "*", schema: "public", table: "viatura_integrantes" }, () => qc.invalidateQueries({ queryKey: ["viaturas"] }))
+      .on("postgres_changes", { event: "*", schema: "public", table: "plantoes" }, () => {
+        qc.invalidateQueries({ queryKey: ["plantao-atual-viaturas"] });
+        qc.invalidateQueries({ queryKey: ["viaturas"] });
+      })
       .subscribe();
     return () => void supabase.removeChannel(ch);
   }, [qc]);
@@ -104,7 +117,7 @@ function Viaturas() {
                 </span>
               </div>
               <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-muted-foreground">
-                <div className="flex items-center gap-1.5"><Users className="h-3.5 w-3.5" />{(Array.isArray(v.viatura_integrantes) ? v.viatura_integrantes.map((x: { equipe?: { nome?: string } | null }) => x.equipe?.nome).filter(Boolean).join(", ") : "") || v.guarnicao || "Sem guarnição"}</div>
+                <div className="flex items-center gap-1.5"><Users className="h-3.5 w-3.5" />{(Array.isArray(v.viatura_integrantes) ? v.viatura_integrantes.filter((x: { plantao_id?: string }) => x.plantao_id === plantaoAtual?.id).map((x: { equipe?: { nome?: string } | null }) => x.equipe?.nome).filter(Boolean).join(", ") : "") || "Sem guarnição"}</div>
                 <div className="flex items-center gap-1.5"><Gauge className="h-3.5 w-3.5" />{v.km_atual != null ? `${v.km_atual.toLocaleString("pt-BR")} km` : "— km"}</div>
               </div>
               {v.observacao && <p className="mt-2 rounded-md bg-muted/50 p-2 text-xs">{v.observacao}</p>}
@@ -180,28 +193,40 @@ function ViaturaDialog({ f: init, onClose, podeTudo, podeEditarGuarnicao }: { f:
     enabled: !!init,
   });
 
-  const { data: plantaoIntegrantes = [] } = useQuery({
-    queryKey: ["plantao-integrantes-viatura-dialog", plantao?.id],
+  const { data: integrantesViaturaAtual = [] } = useQuery({
+    queryKey: ["viatura-integrantes-dialog", init?.id, plantao?.id],
     queryFn: async () => {
-      if (!plantao?.id) return [];
+      if (!init?.id || !plantao?.id) return [];
       const { data, error } = await supabase
-        .from("plantao_integrantes")
+        .from("viatura_integrantes")
         .select("equipe_id")
+        .eq("viatura_id", init.id)
         .eq("plantao_id", plantao.id);
       if (error) throw error;
       return (data ?? []).map((x) => x.equipe_id);
     },
-    enabled: !!init && !!plantao?.id,
+    enabled: !!init?.id && !!plantao?.id,
   });
-  const plantaoIntegranteIds = new Set(plantaoIntegrantes);
+
   useEffect(() => {
-    if (init) {
-      setF(init);
-      setEquipeIds(init.equipe_ids);
-    }
+    if (!init) return;
+    setF(init);
+    setEquipeIds(init.equipe_ids);
+    setIntegranteSelecionado("");
   }, [init]);
-  // O campo de integrantes inicia vazio. O usuário adiciona cada integrante manualmente pelo botão +.
-  // Os vínculos existentes continuam visíveis no card da viatura, mas não são pré-selecionados no formulário.
+
+  useEffect(() => {
+    if (!init?.id) return;
+    if (plantao?.id) {
+      setEquipeIds(integrantesViaturaAtual);
+    } else {
+      setEquipeIds([]);
+    }
+  }, [init?.id, plantao?.id, integrantesViaturaAtual]);
+
+  // Ao editar uma viatura, os integrantes vinculados ao plantão aberto são carregados automaticamente.
+  // Eles permanecem vinculados até o usuário alterar a guarnição ou o plantão ser encerrado.
+  // Integrantes de plantões anteriores não são exibidos como guarnição atual.
   async function salvar(e: React.FormEvent) {
     e.preventDefault();
     if (!init?.id) {
@@ -309,7 +334,7 @@ function ViaturaDialog({ f: init, onClose, podeTudo, podeEditarGuarnicao }: { f:
                           <span className="block font-medium">{index + 1}. {m.nome}</span>
                           <span className="block text-xs text-muted-foreground">{m.tipo}{m.matricula ? ` · Matrícula ${m.matricula}` : ""}{m.funcao ? ` · ${m.funcao}` : ""}</span>
                         </div>
-                        <Button type="button" size="sm" variant="ghost" className="text-destructive" disabled={!podeEditarGuarnicao || !plantao?.id} onClick={() => setEquipeIds((ids) => ids.filter((item) => item !== id))}>Remover</Button>
+                        <Button type="button" size="icon" variant="ghost" className="text-destructive hover:bg-destructive/10 hover:text-destructive" aria-label={`Remover ${m.nome} da guarnição`} title={`Remover ${m.nome}`} disabled={!podeEditarGuarnicao || !plantao?.id} onClick={() => setEquipeIds((ids) => ids.filter((item) => item !== id))}><Trash2 className="h-4 w-4" /></Button>
                       </div>
                     );
                   })}
@@ -358,7 +383,7 @@ function ViaturaDialog({ f: init, onClose, podeTudo, podeEditarGuarnicao }: { f:
               </div>
             )}
             {!plantao?.id && <p className="text-xs text-warning">Inicie um plantão para vincular integrantes à viatura.</p>}
-            <p className="text-xs text-muted-foreground">O botão + exibe todos os integrantes ativos cadastrados em Equipe. O integrante pode ser vinculado à viatura mesmo que ainda não esteja na lista de integrantes do plantão.</p>
+            <p className="text-xs text-muted-foreground">Os integrantes do plantão atual são carregados automaticamente ao abrir a edição. Eles permanecem na viatura até serem removidos/alterados pelo usuário ou até o plantão ser encerrado.</p>
           </div>
           <div className="space-y-1"><Label>Quilometragem atual</Label><Input type="number" min={0} value={f.km_atual} onChange={set("km_atual")} /></div>
           <div className="col-span-2 space-y-1"><Label>Observações</Label><Textarea rows={2} value={f.observacao} onChange={set("observacao")} /></div>
