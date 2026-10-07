@@ -339,10 +339,6 @@ function ViaturaDialog({ f: init, onClose, podeTudo, podeEditarGuarnicao }: { f:
                           disabled={selecionado || !podeEditarGuarnicao || !plantao?.id}
                           onClick={() => {
                             if (selecionado) return;
-                            if (!noPlantao) {
-                              toast.warning(`${m.nome} está cadastrado em Equipe, mas não está selecionado no plantão atual. Selecione-o no plantão antes de vinculá-lo à viatura.`);
-                              return;
-                            }
                             setEquipeIds((ids) => ids.includes(m.id) ? ids : [...ids, m.id]);
                             setIntegranteSelecionado("");
                           }}
@@ -353,7 +349,7 @@ function ViaturaDialog({ f: init, onClose, podeTudo, podeEditarGuarnicao }: { f:
                             <span className="block text-xs text-muted-foreground">{m.tipo}{m.matricula ? ` · Matrícula ${m.matricula}` : ""}{m.funcao ? ` · ${m.funcao}` : ""}</span>
                           </span>
                           <span className="ml-2 shrink-0 text-[10px] font-medium text-muted-foreground">
-                            {selecionado ? "ADICIONADO" : noPlantao ? "ADICIONAR" : "FORA DO PLANTÃO"}
+                            {selecionado ? "ADICIONADO" : "ADICIONAR"}
                           </span>
                         </button>
                       );
@@ -363,7 +359,7 @@ function ViaturaDialog({ f: init, onClose, podeTudo, podeEditarGuarnicao }: { f:
               </div>
             )}
             {!plantao?.id && <p className="text-xs text-warning">Inicie um plantão para vincular integrantes à viatura.</p>}
-            <p className="text-xs text-muted-foreground">O botão + exibe todos os integrantes ativos cadastrados em Equipe. Quem estiver fora do plantão atual continua visível, mas precisa ser selecionado no plantão antes de ser vinculado à viatura.</p>
+            <p className="text-xs text-muted-foreground">O botão + exibe todos os integrantes ativos cadastrados em Equipe. O integrante pode ser vinculado à viatura mesmo que ainda não esteja na lista de integrantes do plantão.</p>
           </div>
           <div className="space-y-1"><Label>Quilometragem atual</Label><Input type="number" min={0} value={f.km_atual} onChange={set("km_atual")} /></div>
           <div className="col-span-2 space-y-1"><Label>Observações</Label><Textarea rows={2} value={f.observacao} onChange={set("observacao")} /></div>
