@@ -143,7 +143,7 @@ function BoletimPlantao({ p, operador, matricula }: { p: Plantao; operador: stri
         </div>
       </div>
 
-      {selecionados.geral && (<Sec t="Dados gerais">
+      {selecionados["geral"] && (<Sec t="Dados gerais">
           <G l="Nome do plantão" v={p.nome_plantao} />
           <G l="Situação" v={status} />
           <G l="Data" v={fmtDia(p.data_inicio)} />
@@ -158,7 +158,7 @@ function BoletimPlantao({ p, operador, matricula }: { p: Plantao; operador: stri
           <G l="Operador responsável" v={operador ? operador + (matricula ? " — Mat. " + matricula : "") : null} />
         </Sec>)}
 
-      {selecionados.alteracoes && (<Sec t="Alterações registradas no plantão">
+      {selecionados["alteracoes"] && (<Sec t="Alterações registradas no plantão">
           {data.alteracoes.length ? (
             <div className="col-span-2">
               <table className="cad-print-table w-full">
@@ -178,7 +178,7 @@ function BoletimPlantao({ p, operador, matricula }: { p: Plantao; operador: stri
           ) : <G l="Resultado" v="Nenhum campo do formulário foi alterado durante o plantão." />}
         </Sec>)}
 
-      {selecionados.ocorrencias && (<Sec t="Ocorrências lançadas ou alteradas">
+      {selecionados["ocorrencias"] && (<Sec t="Ocorrências lançadas ou alteradas">
           {data.ocorrencias.length ? (
             <div className="col-span-2">
               <table className="cad-print-table w-full">
@@ -199,7 +199,7 @@ function BoletimPlantao({ p, operador, matricula }: { p: Plantao; operador: stri
           ) : <G l="Resultado" v="Nenhuma ocorrência foi lançada ou alterada durante o plantão." />}
         </Sec>)}
 
-      {selecionados.escalas && (<Sec t="Escalas lançadas ou alteradas">
+      {selecionados["escalas"] && (<Sec t="Escalas lançadas ou alteradas">
           {data.escalas.length ? (
             <div className="col-span-2">
               <table className="cad-print-table w-full">
@@ -212,7 +212,7 @@ function BoletimPlantao({ p, operador, matricula }: { p: Plantao; operador: stri
           ) : <G l="Resultado" v="Nenhuma escala foi lançada ou alterada durante o plantão." />}
         </Sec>)}
 
-      {selecionados.guarnicoes && (<Sec t="Guarnições">
+      {selecionados["guarnicoes"] && (<Sec t="Guarnições">
           {p.guarnicoes?.length ? (
             <div className="col-span-2">
               <table className="cad-print-table w-full">
@@ -223,7 +223,7 @@ function BoletimPlantao({ p, operador, matricula }: { p: Plantao; operador: stri
           ) : <G l="Resultado" v="Nenhuma guarnição informada." />}
         </Sec>)}
 
-      {selecionados.postos && (<Sec t="Postos e conferências">
+      {selecionados["postos"] && (<Sec t="Postos e conferências">
           {p.postos?.length ? (
             <div className="col-span-2">
               <table className="cad-print-table w-full">
@@ -234,7 +234,7 @@ function BoletimPlantao({ p, operador, matricula }: { p: Plantao; operador: stri
           ) : <G l="Resultado" v="Nenhum posto informado." />}
         </Sec>)}
 
-      {selecionados.itens && (<Sec t="Itens do plantão">
+      {selecionados["itens"] && (<Sec t="Itens do plantão">
           {data.itensPlantao.length ? (
             <div className="col-span-2">
               <table className="cad-print-table w-full">
@@ -244,7 +244,7 @@ function BoletimPlantao({ p, operador, matricula }: { p: Plantao; operador: stri
             </div>
           ) : <G l="Resultado" v="Nenhum item cadastrado no catálogo." />}
         </Sec>)}
-      {selecionados.atualizacoesItens && (<Sec t="Atualizações dos itens do plantão">
+      {selecionados["atualizacoesItens"] && (<Sec t="Atualizações dos itens do plantão">
           {data.itensPlantao.length ? (
             <div className="col-span-2">
               <table className="cad-print-table w-full">
@@ -270,7 +270,7 @@ function BoletimPlantao({ p, operador, matricula }: { p: Plantao; operador: stri
             </div>
           ) : <G l="Resultado" v="Nenhuma atualização de item foi registrada durante o plantão." />}
         </Sec>)}
-      {selecionados.movimentacoes && (<Sec t="Histórico de retiradas e devoluções de itens">
+      {selecionados["movimentacoes"] && (<Sec t="Histórico de retiradas e devoluções de itens">
           {data.movimentacoesItens.length ? (
             <div className="col-span-2">
               <table className="cad-print-table w-full">
@@ -289,7 +289,7 @@ function BoletimPlantao({ p, operador, matricula }: { p: Plantao; operador: stri
           ) : <G l="Resultado" v="Nenhuma retirada ou devolução de item foi registrada durante o plantão." />}
         </Sec>)}
 
-      {selecionados.registros && (<Sec t="Registros operacionais">
+      {selecionados["registros"] && (<Sec t="Registros operacionais">
           {data.registros.length ? (
             <div className="col-span-2">
               <table className="cad-print-table w-full">
@@ -300,7 +300,7 @@ function BoletimPlantao({ p, operador, matricula }: { p: Plantao; operador: stri
           ) : <G l="Resultado" v="Nenhum registro operacional foi lançado durante o plantão." />}
         </Sec>)}
 
-      {selecionados.acoes && (<Sec t="Histórico de ações">
+      {selecionados["acoes"] && (<Sec t="Histórico de ações">
           {data.acoes.length ? (
             <div className="col-span-2">
               <table className="cad-print-table w-full">
@@ -311,7 +311,7 @@ function BoletimPlantao({ p, operador, matricula }: { p: Plantao; operador: stri
           ) : <G l="Resultado" v="Nenhuma ação registrada durante o plantão." />}
         </Sec>)}
 
-      {selecionados.informacoes && (p.atividades || p.materiais || p.informativo || p.atividades_verso || p.observacoes) && (
+      {selecionados["informacoes"] && (p.atividades || p.materiais || p.informativo || p.atividades_verso || p.observacoes) && (
         <Sec t="Informações do plantão">
           <G l="Atividades" v={p.atividades} />
           <G l="Materiais" v={p.materiais} />
@@ -321,7 +321,7 @@ function BoletimPlantao({ p, operador, matricula }: { p: Plantao; operador: stri
         </Sec>
       )}
 
-      {selecionados.assinaturas && (
+      {selecionados["assinaturas"] && (
       <div className="cad-print-signatures space-y-4 pt-12 text-xs">
         <div className="grid grid-cols-2 gap-8 text-center">
           <div className="border-t pt-1">{operador || " "}{matricula ? " — Mat. " + matricula : ""}<br />Operador responsável</div>
