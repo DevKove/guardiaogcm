@@ -127,7 +127,7 @@ function Relatorios() {
           <PieChart><Pie data={s.status} dataKey="total" nameKey="nome" outerRadius={90}>{s.status.map((_, i) => <Cell key={i} fill={CORES[i % CORES.length] ?? "var(--chart-1)"} />)}</Pie><Tooltip {...tip} /></PieChart>
         </Chart>
         <Chart title="Por origem do chamado">
-          <PieChart><Pie data={s.origem} dataKey="total" nameKey="nome" innerRadius={50} outerRadius={90}>{s.origem.map((_, i) => <Cell key={i} fill={CORES[i % 5]} />)}</Pie><Tooltip {...tip} /></PieChart>
+          <PieChart><Pie data={s.origem} dataKey="total" nameKey="nome" innerRadius={50} outerRadius={90}>{s.origem.map((_, i) => <Cell key={i} fill={CORES[i % CORES.length] ?? "var(--chart-1)"} />)}</Pie><Tooltip {...tip} /></PieChart>
         </Chart>
       </div>
     </div>
