@@ -161,8 +161,8 @@ function extrairAlteracoes(rows: PlantaoHistoricoRow[]): AlteracaoPlantao[] {
 
   for (const row of rows) {
     if (row.acao !== "plantao_atualizado" || !row.dados) continue;
-    const antes = row.dados.antes && typeof row.dados.antes === "object" ? row.dados.antes as Record<string, unknown> : {};
-    const depois = row.dados.depois && typeof row.dados.depois === "object" ? row.dados.depois as Record<string, unknown> : {};
+    const antes = row.dados["antes"] && typeof row.dados["antes"] === "object" ? row.dados["antes"] as Record<string, unknown> : {};
+    const depois = row.dados["depois"] && typeof row.dados["depois"] === "object" ? row.dados["depois"] as Record<string, unknown> : {};
 
     for (const [campo, label] of Object.entries(CAMPOS_EDITAVEIS)) {
       if (!jsonIguais(antes[campo], depois[campo])) {
