@@ -90,6 +90,8 @@ function AuthPage() {
         const code = String(error.code ?? "").toLowerCase();
         const emailNaoConfirmadoNoAuth =
           code === "email_not_confirmed" ||
+          code === "email_not_verified" ||
+          Number(error.status) === 400 && msg.includes("confirm") ||
           msg.includes("email not confirmed") ||
           msg.includes("email is not confirmed") ||
           msg.includes("e-mail não confirmado") ||
@@ -262,38 +264,43 @@ function AuthPage() {
         </form>
       </div>
 
-      <Dialog open={emailNaoConfirmado} onOpenChange={setEmailNaoConfirmado}>
-        <DialogContent className="border-cyan-400/20 bg-[#070d13] text-slate-100 sm:max-w-lg">
-          <DialogHeader>
-            <DialogTitle className="text-xl text-white">E-mail ainda não confirmado</DialogTitle>
-            <DialogDescription className="text-slate-400">
-              Para entrar no Guardião GCM, primeiro confirme o endereço de e-mail usado no cadastro.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 py-2">
-            <div className="rounded-md border border-cyan-400/20 bg-cyan-400/5 p-4">
-              <p className="text-sm font-semibold text-cyan-200">Como confirmar seu acesso</p>
-              <ol className="mt-3 space-y-2 text-sm leading-5 text-slate-300">
-                <li><span className="font-semibold text-cyan-300">1.</span> Abra a caixa de entrada do e-mail cadastrado.</li>
-                <li><span className="font-semibold text-cyan-300">2.</span> Procure a mensagem de confirmação do Guardião GCM.</li>
-                <li><span className="font-semibold text-cyan-300">3.</span> Abra a mensagem e clique no botão ou link de confirmação.</li>
-                <li><span className="font-semibold text-cyan-300">4.</span> Depois da confirmação, volte ao sistema e faça o login novamente.</li>
-              </ol>
+      {emailNaoConfirmado && (
+        <div
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="email-nao-confirmado-titulo"
+        >
+          <div className="w-full max-w-lg rounded-lg border border-cyan-400/25 bg-[#070d13] p-6 text-slate-100 shadow-2xl">
+            <div className="border-b border-cyan-400/20 pb-4">
+              <h2 id="email-nao-confirmado-titulo" className="text-xl font-semibold text-white">E-mail ainda não confirmado</h2>
+              <p className="mt-2 text-sm leading-5 text-slate-400">
+                Para entrar no Guardião GCM, primeiro confirme o endereço de e-mail usado no cadastro.
+              </p>
             </div>
-            <div className="rounded-md border border-amber-400/20 bg-amber-400/5 p-3 text-xs leading-5 text-slate-400">
-              <span className="font-semibold text-amber-200">Não encontrou o e-mail?</span> Verifique também Spam, Lixo eletrônico, Promoções e Outras caixas. Se ainda não estiver lá, use o botão abaixo para solicitar um novo envio.
+            <div className="space-y-4 py-4">
+              <div className="rounded-md border border-cyan-400/20 bg-cyan-400/5 p-4">
+                <p className="text-sm font-semibold text-cyan-200">Como confirmar seu acesso</p>
+                <ol className="mt-3 space-y-2 text-sm leading-5 text-slate-300">
+                  <li><span className="font-semibold text-cyan-300">1.</span> Abra a caixa de entrada do e-mail cadastrado.</li>
+                  <li><span className="font-semibold text-cyan-300">2.</span> Procure a mensagem de confirmação do Guardião GCM.</li>
+                  <li><span className="font-semibold text-cyan-300">3.</span> Abra a mensagem e clique no botão ou link de confirmação.</li>
+                  <li><span className="font-semibold text-cyan-300">4.</span> Depois da confirmação, volte ao sistema e faça o login novamente.</li>
+                </ol>
+              </div>
+              <div className="rounded-md border border-amber-400/20 bg-amber-400/5 p-3 text-xs leading-5 text-slate-400">
+                <span className="font-semibold text-amber-200">Não encontrou o e-mail?</span> Verifique também Spam, Lixo eletrônico, Promoções e Outras caixas. Se ainda não estiver lá, use o botão abaixo para solicitar um novo envio.
+              </div>
+            </div>
+            <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+              <Button type="button" variant="outline" onClick={() => setEmailNaoConfirmado(false)} disabled={loading}>Entendi</Button>
+              <Button type="button" onClick={() => void reenviarConfirmacao()} disabled={loading}>
+                {loading ? "Enviando..." : "Reenviar confirmação"}
+              </Button>
             </div>
           </div>
-          <DialogFooter className="gap-2 sm:justify-between">
-            <Button type="button" variant="outline" onClick={() => setEmailNaoConfirmado(false)} disabled={loading}>
-              Entendi
-            </Button>
-            <Button type="button" onClick={() => void reenviarConfirmacao()} disabled={loading}>
-              {loading ? "Enviando..." : "Reenviar confirmação"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+        </div>
+      )}
     </div>
   );
 }
