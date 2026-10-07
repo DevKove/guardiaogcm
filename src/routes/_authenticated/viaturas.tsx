@@ -343,7 +343,7 @@ function ViaturaDialog({ f: init, onClose, podeTudo, podeEditarGuarnicao }: { f:
               </div>
             )}
             {!plantao?.id && <p className="text-xs text-warning">Inicie um plantão para vincular integrantes à viatura.</p>}
-            <p className="text-xs text-muted-foreground">Use + para adicionar cada integrante individualmente.</p>
+            <p className="text-xs text-muted-foreground">O campo inicia vazio. Use o botão + para adicionar cada integrante individualmente.</p>
           </div>
           <div className="space-y-1"><Label>Quilometragem atual</Label><Input type="number" min={0} value={f.km_atual} onChange={set("km_atual")} /></div>
           <div className="col-span-2 space-y-1"><Label>Observações</Label><Textarea rows={2} value={f.observacao} onChange={set("observacao")} /></div>
