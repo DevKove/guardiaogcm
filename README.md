@@ -50,6 +50,20 @@ Os mesmos documentos ficam disponíveis diretamente no sistema, no rodapé das t
 
 O frontend é publicado pelo **GitHub Pages** e a camada de dados, autenticação e regras de segurança utiliza **Supabase**.
 
+### 📱 Aplicativo PWA
+
+O Guardião GCM também funciona como **Progressive Web App (PWA)**, permitindo instalar o sistema diretamente no computador ou celular, com aparência de aplicativo e suporte a recursos de continuidade de acesso.
+
+- 📲 Instalação pelo navegador em dispositivos compatíveis.
+- 🖥️ Execução em modo **standalone**, sem a interface tradicional do navegador.
+- 🔄 Service Worker com atualização automática.
+- 📡 Estratégia de cache para recursos e páginas já acessados.
+- 📴 Estrutura preparada para continuidade de navegação quando a conexão estiver temporariamente indisponível.
+- 🎨 Manifesto, ícones e identidade visual próprios do Guardião GCM.
+- 🛡️ Escopo limitado ao aplicativo publicado em `/guardiaogcm/`.
+
+> **Importante:** o PWA melhora a disponibilidade e a experiência de acesso, mas **não substitui a conexão com o Supabase** para autenticação, dados em tempo real e operações que dependem do backend.
+
 ---
 
 # 🖥️ Módulos do sistema
@@ -373,6 +387,8 @@ para publicação no GitHub Pages.
 
 O projeto possui fluxo de publicação automatizado pelo **GitHub Actions**.
 
+O processo de publicação também disponibiliza os arquivos necessários ao PWA, incluindo o **Web App Manifest**, o **Service Worker** e os ícones instaláveis.
+
 ```
 Alteração no código
        ↓
@@ -428,7 +444,7 @@ Aplicação publicada
   <img src="https://img.shields.io/badge/Backend-Supabase-16a34a?style=for-the-badge">
 </p>
 
-O sistema está em **desenvolvimento e validação contínua**, com frontend publicado no GitHub Pages, backend no Supabase e pipeline de build/deploy automatizado.
+O sistema está em **desenvolvimento e validação contínua**, com frontend publicado no GitHub Pages, backend no Supabase e pipeline de build/deploy automatizado. O PWA está integrado ao frontend e preparado para instalação em navegadores compatíveis.
 
 Antes de considerar o sistema definitivamente homologado para uso operacional, todos os fluxos devem continuar sendo testados em ambiente controlado.
 
