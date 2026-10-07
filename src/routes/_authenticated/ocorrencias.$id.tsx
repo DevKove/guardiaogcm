@@ -62,7 +62,7 @@ function Detalhe() {
       const ids = [...new Set((data ?? []).map((h) => h.usuario_id).filter((id): id is string => Boolean(id)))];
       const { data: profs } = ids.length ? await supabase.from("profiles").select("id,nome").in("id", ids) : { data: [] };
       const map = new Map((profs ?? []).map((p) => [p.id, p.nome]));
-      return (data ?? []).map((h) => ({ ...h, autor: map.get(h.usuario_id) || "—" }));
+      return (data ?? []).map((h) => ({ ...h, autor: (h.usuario_id ? map.get(h.usuario_id) : undefined) || "—" }));
     },
   });
 
