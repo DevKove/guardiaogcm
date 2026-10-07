@@ -213,6 +213,31 @@ function ViaturaDialog({ f: init, onClose, podeTudo, podeEditarGuarnicao }: { f:
       return void toast.error("Selecione somente integrantes ativos cadastrados na Equipe.");
     }
 
+    // A regra de segurança do banco exige que todo integrante da viatura também
+    // esteja registrado no plantão atual. Ao selecionar um integrante cadastrado na
+    // Equipe, sincronizamos esse vínculo no plantão antes de gravar a viatura.
+    // Isso não remove integrantes do plantão quando eles são removidos da viatura.
+    if (permitidos.length) {
+      const { data: plantaoAtuais, error: plantaoAtuaisError } = await supabase
+        .from("plantao_integrantes")
+        .select("equipe_id")
+        .eq("plantao_id", plantao.id);
+      if (plantaoAtuaisError) {
+        return void toast.error("Não foi possível verificar os integrantes do plantão: " + plantaoAtuaisError.message);
+      }
+
+      const jaNoPlantao = new Set((plantaoAtuais ?? []).map((x) => x.equipe_id));
+      const faltantes = permitidos.filter((equipe_id) => !jaNoPlantao.has(equipe_id));
+      if (faltantes.length) {
+        const { error: plantaoInsertError } = await supabase.from("plantao_integrantes").insert(
+          faltantes.map((equipe_id) => ({ plantao_id: plantao.id, equipe_id })),
+        );
+        if (plantaoInsertError) {
+          return void toast.error("Não foi possível vincular os integrantes ao plantão atual: " + plantaoInsertError.message);
+        }
+      }
+    }
+
     if (!podeTudo) {
       // Operador comum: RLS permite alterar somente os vínculos da viatura no plantão aberto.
       const { error: delError } = await supabase
