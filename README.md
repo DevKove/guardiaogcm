@@ -33,6 +33,13 @@ A interface foi pensada para uso operacional, com foco em **clareza, rapidez, ra
 
 ---
 
+## 📜 Documentos legais
+
+- [Termos de Uso](docs/TERMOS-DE-USO.md)
+- [Política de Privacidade](docs/POLITICA-DE-PRIVACIDADE.md)
+
+Os mesmos documentos ficam disponíveis diretamente no sistema, no rodapé das telas públicas e do ambiente autenticado.
+
 ## 🌐 Acesso
 
 ### ▶️ Sistema
