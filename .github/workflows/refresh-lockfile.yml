@@ -16,7 +16,7 @@ jobs:
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
-      - run: bun install --no-frozen-lockfile
+      - run: bun update shell-quote@1.12.0 source-map-js@1.2.2 --lockfile-only
       - name: Commit refreshed lockfile
         run: |
           if git diff --quiet -- bun.lock; then
