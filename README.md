@@ -33,6 +33,11 @@ A interface foi pensada para uso operacional, com foco em **clareza, rapidez, ra
 
 ---
 
+## 📘 Manual do usuário
+
+- [Manual completo do usuário](docs/MANUAL-DO-USUARIO.md)
+- [Índice da documentação](docs/README.md)
+
 ## 📜 Documentos legais
 
 - [Termos de Uso](docs/TERMOS-DE-USO.md)
