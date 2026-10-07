@@ -49,37 +49,34 @@ export function ChatFlutuante() {
   }, [profiles, search]);
 
   useEffect(() => {
-    if (!open) return;
+    let cancelled = false;
+
+    async function loadCurrentUser() {
+      const { data } = await supabase.auth.getUser();
+      if (!cancelled) setCurrentUserId(data.user?.id ?? null);
+    }
+
+    void loadCurrentUser();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!open || !currentUserId) return;
     let cancelled = false;
 
     async function loadUsers() {
       setLoadingUsers(true);
-      const { data: authData } = await supabase.auth.getUser();
-      if (cancelled) return;
-      const userId = authData.user?.id ?? null;
-      setCurrentUserId(userId);
-      if (!userId) {
-        setLoadingUsers(false);
-        return;
-      }
-
-      const [{ data, error }, unreadResult] = await Promise.all([
-        supabase
-          .from("profiles")
-          .select("id,nome,matricula")
-          .eq("aprovado", true)
-          .neq("id", userId)
-          .order("nome", { ascending: true }),
-        supabase
-          .from("mensagens_chat")
-          .select("id", { count: "exact", head: true })
-          .eq("destinatario_id", userId)
-          .is("lida_em", null),
-      ]);
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("id,nome,matricula")
+        .eq("aprovado", true)
+        .neq("id", currentUserId)
+        .order("nome", { ascending: true });
 
       if (!cancelled) {
         if (!error) setProfiles((data ?? []) as ChatProfile[]);
-        setUnread(unreadResult.count ?? 0);
         setLoadingUsers(false);
       }
     }
@@ -88,59 +85,48 @@ export function ChatFlutuante() {
     return () => {
       cancelled = true;
     };
-  }, [open]);
+  }, [open, currentUserId]);
 
   useEffect(() => {
-    if (!open || !currentUserId) return;
+    if (!currentUserId) return;
 
+    let active = true;
     const channel = supabase
       .channel(`chat-mensagens-${currentUserId}`)
       .on(
         "postgres_changes",
-        { event: "*", schema: "public", table: "mensagens_chat" },
+        { event: "INSERT", schema: "public", table: "mensagens_chat" },
         (payload) => {
-          const incoming = (payload.new ?? payload.old) as Partial<ChatMessage>;
-          if (!incoming?.id) return;
+          if (!active) return;
+          const msg = payload.new as ChatMessage;
+          if (!msg?.id || msg.destinatario_id !== currentUserId) return;
 
-          if (payload.eventType === "INSERT") {
-            const msg = payload.new as ChatMessage;
-            const belongsToCurrentUser =
-              msg.remetente_id === currentUserId || msg.destinatario_id === currentUserId;
-            if (!belongsToCurrentUser) return;
+          const isCurrentConversation =
+            !!selected &&
+            msg.remetente_id === selected.id &&
+            msg.destinatario_id === currentUserId;
 
-            if (
-              selected &&
-              ((msg.remetente_id === currentUserId && msg.destinatario_id === selected.id) ||
-                (msg.remetente_id === selected.id && msg.destinatario_id === currentUserId))
-            ) {
-              setMessages((current) =>
-                current.some((item) => item.id === msg.id) ? current : [...current, msg],
-              );
-              if (msg.destinatario_id === currentUserId && !msg.lida_em) {
-                void supabase
-                  .from("mensagens_chat")
-                  .update({ lida_em: new Date().toISOString() })
-                  .eq("id", msg.id);
-              }
-            } else if (msg.destinatario_id === currentUserId) {
-              setUnread((count) => count + 1);
-            }
-          }
-
-          if (payload.eventType === "UPDATE") {
-            const msg = payload.new as ChatMessage;
+          if (isCurrentConversation) {
             setMessages((current) =>
-              current.map((item) => (item.id === msg.id ? msg : item)),
+              current.some((item) => item.id === msg.id) ? current : [...current, msg],
             );
+            void supabase
+              .from("mensagens_chat")
+              .update({ lida_em: new Date().toISOString() })
+              .eq("id", msg.id)
+              .is("lida_em", null);
+          } else {
+            setUnread((count) => count + 1);
           }
         },
       )
       .subscribe();
 
     return () => {
+      active = false;
       void supabase.removeChannel(channel);
     };
-  }, [open, currentUserId, selected]);
+  }, [currentUserId, selected?.id]);
 
   useEffect(() => {
     if (!selected || !currentUserId) {
@@ -176,7 +162,7 @@ export function ChatFlutuante() {
         .is("lida_em", null);
 
       if (!cancelled) {
-        setUnread((count) => Math.max(0, count - messages.filter((m) => m.destinatario_id === currentUserId && !m.lida_em).length));
+        setUnread((count) => Math.max(0, count - 1));
       }
     }
 
@@ -385,8 +371,8 @@ export function ChatFlutuante() {
           {unread > 0 && (
             <span
               className="absolute -right-2 -top-2 flex h-6 min-w-6 items-center justify-center rounded-full border-2 border-[#07131f] bg-red-600 px-1.5 text-[10px] font-black text-white shadow-[0_0_0_2px_rgba(239,68,68,.18),0_4px_14px_rgba(239,68,68,.45)] animate-pulse"
-              aria-label={`${unread > 99 ? "99+" : unread} mensagem${unread === 1 ? "" : "ns"} pendente${unread === 1 ? "" : "s"}`}
-              title={`${unread > 99 ? "99+" : unread} mensagem${unread === 1 ? "" : "ns"} pendente${unread === 1 ? "" : "s"}`}
+              aria-label={`${unread > 99 ? "99+" : unread} ${unread === 1 ? "mensagem pendente" : "mensagens pendentes"}`}
+              title={`${unread > 99 ? "99+" : unread} ${unread === 1 ? "mensagem pendente" : "mensagens pendentes"}`}
             >
               {unread > 99 ? "99+" : unread}
             </span>
