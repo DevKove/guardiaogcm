@@ -49,7 +49,7 @@ function Painel() {
     }
     toast.success("Plantão iniciado.");
     qc.invalidateQueries({ queryKey: ["plantao-atual"] });
-    navigate({ to: "/plantao/$id", params: { id: data.id } });
+    navigate({ to: "/plantao" });
   }
 
   const { data = [], isLoading } = useQuery({
