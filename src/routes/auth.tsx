@@ -87,7 +87,14 @@ function AuthPage() {
       });
       if (error) {
         const msg = `${error.message ?? ""}`.toLowerCase();
-        if (msg.includes("email not confirmed")) {
+        const code = String(error.code ?? "").toLowerCase();
+        const emailNaoConfirmadoNoAuth =
+          code === "email_not_confirmed" ||
+          msg.includes("email not confirmed") ||
+          msg.includes("email is not confirmed") ||
+          msg.includes("e-mail não confirmado") ||
+          msg.includes("email nao confirmado");
+        if (emailNaoConfirmadoNoAuth) {
           setEmailNaoConfirmado(true);
           return;
         }
