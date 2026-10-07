@@ -167,20 +167,33 @@ function ViaturaDialog({ f: init, onClose, podeTudo, podeEditarGuarnicao }: { f:
     enabled: !!init,
   });
   const { data: efetivo = [] } = useQuery({
-    queryKey: ["equipe-viatura-dialog", plantao?.id],
+    queryKey: ["equipe-viatura-dialog"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("equipe")
+        .select("id, nome, matricula, tipo, funcao, ativo")
+        .eq("ativo", true)
+        .order("nome");
+      if (error) throw error;
+      return (data ?? []).filter((x) => x.ativo);
+    },
+    enabled: !!init,
+  });
+
+  const { data: plantaoIntegrantes = [] } = useQuery({
+    queryKey: ["plantao-integrantes-viatura-dialog", plantao?.id],
     queryFn: async () => {
       if (!plantao?.id) return [];
       const { data, error } = await supabase
         .from("plantao_integrantes")
-        .select("equipe:equipe_id(id, nome, matricula, tipo, funcao)")
+        .select("equipe_id")
         .eq("plantao_id", plantao.id);
       if (error) throw error;
-      return (data ?? [])
-        .map((x) => x.equipe)
-        .filter((x): x is { id: string; nome: string; matricula: string | null; tipo: string; funcao: string } => !!x);
+      return (data ?? []).map((x) => x.equipe_id);
     },
     enabled: !!init && !!plantao?.id,
   });
+  const plantaoIntegranteIds = new Set(plantaoIntegrantes);
   useEffect(() => {
     if (init) {
       setF(init);
@@ -315,8 +328,8 @@ function ViaturaDialog({ f: init, onClose, podeTudo, podeEditarGuarnicao }: { f:
                 }}>
                   <option value="" className="bg-popover">Selecione um integrante...</option>
                   {efetivo.map((m) => (
-                    <option key={m.id} value={m.id} disabled={equipeIds.includes(m.id)} className="bg-popover">
-                      {m.nome}{m.matricula ? ` · Matrícula ${m.matricula}` : ""}{m.funcao ? ` · ${m.funcao}` : ""}
+                    <option key={m.id} value={m.id} disabled={equipeIds.includes(m.id) || !plantaoIntegranteIds.has(m.id)} className="bg-popover">
+                      {m.nome}{m.matricula ? ` · Matrícula ${m.matricula}` : ""}{m.funcao ? ` · ${m.funcao}` : ""}{!plantaoIntegranteIds.has(m.id) ? " · não selecionado no plantão atual" : ""}
                     </option>
                   ))}
                 </select>
@@ -324,7 +337,7 @@ function ViaturaDialog({ f: init, onClose, podeTudo, podeEditarGuarnicao }: { f:
               </div>
             )}
             {!plantao?.id && <p className="text-xs text-warning">Inicie um plantão para vincular integrantes à viatura.</p>}
-            <p className="text-xs text-muted-foreground">O campo inicia vazio. Use o botão + para adicionar integrantes já selecionados no plantão atual.</p>
+            <p className="text-xs text-muted-foreground">O botão + exibe todos os integrantes ativos cadastrados em Equipe. Para respeitar a regra operacional, somente quem estiver selecionado no plantão atual pode ser vinculado à viatura.</p>
           </div>
           <div className="space-y-1"><Label>Quilometragem atual</Label><Input type="number" min={0} value={f.km_atual} onChange={set("km_atual")} /></div>
           <div className="col-span-2 space-y-1"><Label>Observações</Label><Textarea rows={2} value={f.observacao} onChange={set("observacao")} /></div>
