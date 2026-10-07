@@ -8,7 +8,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { LegalFooter } from "@/components/legal-footer";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
@@ -22,6 +21,7 @@ export const Route = createFileRoute("/auth")({
 
 function AuthPage() {
   const navigate = useNavigate();
+  const emailRedirectTo = typeof window !== "undefined" ? `${window.location.origin}${import.meta.env.BASE_URL}auth` : undefined;
   const [mode, setMode] = useState<"login" | "cadastro">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -63,6 +63,7 @@ function AuthPage() {
           email: cleanEmail,
           password,
           options: {
+            ...(emailRedirectTo ? { emailRedirectTo } : {}),
             data: {
               nome: cleanNome,
               matricula: cleanMatricula,
@@ -128,6 +129,7 @@ function AuthPage() {
       const { error } = await supabase.auth.resend({
         type: "signup",
         email: targetEmail,
+        ...(emailRedirectTo ? { options: { emailRedirectTo } } : {}),
       });
       if (error) throw error;
       toast.success("Novo e-mail de confirmação enviado. Verifique também o Spam e o Lixo eletrônico.");
