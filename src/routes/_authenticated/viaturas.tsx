@@ -147,12 +147,12 @@ function Viaturas() {
         {lista.length === 0 && <div className="card-3d col-span-full p-10 text-center text-muted-foreground">Nenhuma viatura encontrada.</div>}
       </div>
 
-      <ViaturaDialog f={edit} onClose={() => setEdit(null)} podeTudo={!!me?.isSupervisor} />
+      <ViaturaDialog f={edit} onClose={() => setEdit(null)} podeTudo={!!me?.isSupervisor} podeEditarGuarnicao={!!me} />
     </div>
   );
 }
 
-function ViaturaDialog({ f: init, onClose, podeTudo }: { f: Form | null; onClose: () => void; podeTudo: boolean }) {
+function ViaturaDialog({ f: init, onClose, podeTudo, podeEditarGuarnicao }: { f: Form | null; onClose: () => void; podeTudo: boolean; podeEditarGuarnicao: boolean }) {
   const qc = useQueryClient();
   const [f, setF] = useState<Form>(vazio);
   const [equipeIds, setEquipeIds] = useState<string[]>([]);
@@ -249,12 +249,12 @@ function ViaturaDialog({ f: init, onClose, podeTudo }: { f: Form | null; onClose
               className="min-h-28 w-full rounded-md border border-input bg-background px-2 py-1 text-sm outline-none"
               value={equipeIds}
               onChange={(e) => setEquipeIds(Array.from(e.target.selectedOptions).map((o) => o.value))}
-              disabled={!podeTudo || !plantao?.id}
+              disabled={!podeEditarGuarnicao || !plantao?.id}
             >
-              {efetivo.filter((m) => plantaoMembros.includes(m.id)).map((m) => <option key={m.id} value={m.id}>{m.nome} · {m.tipo}{m.matricula ? ` · ${m.matricula}` : ""}</option>)}
+              {efetivo.map((m) => <option key={m.id} value={m.id} disabled={!plantaoMembros.includes(m.id)}>{m.nome} · {m.tipo}{m.matricula ? ` · ${m.matricula}` : ""}{!plantaoMembros.includes(m.id) ? " · fora do plantão atual" : ""}</option>)}
             </select>
             {!plantao?.id && <p className="text-xs text-warning">Inicie um plantão para vincular integrantes à viatura.</p>}
-            <p className="text-xs text-muted-foreground">Somente integrantes ativos cadastrados em Equipe. Para retirar um integrante, remova-o da seleção.</p>
+            <p className="text-xs text-muted-foreground">Os integrantes são carregados automaticamente do cadastro de Equipe. Somente integrantes ativos pertencentes ao plantão atual podem ser vinculados à guarnição.</p>
           </div>
           <div className="space-y-1"><Label>Quilometragem atual</Label><Input type="number" min={0} value={f.km_atual} onChange={set("km_atual")} /></div>
           <div className="col-span-2 space-y-1"><Label>Observações</Label><Textarea rows={2} value={f.observacao} onChange={set("observacao")} /></div>
