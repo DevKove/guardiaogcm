@@ -41,6 +41,48 @@ export type Database = {
         }
         Relationships: []
       }
+      mensagens_chat: {
+        Row: {
+          created_at: string
+          destinatario_id: string
+          id: string
+          lida_em: string | null
+          mensagem: string
+          remetente_id: string
+        }
+        Insert: {
+          created_at?: string
+          destinatario_id: string
+          id?: string
+          lida_em?: string | null
+          mensagem: string
+          remetente_id: string
+        }
+        Update: {
+          created_at?: string
+          destinatario_id?: string
+          id?: string
+          lida_em?: string | null
+          mensagem?: string
+          remetente_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mensagens_chat_destinatario_id_fkey"
+            columns: ["destinatario_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mensagens_chat_remetente_id_fkey"
+            columns: ["remetente_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       equipe: {
         Row: {
           ativo: boolean
