@@ -1,49 +1,42 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Shield, ArrowLeft } from "lucide-react";
+import { ArrowLeft, Shield } from "lucide-react";
 
 export const Route = createFileRoute("/politica-de-privacidade")({
-  head: () => ({ meta: [{ title: "Política de Privacidade · Guardião GCM" }, { name: "description", content: "Política de Privacidade do Guardião GCM." }] }),
+  head: () => ({ meta: [{ title: "Política de Privacidade · Guardião GCM" }, { name: "description", content: "Política de Privacidade do Guardião GCM — CAD Central de Atendimento e Despacho." }] }),
   component: PrivacyPage,
 });
 
-function PrivacyPage() {
-  return (
-    <div className="min-h-screen bg-background text-foreground">
-      <div className="stripe-top h-2" />
-      <header className="border-b border-border bg-card">
-        <div className="mx-auto flex max-w-4xl items-center justify-between gap-4 px-5 py-5">
-          <Link to="/" className="flex items-center gap-3">
-            <Shield className="h-7 w-7 text-primary" />
-            <div><div className="font-bold">CAD GUARDA MUNICIPAL</div><div className="text-[10px] uppercase tracking-wider text-muted-foreground">Guardião GCM</div></div>
-          </Link>
-          <Link to="/auth" className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:underline"><ArrowLeft className="h-4 w-4" /> Acesso ao sistema</Link>
-        </div>
-      </header>
-      <main className="mx-auto max-w-4xl px-5 py-10">
-        <article className="prose prose-slate max-w-none dark:prose-invert">
-          <h1>Política de Privacidade</h1>
-          <p><strong>Guardião GCM · CAD — Central de Atendimento e Despacho</strong></p>
-          <p className="text-sm text-muted-foreground">Última atualização: 07/10/2026</p>
-          <Section title="1. Objetivo">Esta Política explica como dados pessoais podem ser tratados no Guardião GCM. O tratamento deve observar a legislação brasileira aplicável, especialmente a Lei nº 13.709/2018 (LGPD).</Section>
-          <Section title="2. Responsável pelo tratamento">O órgão ou entidade responsável pela operação do CAD define as finalidades institucionais e os procedimentos de tratamento. Desenvolvedores e mantenedores técnicos não assumem automaticamente a posição de controlador apenas por criarem ou manterem o software.</Section>
-          <Section title="3. Dados tratados">Podem ser tratados dados de identificação funcional, e-mail, perfil, autenticação, equipes, plantões, ocorrências, endereços relacionados aos atendimentos, viaturas, itens, histórico e logs técnicos, conforme a finalidade e necessidade.</Section>
-          <Section title="4. Finalidades">Os dados podem ser tratados para autenticação, controle de permissões, atendimento, despacho, registro de ocorrências, gestão de plantões, organização operacional, relatórios, histórico, segurança e cumprimento de obrigações legais.</Section>
-          <Section title="5. Minimização">Usuários devem inserir somente dados necessários, pertinentes, verdadeiros e autorizados. Não devem ser inseridas senhas, segredos de autenticação ou informações pessoais excessivas sem necessidade operacional.</Section>
-          <Section title="6. Compartilhamento">O acesso e eventual compartilhamento devem ocorrer somente quando houver fundamento jurídico e necessidade operacional, administrativa, legal ou de segurança. Podem existir provedores técnicos de hospedagem, autenticação e infraestrutura.</Section>
-          <Section title="7. Segurança">O sistema utiliza mecanismos compatíveis com sua arquitetura, mas nenhuma tecnologia conectada à internet é absolutamente invulnerável. Usuários devem proteger credenciais e comunicar incidentes.</Section>
-          <Section title="8. Incidentes e ataques">Na máxima extensão permitida pela legislação, desenvolvedores e mantenedores técnicos não assumem responsabilidade automática por incidentes provocados por terceiros, invasões, malware, credenciais comprometidas, falhas de provedores, ataques de negação de serviço ou eventos fora de seu controle razoável. A responsabilidade legal de cada agente será analisada conforme sua efetiva atuação e a legislação aplicável.</Section>
-          <Section title="9. Retenção">Os dados podem ser mantidos pelo período necessário às finalidades institucionais, obrigações legais, auditoria, segurança, preservação do histórico e exercício regular de direitos.</Section>
-          <Section title="10. Direitos dos titulares">Os direitos previstos na LGPD devem ser exercidos perante o controlador responsável pelo tratamento, pelos canais oficiais do órgão ou entidade que opera o CAD.</Section>
-          <Section title="11. Credenciais">Credenciais são pessoais e intransferíveis. O usuário deve manter sua senha em sigilo, encerrar sessões em equipamentos compartilhados e comunicar suspeitas de comprometimento.</Section>
-          <Section title="12. Desenvolvedores e mantenedores">A criação ou manutenção do software não significa acesso irrestrito aos dados operacionais. Eventual acesso técnico autorizado deve limitar-se ao necessário para manutenção, segurança, diagnóstico ou suporte.</Section>
-          <Section title="13. Alterações">Esta Política poderá ser atualizada para refletir mudanças legais, técnicas ou operacionais. A versão vigente ficará disponível no sistema.</Section>
-          <Section title="14. Contato">Questões relacionadas ao tratamento de dados pessoais devem ser direcionadas ao órgão ou entidade responsável pela operação do Guardião GCM, por seus canais administrativos oficiais.</Section>
-        </article>
-      </main>
-    </div>
-  );
-}
+const sections = [
+  ["1. Apresentação", "Esta Política explica como dados pessoais podem ser tratados no Guardião GCM. O tratamento deve observar a legislação brasileira aplicável, especialmente a Lei nº 13.709/2018 — LGPD."],
+  ["2. Responsável pelo tratamento", "O órgão ou entidade responsável pela operação do CAD define finalidades, regras de acesso e procedimentos. A definição formal de controlador, operador, encarregado e demais agentes depende da estrutura jurídica da implantação. Desenvolvedores não se tornam automaticamente controladores apenas por criar ou manter o software."],
+  ["3. Princípios", "O tratamento deve observar, conforme aplicável, finalidade, adequação, necessidade, transparência, qualidade, segurança, prevenção, não discriminação e responsabilização."],
+  ["4. Dados que podem ser tratados", "Podem existir dados de identificação funcional, matrícula, e-mail, perfil, permissões, autenticação, equipes, plantões, ocorrências, solicitantes e envolvidos, endereços relacionados a atendimentos, viaturas, postos, itens, documentos, histórico, alterações e logs técnicos. A existência de uma funcionalidade não significa que todos esses dados sejam coletados em toda utilização."],
+  ["5. Dados sensíveis", "Ocorrências podem conter informações sensíveis. Usuários não devem inserir dados sensíveis quando desnecessários. Quando indispensáveis à finalidade legal ou institucional, devem ser tratados conforme a hipótese legal e os controles definidos pelo órgão."],
+  ["6. Crianças e adolescentes", "Quando uma ocorrência envolver criança ou adolescente, devem ser registradas apenas informações necessárias, observando as normas específicas de proteção e evitando exposição ou compartilhamento incompatível com a finalidade do atendimento."],
+  ["7. Finalidades", "Os dados podem ser usados para autenticação, permissões, atendimento, despacho, ocorrências, plantões, equipes, viaturas, itens, relatórios, histórico, rastreabilidade, prevenção de abuso, investigação de incidentes e cumprimento de obrigações legais."],
+  ["8. Bases legais", "A base legal varia conforme a finalidade. Pode envolver obrigação legal ou regulatória, execução de políticas públicas, exercício regular de direitos, proteção da vida, segurança, legítimo interesse quando aplicável ou outra hipótese legal. O uso do sistema não significa que todo tratamento dependa de consentimento."],
+  ["9. Necessidade e minimização", "Usuários devem inserir somente informações necessárias e pertinentes. Não devem ser armazenadas em campos operacionais senhas, tokens, chaves secretas, dados íntimos sem necessidade ou informações destinadas a finalidade particular."],
+  ["10. Origem dos dados", "Dados podem ser fornecidos por usuários, servidores, solicitantes, envolvidos ou outras fontes institucionais autorizadas. Quem registra deve observar as regras internas de obtenção, conferência e utilização."],
+  ["11. Compartilhamento e acesso", "O acesso deve seguir necessidade e permissões. Pode envolver usuários autorizados, administradores, setores competentes, autoridades com competência legal e provedores técnicos necessários ao funcionamento. Nenhum compartilhamento autoriza finalidade incompatível com a lei."],
+  ["12. Provedores de infraestrutura", "Hospedagem, banco de dados, autenticação, armazenamento, DNS, CDN e monitoramento podem ser fornecidos por terceiros. Esses fornecedores possuem políticas próprias e podem tratar dados técnicos necessários à prestação do serviço, conforme a contratação e a legislação aplicável."],
+  ["13. Segurança da informação", "Podem ser utilizados autenticação, autorização, políticas de acesso, auditoria, proteção de sessão, validação de entradas, limitação de tentativas e outros controles. A segurança deve ser continuamente avaliada. Nenhum sistema conectado à internet é absolutamente invulnerável."],
+  ["14. Credenciais", "Credenciais são pessoais e intransferíveis. O usuário deve manter senhas, códigos e tokens em sigilo. A organização deve possuir procedimentos de criação, aprovação, alteração, suspensão e revogação compatíveis com seus controles."],
+  ["15. Logs e rastreabilidade", "Podem ser registrados logins, tentativas de autenticação, alterações cadastrais, criação e encerramento de registros, movimentações, ações administrativas, eventos de segurança e informações técnicas. O acesso aos logs deve ser restrito e sua retenção deve observar a finalidade e as obrigações aplicáveis."],
+  ["16. Retenção e eliminação", "Dados podem ser conservados enquanto necessários às finalidades institucionais, obrigações legais, auditoria, segurança, defesa de direitos e preservação de registros operacionais. Prazos devem ser definidos pelo controlador conforme a natureza da informação e normas aplicáveis."],
+  ["17. Direitos dos titulares", "Nos termos da LGPD e conforme a hipótese aplicável, o titular poderá exercer direitos relacionados aos seus dados, observadas limitações legais próprias da administração pública, segurança pública, investigações e outras situações previstas em lei. Solicitações devem ser encaminhadas ao controlador pelos canais oficiais."],
+  ["18. Segurança pública e investigação", "Determinados tratamentos relacionados à segurança pública, defesa do Estado, investigação ou persecução penal podem estar sujeitos a regimes específicos e limitações legais. Por isso, pedidos de acesso, alteração, eliminação ou divulgação podem sofrer restrições legítimas."],
+  ["19. Incidentes", "Incidentes ou suspeitas devem ser comunicados ao responsável institucional. Podem ser adotadas contenção, preservação de evidências, bloqueio de contas, revogação de sessões e análise de logs. Quando houver obrigação legal de comunicação, o controlador deverá avaliar e cumprir os procedimentos aplicáveis."],
+  ["20. Ataques e terceiros", "Na máxima extensão permitida pela legislação, desenvolvedores e mantenedores não assumem responsabilidade automática por incidentes causados exclusivamente por terceiros, como invasões, malware, engenharia social, credenciais comprometidas, ataques de negação de serviço, falhas externas ou vulnerabilidades exploradas fora de seu controle razoável."],
+  ["21. Desenvolvedores e acesso técnico", "A manutenção do software não significa acesso irrestrito aos dados do órgão. Quando suporte exigir acesso, este deve ser limitado ao necessário para diagnóstico, manutenção, segurança, correção ou evolução autorizada. Sempre que possível, devem ser usados dados mínimos, anonimizados ou ambientes de teste."],
+  ["22. Navegador e armazenamento local", "O sistema pode utilizar armazenamento local, cookies técnicos ou mecanismos equivalentes para autenticação, funcionamento, preferências e segurança, de forma compatível com a finalidade da aplicação."],
+  ["23. Transferência internacional", "Caso algum fornecedor realize armazenamento ou tratamento fora do Brasil, a operação deverá observar os requisitos legais aplicáveis e as salvaguardas exigidas para transferência internacional de dados."],
+  ["24. Responsabilidade do usuário", "O usuário deve registrar somente informações necessárias, respeitar sigilo e permissões, proteger credenciais, não compartilhar dados sem autorização, comunicar incidentes e seguir as normas internas do órgão."],
+  ["25. Responsabilidade institucional", "Cabe ao órgão controlador definir políticas, bases legais, perfis, retenção, procedimentos para titulares, governança, segurança e demais decisões sobre tratamento, conforme sua competência. A plataforma não substitui essa governança."],
+  ["26. Alterações", "Esta Política poderá ser atualizada por mudanças legais, técnicas, operacionais ou de segurança. A versão vigente deverá permanecer disponível em canal apropriado e mudanças relevantes devem ser comunicadas conforme os procedimentos do órgão."],
+  ["27. Contato", "Questões sobre tratamento de dados, exercício de direitos ou incidentes devem ser encaminhadas ao órgão ou entidade responsável pela operação do Guardião GCM, pelos canais oficiais."],
+  ["28. Disposição final", "A simples criação, manutenção, hospedagem ou suporte técnico não transfere automaticamente aos desenvolvedores a condição de controlador nem a responsabilidade pelos atos do órgão, usuários ou terceiros. A responsabilidade deve ser determinada conforme atuação efetiva, atribuições, vínculos e legislação aplicável."],
+];
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
-  return <section className="mt-7"><h2 className="text-xl font-bold">{title}</h2><div className="mt-2 leading-7 text-muted-foreground">{children}</div></section>;
+function PrivacyPage() {
+  return <div className="min-h-screen bg-background text-foreground"><div className="stripe-top h-2" /><header className="border-b border-border bg-card"><div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-5 py-5"><Link to="/" className="flex items-center gap-3"><Shield className="h-7 w-7 text-primary" /><div><div className="font-bold">CAD GUARDA MUNICIPAL</div><div className="text-[10px] uppercase tracking-wider text-muted-foreground">Guardião GCM</div></div></Link><Link to="/auth" className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:underline"><ArrowLeft className="h-4 w-4" /> Acesso ao sistema</Link></div></header><main className="mx-auto max-w-5xl px-5 py-10"><article className="prose prose-slate max-w-none dark:prose-invert"><h1>Política de Privacidade</h1><p><strong>Guardião GCM · CAD — Central de Atendimento e Despacho</strong></p><p className="text-sm text-muted-foreground">Última atualização: 07/10/2026</p>{sections.map(([title,body])=><section key={title} className="mt-8"><h2>{title}</h2><p>{body}</p></section>)}<div className="not-prose mt-10 rounded-xl border border-primary/20 bg-primary/5 p-5 text-sm leading-6 text-muted-foreground"><strong className="text-foreground">Importante:</strong> esta Política descreve responsabilidades gerais e não substitui a análise jurídica da implantação concreta. Recomenda-se validação pela assessoria jurídica e pelo responsável/encarregado pela proteção de dados do órgão.</div></article></main></div>;
 }
