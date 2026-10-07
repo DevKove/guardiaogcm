@@ -331,7 +331,6 @@ function ViaturaDialog({ f: init, onClose, podeTudo, podeEditarGuarnicao }: { f:
                   <div className="max-h-56 space-y-1 overflow-y-auto pr-1">
                     {efetivo.map((m) => {
                       const selecionado = equipeIds.includes(m.id);
-                      const noPlantao = plantaoIntegranteIds.has(m.id);
                       return (
                         <button
                           key={m.id}
