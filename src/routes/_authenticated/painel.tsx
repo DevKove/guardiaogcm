@@ -108,7 +108,7 @@ function Painel() {
             <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
               {plantaoAtual ? `${plantaoAtual.turno} · iniciado em ${new Date(plantaoAtual.iniciado_em).toLocaleString("pt-BR")}` : `${atual.turno} · ${fmtDia(atual.data)} · ${atual.horario}`}
               {plantaoAtual && (
-                <Link to="/plantao" search={() => ({})} className="inline-flex items-center gap-1 font-semibold text-success hover:underline">
+                <Link to="/plantao" search={undefined as never} className="inline-flex items-center gap-1 font-semibold text-success hover:underline">
                   <Activity className="h-3.5 w-3.5" /> Atualização em tempo real
                 </Link>
               )}
