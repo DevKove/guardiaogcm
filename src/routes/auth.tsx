@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Shield, UserPlus, Clock3 } from "lucide-react";
 import { toast } from "sonner";
@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { LegalFooter } from "@/components/legal-footer";
 
 export const Route = createFileRoute("/auth")({
@@ -25,6 +26,7 @@ function AuthPage() {
   const [password, setPassword] = useState("");
   const [nome, setNome] = useState("");
   const [matricula, setMatricula] = useState("");
+  const [aceitouTermos, setAceitouTermos] = useState(false);
   const [loading, setLoading] = useState(false);
   const [pending, setPending] = useState(false);
 
@@ -53,11 +55,21 @@ function AuthPage() {
         if (cleanNome.length < 3 || cleanNome.length > 120) throw new Error("Informe seu nome completo.");
         if (cleanMatricula.length > 40) throw new Error("Matrícula inválida.");
         if (password.length < 12 || password.length > 72) throw new Error("A senha deve ter entre 12 e 72 caracteres.");
+        if (!aceitouTermos) throw new Error("É necessário aceitar os Termos de Uso e a Política de Privacidade para criar o cadastro.");
 
         const { data, error } = await supabase.auth.signUp({
           email: cleanEmail,
           password,
-          options: { data: { nome: cleanNome, matricula: cleanMatricula } },
+          options: {
+            data: {
+              nome: cleanNome,
+              matricula: cleanMatricula,
+              termos_uso_aceitos: true,
+              politica_privacidade_aceita: true,
+              termos_aceitos_em: new Date().toISOString(),
+              versao_termos_aceita: "2026-10-07",
+            },
+          },
         });
         if (error) throw error;
         if (!data.user) throw new Error("Não foi possível criar a conta.");
@@ -93,6 +105,7 @@ function AuthPage() {
     setMode("login");
     setEmail("");
     setPassword("");
+    setAceitouTermos(false);
   }
 
   if (pending) {
@@ -174,11 +187,39 @@ function AuthPage() {
             {mode === "cadastro" && <p className="text-[11px] text-slate-500">Use uma senha com pelo menos 12 caracteres.</p>}
           </div>
 
+          {mode === "cadastro" && (
+            <div className="rounded-md border border-cyan-400/20 bg-cyan-400/5 p-3">
+              <div className="flex items-start gap-3">
+                <Checkbox
+                  id="aceite-termos"
+                  checked={aceitouTermos}
+                  onCheckedChange={(checked) => setAceitouTermos(checked === true)}
+                  disabled={loading}
+                  aria-required="true"
+                />
+                <Label htmlFor="aceite-termos" className="cursor-pointer text-xs font-normal leading-5 text-slate-300">
+                  Declaro que li e aceito os{" "}
+                  <Link to="/termos-de-uso" className="font-semibold text-cyan-300 underline underline-offset-2 hover:text-cyan-200">
+                    Termos de Uso
+                  </Link>{" "}
+                  e a{" "}
+                  <Link to="/politica-de-privacidade" className="font-semibold text-cyan-300 underline underline-offset-2 hover:text-cyan-200">
+                    Política de Privacidade
+                  </Link>{" "}
+                  do Guardião GCM.
+                </Label>
+              </div>
+              <p className="mt-2 pl-7 text-[10px] leading-4 text-slate-500">
+                O cadastro somente poderá ser enviado após a marcação deste aceite.
+              </p>
+            </div>
+          )}
+
           <Button type="submit" className="w-full" disabled={loading}>
             {loading ? (mode === "login" ? "Autenticando..." : "Enviando cadastro...") : (mode === "login" ? "Entrar" : "Enviar cadastro")}
           </Button>
 
-          <button type="button" className="w-full text-center text-xs font-semibold text-cyan-300 hover:text-cyan-200" onClick={() => setMode(mode === "login" ? "cadastro" : "login")}>
+          <button type="button" className="w-full text-center text-xs font-semibold text-cyan-300 hover:text-cyan-200" onClick={() => { setMode(mode === "login" ? "cadastro" : "login"); if (mode === "cadastro") setAceitouTermos(false); }}>
             {mode === "login" ? "Ainda não possui acesso? Solicitar cadastro" : "Já possui cadastro? Entrar"}
           </button>
         </form>
