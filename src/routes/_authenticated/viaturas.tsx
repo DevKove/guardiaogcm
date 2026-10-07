@@ -165,16 +165,6 @@ function ViaturaDialog({ f: init, onClose, podeTudo, podeEditarGuarnicao }: { f:
     },
     enabled: !!init,
   });
-  const { data: plantaoMembros = [] } = useQuery({
-    queryKey: ["plantao-membros-viatura-dialog", plantao?.id],
-    queryFn: async () => {
-      if (!plantao?.id) return [] as string[];
-      const { data, error } = await supabase.from("plantao_integrantes").select("equipe_id").eq("plantao_id", plantao.id);
-      if (error) throw error;
-      return (data ?? []).map((x) => x.equipe_id);
-    },
-    enabled: !!plantao?.id,
-  });
   const { data: efetivo = [] } = useQuery({
     queryKey: ["equipe-viatura-dialog"],
     queryFn: async () => {
