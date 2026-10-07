@@ -108,6 +108,27 @@ function AuthPage() {
     }
   }
 
+  async function reenviarConfirmacao() {
+    const targetEmail = email.trim().toLowerCase();
+    if (!targetEmail) {
+      toast.error("Informe seu e-mail para reenviar a confirmação.");
+      return;
+    }
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.resend({
+        type: "signup",
+        email: targetEmail,
+      });
+      if (error) throw error;
+      toast.success("Novo e-mail de confirmação enviado. Verifique também o Spam e o Lixo eletrônico.");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Não foi possível reenviar o e-mail de confirmação.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   async function sairDaConta() {
     await supabase.auth.signOut();
     setPending(false);
