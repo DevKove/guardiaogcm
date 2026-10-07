@@ -118,6 +118,7 @@ function AuthPage() {
             <Button type="button" variant="outline" className="w-full" onClick={sairDaConta}>Voltar para o acesso</Button>
           </div>
         </div>
+        <LegalFooter />
       </div>
     );
   }
