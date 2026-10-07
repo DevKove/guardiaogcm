@@ -322,14 +322,20 @@ function ViaturaDialog({ f: init, onClose, podeTudo, podeEditarGuarnicao }: { f:
             {integranteSelecionado === "__abrir__" && (
               <div className="flex gap-2">
                 <select autoFocus className={selectCls + " flex-1"} value="" disabled={!podeEditarGuarnicao || !plantao?.id} onChange={(e) => {
-                  if (!e.target.value) return;
-                  setEquipeIds((ids) => ids.includes(e.target.value) ? ids : [...ids, e.target.value]);
+                  const id = e.target.value;
+                  if (!id) return;
+                  if (!plantaoIntegranteIds.has(id)) {
+                    const m = efetivo.find((item) => item.id === id);
+                    toast.warning(`${m?.nome ?? "Integrante"} está cadastrado em Equipe, mas não está selecionado no plantão atual. Selecione-o no plantão antes de vinculá-lo à viatura.`);
+                    return;
+                  }
+                  setEquipeIds((ids) => ids.includes(id) ? ids : [...ids, id]);
                   setIntegranteSelecionado("");
                 }}>
                   <option value="" className="bg-popover">Selecione um integrante...</option>
                   {efetivo.map((m) => (
-                    <option key={m.id} value={m.id} disabled={equipeIds.includes(m.id) || !plantaoIntegranteIds.has(m.id)} className="bg-popover">
-                      {m.nome}{m.matricula ? ` · Matrícula ${m.matricula}` : ""}{m.funcao ? ` · ${m.funcao}` : ""}{!plantaoIntegranteIds.has(m.id) ? " · não selecionado no plantão atual" : ""}
+                    <option key={m.id} value={m.id} disabled={equipeIds.includes(m.id)} className="bg-popover">
+                      {m.nome}{m.matricula ? ` · Matrícula ${m.matricula}` : ""}{m.funcao ? ` · ${m.funcao}` : ""}{!plantaoIntegranteIds.has(m.id) ? " · fora do plantão atual" : ""}
                     </option>
                   ))}
                 </select>
@@ -337,7 +343,7 @@ function ViaturaDialog({ f: init, onClose, podeTudo, podeEditarGuarnicao }: { f:
               </div>
             )}
             {!plantao?.id && <p className="text-xs text-warning">Inicie um plantão para vincular integrantes à viatura.</p>}
-            <p className="text-xs text-muted-foreground">O botão + exibe todos os integrantes ativos cadastrados em Equipe. Para respeitar a regra operacional, somente quem estiver selecionado no plantão atual pode ser vinculado à viatura.</p>
+            <p className="text-xs text-muted-foreground">O botão + exibe todos os integrantes ativos cadastrados em Equipe. Quem estiver fora do plantão atual continua visível, mas precisa ser selecionado no plantão antes de ser vinculado à viatura.</p>
           </div>
           <div className="space-y-1"><Label>Quilometragem atual</Label><Input type="number" min={0} value={f.km_atual} onChange={set("km_atual")} /></div>
           <div className="col-span-2 space-y-1"><Label>Observações</Label><Textarea rows={2} value={f.observacao} onChange={set("observacao")} /></div>
