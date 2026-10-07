@@ -1,41 +1,73 @@
-# Guardião GCM
+# 🛡️ Guardião GCM
+## CAD — Central de Atendimento e Despacho
+### Guarda Civil Municipal de Araçoiaba da Serra · SP
 
-Sistema web de **Atendimento e Despacho (CAD) para Guarda Civil Municipal**, desenvolvido para centralizar o registro e acompanhamento de ocorrências, plantões, viaturas, postos, escalas, usuários e relatórios operacionais.
+<p align="center">
+  <img src="IMG/guarda.png" alt="Guarda Municipal" width="120">
+</p>
 
-O projeto utiliza **React + TanStack + Vite** no frontend e **Supabase** como backend, autenticação e banco de dados PostgreSQL com RLS.
+<p align="center">
+  <strong>Sistema operacional web para atendimento, despacho, gestão de ocorrências e controle de plantões.</strong>
+</p>
 
-## Acesso
-
-**Aplicação em produção:**  
-https://devkove.github.io/guardiaogcm/
-
-**Repositório:**  
-https://github.com/DevKove/guardiaogcm
-
-O frontend é publicado gratuitamente pelo **GitHub Pages**. O backend permanece no **Supabase**.
+<p align="center">
+  <img src="https://img.shields.io/badge/status-em%20desenvolvimento%20ativo-0ea5e9?style=for-the-badge">
+  <img src="https://img.shields.io/badge/frontend-React%20%2B%20TypeScript-61dafb?style=for-the-badge&logo=react&logoColor=white">
+  <img src="https://img.shields.io/badge/backend-Supabase-3ecf8e?style=for-the-badge&logo=supabase&logoColor=white">
+  <img src="https://img.shields.io/badge/deploy-GitHub%20Pages-222?style=for-the-badge&logo=github&logoColor=white">
+</p>
 
 ---
 
-## Funcionalidades
+## 🚨 Sobre o projeto
 
-### Atendimento e ocorrências
-- Registro de novas ocorrências.
-- Classificação por natureza e prioridade.
-- Origem da solicitação.
-- Dados do solicitante.
-- Endereço, bairro e referência.
-- Relato da ocorrência.
-- Registro de envolvidos.
-- Vinculação da ocorrência ao plantão aberto.
-- Despacho de viatura.
-- Registro de chegada ao local.
-- Encerramento da ocorrência.
-- Desfecho e observações.
-- Histórico da ocorrência.
-- Detalhamento e impressão.
+O **Guardião GCM** é um CAD desenvolvido para centralizar a operação da Guarda Civil Municipal, reunindo em um único ambiente o **atendimento, despacho, ocorrências, viaturas, equipes, postos, plantões, itens operacionais, histórico e relatórios**.
 
-### Plantão
-- Abertura e encerramento de plantão.
+A interface foi pensada para uso operacional, com foco em **clareza, rapidez, rastreabilidade e controle de acesso**.
+
+<p align="center">
+  <img src="IMG/Captura de tela 2026-10-03 214509.png" alt="Prévia do Guardião GCM" width="900">
+</p>
+
+> 🔵🔴 A identidade visual utiliza elementos inspirados na operação de emergência, incluindo efeitos de giroflex, ícones operacionais e recursos visuais próprios do projeto.
+
+---
+
+## 🌐 Acesso
+
+### ▶️ Sistema
+**https://devkove.github.io/guardiaogcm/**
+
+### 💻 Repositório
+**https://github.com/DevKove/guardiaogcm**
+
+O frontend é publicado pelo **GitHub Pages** e a camada de dados, autenticação e regras de segurança utiliza **Supabase**.
+
+---
+
+# 🖥️ Módulos do sistema
+
+| Módulo | Principais recursos |
+|---|---|
+| 🚨 **Ocorrências** | Cadastro, classificação, despacho, chegada, atendimento, encerramento e histórico |
+| 🕐 **Plantão** | Abertura, acompanhamento em tempo real, registros, observações, equipe e encerramento |
+| 🚓 **Viaturas** | Cadastro, prefixo, placa, status, guarnição, quilometragem e disponibilidade |
+| 👮 **Equipe** | Gestão de agentes, funções, equipes e vinculações operacionais |
+| 📍 **Postos fixos** | Cadastro, localização, responsáveis, horários e status |
+| 📊 **Relatórios** | Relatórios operacionais, histórico e documentos para impressão |
+| 🗂️ **Histórico** | Consulta e acompanhamento das operações realizadas |
+| 🧰 **Itens** | Controle operacional de armas, rádios e itens cadastrados |
+| 👤 **Usuários** | Perfis, permissões e administração de acesso |
+
+---
+
+# 🕐 Plantão operacional
+
+O **Plantão** é o centro do acompanhamento operacional.
+
+### Recursos
+
+- Abertura e encerramento do plantão.
 - Operador responsável.
 - Supervisor.
 - Operador de rádio.
@@ -46,64 +78,121 @@ O frontend é publicado gratuitamente pelo **GitHub Pages**. O backend permanece
 - Materiais.
 - Informativo.
 - Atividades do verso.
-- Registro manual de atividades.
+- Registros manuais.
+- **Atualização em tempo real.**
+- **Outras observações.**
 - Histórico do plantão.
 - Relatório do plantão.
+- Assinatura e impressão.
 
-### Viaturas
-- Cadastro de viaturas.
-- Prefixo e placa.
-- Modelo e tipo.
-- Status operacional.
-- Guarnição.
-- Quilometragem.
-- Observações.
-- Vinculação com ocorrências.
-- Controle de disponibilidade.
+### 🔄 Atualização em tempo real
 
-### Postos fixos
-- Cadastro de postos.
-- Tipo do posto.
-- Endereço e bairro.
-- Telefone.
-- Responsável.
-- Horário.
-- Observações.
-- Ativação/inativação.
-
-### Escalas
-- Cadastro de novas escalas.
-- Data e turno.
-- Horário de início e término.
-- Agentes.
-- Função.
-- Posto fixo.
-- Viatura.
-- Observações.
-
-### Usuários e acesso
-- Autenticação pelo Supabase Auth.
-- Perfis de acesso:
-  - **Administrador**
-  - **Supervisor**
-  - **Operador**
-- Cadastro, edição e exclusão de usuários por administrador.
-- Controle de funções por banco de dados.
-- Operações administrativas protegidas por Edge Function.
-- Proteção por Row Level Security (RLS).
-
-### Personalização visual\n- Seletor de tema disponível no cabeçalho do sistema.\n- Temas Escuro, Claro, Cyberpunk, Oceano e Floresta.\n- Preferência salva no navegador e restaurada ao retornar ao sistema.\n\n### Relatórios e histórico
-- Relatórios operacionais.
-- Consulta de ocorrências.
-- Histórico de operações.
-- Detalhamento de plantões.
-- Impressão de registros.
+O acompanhamento em tempo real permanece **exclusivamente dentro da área Plantão**, mantendo Ocorrências focada no atendimento e despacho.
 
 ---
 
-## Arquitetura
+# 🚨 Atendimento e ocorrências
 
-### Frontend
+O módulo de ocorrências permite acompanhar o atendimento desde o recebimento até o encerramento.
+
+**Fluxo operacional:**
+
+```
+📞 Atendimento
+      ↓
+📝 Nova ocorrência
+      ↓
+🏷️ Classificação
+      ↓
+🚓 Despacho
+      ↓
+📍 Chegada ao local
+      ↓
+👮 Atendimento
+      ↓
+✅ Encerramento
+      ↓
+📚 Histórico
+```
+
+Inclui:
+
+- Natureza e prioridade.
+- Origem da solicitação.
+- Dados do solicitante.
+- Endereço, bairro e referência.
+- Relato.
+- Envolvidos.
+- Viatura vinculada.
+- Despacho.
+- Horário de chegada.
+- Desfecho.
+- Observações.
+- Histórico.
+- Impressão.
+
+---
+
+# 🧰 Itens operacionais
+
+O sistema possui área própria para gerenciamento de itens utilizados durante o serviço.
+
+### 🔫 Armas
+Controle de itens de armamento e movimentações durante o plantão.
+
+### 📻 Rádios
+Controle dos equipamentos de comunicação.
+
+### 🖥️ CAD
+Controle de outros itens cadastrados pela administração.
+
+O objetivo é permitir rastreabilidade sobre **quem retirou, quando retirou, quando devolveu e em qual plantão ocorreu a movimentação**.
+
+---
+
+# 📊 Relatórios e histórico
+
+O Guardião GCM mantém registros para facilitar a consulta posterior e a geração de documentos operacionais.
+
+### Relatórios
+
+- Relatório de plantão.
+- Registros operacionais.
+- Ocorrências.
+- Histórico.
+- Informações registradas durante o serviço.
+- Impressão em formato adequado para documentação.
+
+### 🖨️ Documentos
+
+Os relatórios são preparados para impressão, com estrutura limpa e adequada para utilização administrativa.
+
+---
+
+# 🔐 Segurança
+
+A segurança é aplicada principalmente no **backend**, e não apenas na interface.
+
+### Controles utilizados
+
+- 🔒 Supabase Auth.
+- 🛡️ Row Level Security (RLS).
+- 👤 Perfis e funções de usuário.
+- ⚙️ Operações administrativas protegidas.
+- 🧩 Supabase Edge Functions.
+- 🗄️ PostgreSQL.
+- 🔑 Chave pública própria para utilização no frontend.
+
+> ⚠️ **Nunca coloque uma chave `service_role` ou `sb_secret_` no frontend ou em variáveis `VITE_*`.**
+
+O controle efetivo de autorização deve permanecer protegido pelas políticas e funções do banco.
+
+---
+
+# 🏗️ Arquitetura
+
+## Frontend
+
 - React
 - TypeScript
 - TanStack Router
@@ -113,40 +202,47 @@ O frontend é publicado gratuitamente pelo **GitHub Pages**. O backend permanece
 - Radix UI
 - Lucide React
 
-### Backend
+## Backend
+
 - Supabase
 - PostgreSQL
 - Supabase Auth
 - Supabase Edge Functions
-- Row Level Security (RLS)
+- Row Level Security
 
-### Hospedagem
-- GitHub Pages para o frontend.
-- Supabase para banco, autenticação e funções de backend.
-- GitHub Actions para build e publicação automática.
+## Publicação
+
+```
+┌─────────────────────┐
+│      GitHub         │
+│     Repository      │
+└──────────┬──────────┘
+           │
+           ▼
+┌─────────────────────┐
+│   GitHub Actions    │
+│       Build         │
+└──────────┬──────────┘
+           │
+           ▼
+┌─────────────────────┐
+│    GitHub Pages     │
+│      Frontend       │
+└──────────┬──────────┘
+           │
+           ▼
+┌─────────────────────┐
+│      Supabase       │
+│ Auth + PostgreSQL   │
+│ + Edge Functions    │
+└─────────────────────┘
+```
 
 ---
 
-## Segurança
+# 🗄️ Banco de dados
 
-O sistema utiliza controles de acesso no frontend e, principalmente, no backend.
-
-- RLS habilitado nas principais tabelas.
-- Autorização baseada em funções armazenadas em `user_roles`.
-- Operações administrativas de usuários executadas por Edge Function.
-- Chaves secretas do Supabase não são utilizadas no frontend.
-- A chave pública/publishable pode ser utilizada no cliente.
-- Funções administrativas verificam o usuário autenticado e sua função.
-- Índices e permissões do banco foram ajustados para o funcionamento operacional do CAD.
-- Operações sensíveis permanecem protegidas por políticas e funções do PostgreSQL.
-
-**Nunca coloque uma `service_role` key ou chave `sb_secret_` no código frontend ou em variáveis `VITE_*`.**
-
----
-
-## Banco de dados
-
-Principais tabelas:
+Entre as principais estruturas utilizadas:
 
 - `profiles`
 - `user_roles`
@@ -165,22 +261,51 @@ As operações são vinculadas ao usuário autenticado e, quando aplicável, ao 
 
 ---
 
-## Desenvolvimento local
+# 👥 Perfis de acesso
 
-Requisitos:
+| Perfil | Permissões |
+|---|---|
+| 🛡️ **Administrador** | Administração completa e gerenciamento operacional |
+| ⭐ **Supervisor** | Operação e funções de supervisão autorizadas |
+| 👮 **Operador** | Atendimento, ocorrências e operações permitidas |
+
+> A interface não deve ser considerada a única camada de segurança. As permissões efetivas devem ser aplicadas pelo Supabase/RLS e pelas funções de autorização.
+
+---
+
+# 🎨 Identidade visual
+
+O projeto utiliza uma identidade visual operacional com:
+
+- 🔵 Azul institucional.
+- 🔴 Vermelho de emergência.
+- 🟡 Elementos de alerta.
+- 🌑 Tema escuro.
+- ☀️ Tema claro.
+- ✨ Efeitos visuais e animações.
+- 🚨 Elementos inspirados em giroflex.
+- 🛡️ Identidade visual da Guarda Municipal.
+
+O repositório mantém seus recursos gráficos na pasta `IMG/`, incluindo imagens e GIFs utilizados pelos módulos.
+
+---
+
+# 💻 Desenvolvimento local
+
+### Requisitos
 
 - Node.js
 - npm ou Bun
-- Conta/projeto Supabase para ambiente de desenvolvimento
+- Projeto Supabase para desenvolvimento
 
-Clone o projeto:
+### Clonar
 
 ```bash
 git clone https://github.com/DevKove/guardiaogcm.git
 cd guardiaogcm
 ```
 
-Instale as dependências:
+### Instalar
 
 ```bash
 npm install
@@ -192,14 +317,16 @@ ou:
 bun install
 ```
 
-Configure as variáveis de ambiente em um arquivo `.env.local`:
+### Configurar ambiente
+
+Crie `.env.local`:
 
 ```env
 VITE_SUPABASE_URL=https://SEU_PROJETO.supabase.co
 VITE_SUPABASE_PUBLISHABLE_KEY=SUA_CHAVE_PUBLICA
 ```
 
-Inicie o ambiente de desenvolvimento:
+### Executar
 
 ```bash
 npm run dev
@@ -213,9 +340,7 @@ bun run dev
 
 ---
 
-## Build
-
-Para gerar a versão de produção:
+# 📦 Build
 
 ```bash
 npm run build
@@ -227,116 +352,90 @@ ou:
 bun run build
 ```
 
-O projeto possui configuração específica para publicação no GitHub Pages, incluindo a base:
+A aplicação utiliza a base:
 
 ```
 /guardiaogcm/
 ```
 
+para publicação no GitHub Pages.
+
 ---
 
-## Deploy
+# 🚀 Deploy
 
-O deploy de produção é realizado pelo GitHub Actions.
-
-Fluxo:
+O projeto possui fluxo de publicação automatizado pelo **GitHub Actions**.
 
 ```
-GitHub
-   |
-   v
+Alteração no código
+       ↓
+Git push
+       ↓
 GitHub Actions
-   |
-   v
-Build Vite/TanStack
-   |
-   v
+       ↓
+Build
+       ↓
 GitHub Pages
-   |
-   +------> Supabase Auth
-   |
-   +------> Supabase PostgreSQL
-   |
-   +------> Supabase Edge Functions
-```
-
-Alterações enviadas para a branch de produção acionam o workflow de publicação.
-
----
-
-## Fluxo operacional principal
-
-O fluxo previsto para utilização do CAD é:
-
-```
-Login
-  ↓
-Abertura do Plantão
-  ↓
-Central / Atendimento
-  ↓
-Nova Ocorrência
-  ↓
-Registro e classificação
-  ↓
-Despacho da Viatura
-  ↓
-Chegada ao local
-  ↓
-Atendimento
-  ↓
-Encerramento
-  ↓
-Desfecho
-  ↓
-Histórico
-  ↓
-Relatório do Plantão
+       ↓
+Aplicação publicada
 ```
 
 ---
 
-## Perfis de acesso
+# 🧭 Fluxo operacional recomendado
 
-| Função | Acesso |
-|---|---|
-| Administrador | Administração completa, usuários e configurações operacionais |
-| Supervisor | Operação e funções de supervisão permitidas pelo RLS |
-| Operador | Atendimento, ocorrências e operações permitidas pelo plantão |
-
-O controle efetivo de acesso deve ser realizado pelas políticas do Supabase e pelas funções de autorização do banco, não apenas pela interface.
-
----
-
-## Status do projeto
-
-O projeto está configurado para operar com:
-
-- Frontend publicado no GitHub Pages.
-- Backend no Supabase.
-- Autenticação integrada.
-- Banco PostgreSQL.
-- RLS nas tabelas operacionais.
-- Gestão administrativa de usuários via Supabase Edge Function.
-- Plantão operacional.
-- Ocorrências vinculadas ao plantão.
-- Viaturas.
-- Postos fixos.
-- Escalas.
-- Histórico.
-- Relatórios.
-- Pipeline de build e deploy automático.
-
-### Próxima etapa de validação
-
-A validação funcional deve ser realizada pelo seguinte fluxo:
-
-**Login → abrir plantão → nova ocorrência → despachar VTR → registrar chegada → encerrar ocorrência → consultar histórico → emitir relatório.**
-
-O projeto deve continuar sendo validado em ambiente real antes de ser considerado definitivamente homologado para uso operacional.
+```
+🔐 Login
+  ↓
+🕐 Abrir Plantão
+  ↓
+📡 Acompanhar Plantão em tempo real
+  ↓
+📞 Atendimento
+  ↓
+🚨 Nova Ocorrência
+  ↓
+🚓 Despacho
+  ↓
+📍 Chegada
+  ↓
+👮 Atendimento
+  ↓
+✅ Encerramento
+  ↓
+📚 Histórico
+  ↓
+📄 Relatório
+  ↓
+🕐 Encerramento do Plantão
+```
 
 ---
 
-## Licença
+# 📌 Status
 
-Projeto privado/de uso controlado. Consulte os responsáveis pelo repositório antes de redistribuir, modificar ou utilizar o sistema em outro ambiente.
+<p align="center">
+  <img src="https://img.shields.io/badge/Projeto-Guardião%20GCM-0f172a?style=for-the-badge">
+  <img src="https://img.shields.io/badge/Operação-CAD-1d4ed8?style=for-the-badge">
+  <img src="https://img.shields.io/badge/Segurança-RLS-059669?style=for-the-badge">
+  <img src="https://img.shields.io/badge/Backend-Supabase-16a34a?style=for-the-badge">
+</p>
+
+O sistema está em **desenvolvimento e validação contínua**, com frontend publicado no GitHub Pages, backend no Supabase e pipeline de build/deploy automatizado.
+
+Antes de considerar o sistema definitivamente homologado para uso operacional, todos os fluxos devem continuar sendo testados em ambiente controlado.
+
+---
+
+# 📄 Licença
+
+Projeto privado/de uso controlado.
+
+A redistribuição, modificação ou utilização do sistema em outro ambiente deve ser autorizada pelos responsáveis pelo repositório.
+
+---
+
+<p align="center">
+  <strong>🛡️ Guardião GCM</strong><br>
+  <sub>Central de Atendimento e Despacho · Guarda Civil Municipal de Araçoiaba da Serra — SP</sub>
+</p>
