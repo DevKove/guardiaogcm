@@ -156,7 +156,7 @@ function ViaturaDialog({ f: init, onClose, podeTudo, podeEditarGuarnicao }: { f:
   const qc = useQueryClient();
   const [f, setF] = useState<Form>(vazio);
   const [equipeIds, setEquipeIds] = useState<string[]>([]);
-  const [integrantesOpen, setIntegrantesOpen] = useState(false);
+  const [integranteSelecionado, setIntegranteSelecionado] = useState("");
   const { data: plantao } = useQuery({
     queryKey: ["plantao-atual-viatura-dialog"],
     queryFn: async () => {
@@ -302,60 +302,68 @@ function ViaturaDialog({ f: init, onClose, podeTudo, podeEditarGuarnicao }: { f:
               {TIPOS_VIATURA.map((t) => <option key={t} className="bg-popover">{t}</option>)}
             </select>
           </div>
-          <div className="col-span-2 space-y-1">
+          <div className="col-span-2 space-y-2">
             <Label>Integrantes da guarnição</Label>
-            <div className="relative">
-              <button
-                type="button"
+            <div className="flex gap-2">
+              <select
+                className={`${selectCls} flex-1`}
+                value={integranteSelecionado}
                 disabled={!podeEditarGuarnicao || !plantao?.id}
-                onClick={() => setIntegrantesOpen((v) => !v)}
-                className="flex min-h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-left text-sm shadow-sm transition hover:bg-accent disabled:cursor-not-allowed disabled:opacity-50"
+                onChange={(e) => setIntegranteSelecionado(e.target.value)}
               >
-                <span className={equipeIds.length ? "text-foreground" : "text-muted-foreground"}>
-                  {equipeIds.length
-                    ? `${equipeIds.length} integrante${equipeIds.length > 1 ? "s" : ""} selecionado${equipeIds.length > 1 ? "s" : ""}`
-                    : "Selecione os integrantes da viatura..."}
-                </span>
-                <span className="text-muted-foreground">▾</span>
-              </button>
-              {integrantesOpen && podeEditarGuarnicao && plantao?.id && (
-                <div className="absolute z-50 mt-1 max-h-64 w-full overflow-y-auto rounded-md border bg-popover p-1 shadow-xl">
-                  {efetivo.length === 0 ? (
-                    <div className="p-3 text-sm text-muted-foreground">Nenhum integrante ativo cadastrado.</div>
-                  ) : (
-                    efetivo.map((m) => {
-                      const selecionado = equipeIds.includes(m.id);
-                      return (
-                        <label key={m.id} className="flex cursor-pointer items-center gap-3 rounded-md px-3 py-2 text-sm hover:bg-accent">
-                          <input
-                            type="checkbox"
-                            checked={selecionado}
-                            onChange={() => setEquipeIds((ids) => selecionado ? ids.filter((id) => id !== m.id) : [...ids, m.id])}
-                            className="h-4 w-4 accent-primary"
-                          />
-                          <span className="min-w-0 flex-1">
-                            <span className="block font-medium">{m.nome}</span>
-                            <span className="block text-xs text-muted-foreground">
-                              {m.tipo}{m.matricula ? ` · Matrícula ${m.matricula}` : ""}{m.funcao ? ` · ${m.funcao}` : ""}
-                            </span>
-                          </span>
-                        </label>
-                      );
-                    })
-                  )}
-                </div>
-              )}
+                <option value="" className="bg-popover">Selecione um integrante...</option>
+                {efetivo.map((m) => (
+                  <option key={m.id} value={m.id} disabled={equipeIds.includes(m.id)} className="bg-popover">
+                    {m.nome}{m.matricula ? ` · Matrícula ${m.matricula}` : ""}{m.funcao ? ` · ${m.funcao}` : ""}
+                  </option>
+                ))}
+              </select>
+              <Button
+                type="button"
+                variant="outline"
+                disabled={!integranteSelecionado || equipeIds.includes(integranteSelecionado) || !podeEditarGuarnicao || !plantao?.id}
+                onClick={() => {
+                  if (!integranteSelecionado || equipeIds.includes(integranteSelecionado)) return;
+                  setEquipeIds((ids) => [...ids, integranteSelecionado]);
+                  setIntegranteSelecionado("");
+                }}
+              >
+                Adicionar
+              </Button>
             </div>
-            {equipeIds.length > 0 && (
-              <div className="flex flex-wrap gap-1.5 pt-1">
-                {equipeIds.map((id) => {
+            {equipeIds.length > 0 ? (
+              <div className="space-y-1.5 rounded-md border bg-muted/30 p-2">
+                <div className="text-xs font-medium text-muted-foreground">Integrantes selecionados ({equipeIds.length})</div>
+                {equipeIds.map((id, index) => {
                   const m = efetivo.find((x) => x.id === id);
-                  return m ? <span key={id} className="rounded-full border bg-muted px-2 py-1 text-xs">{m.nome}</span> : null;
+                  if (!m) return null;
+                  return (
+                    <div key={id} className="flex items-center justify-between rounded-md border bg-background px-3 py-2 text-sm">
+                      <div className="min-w-0">
+                        <span className="block font-medium">{index + 1}. {m.nome}</span>
+                        <span className="block text-xs text-muted-foreground">
+                          {m.tipo}{m.matricula ? ` · Matrícula ${m.matricula}` : ""}{m.funcao ? ` · ${m.funcao}` : ""}
+                        </span>
+                      </div>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="ghost"
+                        className="text-destructive"
+                        disabled={!podeEditarGuarnicao || !plantao?.id}
+                        onClick={() => setEquipeIds((ids) => ids.filter((item) => item !== id))}
+                      >
+                        Remover
+                      </Button>
+                    </div>
+                  );
                 })}
               </div>
+            ) : (
+              <p className="rounded-md border border-dashed p-3 text-xs text-muted-foreground">Nenhum integrante selecionado. Escolha um guarda no campo acima e clique em Adicionar.</p>
             )}
             {!plantao?.id && <p className="text-xs text-warning">Inicie um plantão para vincular integrantes à viatura.</p>}
-            <p className="text-xs text-muted-foreground">Selecione no campo acima todos os integrantes que estão nesta viatura. A seleção fica registrada no plantão aberto.</p>
+            <p className="text-xs text-muted-foreground">Selecione um guarda por vez. Clique em Adicionar para montar a guarnição com vários integrantes.</p>
           </div>
           <div className="space-y-1"><Label>Quilometragem atual</Label><Input type="number" min={0} value={f.km_atual} onChange={set("km_atual")} /></div>
           <div className="col-span-2 space-y-1"><Label>Observações</Label><Textarea rows={2} value={f.observacao} onChange={set("observacao")} /></div>
