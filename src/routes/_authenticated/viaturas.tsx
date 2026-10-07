@@ -167,13 +167,19 @@ function ViaturaDialog({ f: init, onClose, podeTudo, podeEditarGuarnicao }: { f:
     enabled: !!init,
   });
   const { data: efetivo = [] } = useQuery({
-    queryKey: ["equipe-viatura-dialog"],
+    queryKey: ["equipe-viatura-dialog", plantao?.id],
     queryFn: async () => {
-      const { data, error } = await supabase.from("equipe").select("id, nome, matricula, tipo, funcao").eq("ativo", true).order("nome");
+      if (!plantao?.id) return [];
+      const { data, error } = await supabase
+        .from("plantao_integrantes")
+        .select("equipe:equipe_id(id, nome, matricula, tipo, funcao)")
+        .eq("plantao_id", plantao.id);
       if (error) throw error;
-      return data as { id: string; nome: string; matricula: string | null; tipo: string; funcao: string }[];
+      return (data ?? [])
+        .map((x) => x.equipe)
+        .filter((x): x is { id: string; nome: string; matricula: string | null; tipo: string; funcao: string } => !!x);
     },
-    enabled: !!init,
+    enabled: !!init && !!plantao?.id,
   });
   useEffect(() => {
     if (init) {
@@ -211,31 +217,6 @@ function ViaturaDialog({ f: init, onClose, podeTudo, podeEditarGuarnicao }: { f:
     const permitidos = equipeIds.filter((id) => idsAtivos.has(id));
     if (permitidos.length !== equipeIds.length) {
       return void toast.error("Selecione somente integrantes ativos cadastrados na Equipe.");
-    }
-
-    // A regra de segurança do banco exige que todo integrante da viatura também
-    // esteja registrado no plantão atual. Ao selecionar um integrante cadastrado na
-    // Equipe, sincronizamos esse vínculo no plantão antes de gravar a viatura.
-    // Isso não remove integrantes do plantão quando eles são removidos da viatura.
-    if (permitidos.length) {
-      const { data: plantaoAtuais, error: plantaoAtuaisError } = await supabase
-        .from("plantao_integrantes")
-        .select("equipe_id")
-        .eq("plantao_id", plantao.id);
-      if (plantaoAtuaisError) {
-        return void toast.error("Não foi possível verificar os integrantes do plantão: " + plantaoAtuaisError.message);
-      }
-
-      const jaNoPlantao = new Set((plantaoAtuais ?? []).map((x) => x.equipe_id));
-      const faltantes = permitidos.filter((equipe_id) => !jaNoPlantao.has(equipe_id));
-      if (faltantes.length) {
-        const { error: plantaoInsertError } = await supabase.from("plantao_integrantes").insert(
-          faltantes.map((equipe_id) => ({ plantao_id: plantao.id, equipe_id })),
-        );
-        if (plantaoInsertError) {
-          return void toast.error("Não foi possível vincular os integrantes ao plantão atual: " + plantaoInsertError.message);
-        }
-      }
     }
 
     if (!podeTudo) {
@@ -368,7 +349,7 @@ function ViaturaDialog({ f: init, onClose, podeTudo, podeEditarGuarnicao }: { f:
               </div>
             )}
             {!plantao?.id && <p className="text-xs text-warning">Inicie um plantão para vincular integrantes à viatura.</p>}
-            <p className="text-xs text-muted-foreground">O campo inicia vazio. Use o botão + para adicionar cada integrante individualmente.</p>
+            <p className="text-xs text-muted-foreground">O campo inicia vazio. Use o botão + para adicionar integrantes já selecionados no plantão atual.</p>
           </div>
           <div className="space-y-1"><Label>Quilometragem atual</Label><Input type="number" min={0} value={f.km_atual} onChange={set("km_atual")} /></div>
           <div className="col-span-2 space-y-1"><Label>Observações</Label><Textarea rows={2} value={f.observacao} onChange={set("observacao")} /></div>
