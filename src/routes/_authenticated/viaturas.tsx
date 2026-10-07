@@ -221,9 +221,10 @@ function ViaturaDialog({ f: init, onClose, podeTudo, podeEditarGuarnicao }: { f:
       return void toast.error("É necessário ter um plantão aberto para alterar os integrantes da guarnição.");
     }
 
-    const permitidos = equipeIds.filter((id) => plantaoMembros.includes(id));
+    const idsAtivos = new Set(efetivo.map((m) => m.id));
+    const permitidos = equipeIds.filter((id) => idsAtivos.has(id));
     if (permitidos.length !== equipeIds.length) {
-      return void toast.error("A guarnição só pode usar integrantes do plantão atual.");
+      return void toast.error("Selecione somente integrantes ativos cadastrados na Equipe.");
     }
 
     if (!podeTudo) {
@@ -319,10 +320,10 @@ function ViaturaDialog({ f: init, onClose, podeTudo, podeEditarGuarnicao }: { f:
               onChange={(e) => setEquipeIds(Array.from(e.target.selectedOptions).map((o) => o.value))}
               disabled={!podeEditarGuarnicao || !plantao?.id}
             >
-              {efetivo.map((m) => <option key={m.id} value={m.id} disabled={!plantaoMembros.includes(m.id)}>{m.nome} · {m.tipo}{m.matricula ? ` · ${m.matricula}` : ""}{!plantaoMembros.includes(m.id) ? " · fora do plantão atual" : ""}</option>)}
+              {efetivo.map((m) => <option key={m.id} value={m.id}>{m.nome} · {m.tipo}{m.matricula ? ` · ${m.matricula}` : ""}{m.funcao ? ` · ${m.funcao}` : ""}</option>)}
             </select>
             {!plantao?.id && <p className="text-xs text-warning">Inicie um plantão para vincular integrantes à viatura.</p>}
-            <p className="text-xs text-muted-foreground">Os integrantes são carregados automaticamente do cadastro de Equipe. Você pode alterar a guarnição do plantão atual; os demais campos da viatura ficam protegidos para usuários sem permissão de supervisão.</p>
+            <p className="text-xs text-muted-foreground">Os integrantes são carregados automaticamente do cadastro de Equipe e podem ser selecionados diretamente. A alteração fica registrada no plantão aberto; os demais campos da viatura ficam protegidos para usuários sem permissão de supervisão.</p>
           </div>
           <div className="space-y-1"><Label>Quilometragem atual</Label><Input type="number" min={0} value={f.km_atual} onChange={set("km_atual")} /></div>
           <div className="col-span-2 space-y-1"><Label>Observações</Label><Textarea rows={2} value={f.observacao} onChange={set("observacao")} /></div>
