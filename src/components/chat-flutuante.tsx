@@ -369,7 +369,7 @@ export function ChatFlutuante() {
       <button
         type="button"
         onClick={() => setOpen((value) => !value)}
-        className={`fixed bottom-5 right-5 z-[80] inline-flex h-14 items-center gap-2 rounded-full border border-cyan-300/30 bg-[#07131f] px-5 text-sm font-black uppercase tracking-[0.08em] text-white shadow-[0_12px_36px_rgba(0,0,0,.35)] transition hover:-translate-y-0.5 hover:border-cyan-300/60 hover:bg-[#0a1d2d] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/70 sm:bottom-7 sm:right-7 ${open ? "ring-2 ring-cyan-400/30" : ""}`}
+        className={`!fixed !bottom-5 !right-5 !z-[9999] pointer-events-auto inline-flex h-14 items-center gap-2 rounded-full border border-cyan-300/30 bg-[#07131f] px-5 text-sm font-black uppercase tracking-[0.08em] text-white shadow-[0_12px_36px_rgba(0,0,0,.35)] transition hover:-translate-y-0.5 hover:border-cyan-300/60 hover:bg-[#0a1d2d] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/70 sm:bottom-7 sm:right-7 ${open ? "ring-2 ring-cyan-400/30" : ""}`}
         aria-label={open ? "Fechar Chat" : "Abrir Chat"}
         title="Chat"
       >
