@@ -1,147 +1,263 @@
 # POLÍTICA DE PRIVACIDADE — GUARDIÃO GCM
 
+**CAD — Central de Atendimento e Despacho**  
 **Última atualização:** 07/10/2026
 
-## 1. Objetivo
+## 1. Apresentação
 
-Esta Política explica, de forma geral, como dados pessoais podem ser tratados no Guardião GCM, sistema utilizado para apoiar atendimento, despacho, ocorrências, plantões, equipes, viaturas, itens operacionais, usuários e relatórios.
+Esta Política explica, de forma transparente, como dados pessoais podem ser tratados no Guardião GCM, plataforma destinada ao apoio de atendimento, despacho, ocorrências, plantões, equipes, viaturas, postos, itens operacionais, usuários e relatórios.
 
-O tratamento deve observar a legislação brasileira aplicável, especialmente a Lei nº 13.709/2018 (LGPD).
+O tratamento deve observar a legislação brasileira aplicável, especialmente a Lei nº 13.709/2018 — Lei Geral de Proteção de Dados Pessoais (LGPD), além de outras normas pertinentes à atividade pública e à segurança da informação. A LGPD estabelece princípios, direitos dos titulares e regras para agentes de tratamento. citeturn0search0
 
-## 2. Quem determina o tratamento
+## 2. Quem é o responsável pelo tratamento
 
-O **órgão ou entidade responsável pela operação do CAD** é quem define as finalidades institucionais e os procedimentos de tratamento dos dados utilizados no sistema.
+O **órgão ou entidade responsável pela operação do CAD** define as finalidades institucionais, as regras de acesso, os procedimentos internos e as decisões relacionadas ao tratamento dos dados.
 
-Os desenvolvedores e mantenedores técnicos atuam, conforme o arranjo de cada implantação, como responsáveis pelo desenvolvimento, manutenção ou suporte tecnológico, não assumindo automaticamente a posição de controlador dos dados apenas por terem criado ou mantido o software.
+A definição formal de controlador, operador, encarregado e demais agentes de tratamento deve considerar a estrutura jurídica e administrativa da implantação concreta.
 
-A definição formal de controlador, operador, encarregado e demais agentes de tratamento deve ser feita pelo órgão responsável pela implantação.
+Desenvolvedores e mantenedores técnicos **não se tornam automaticamente controladores apenas por criarem, hospedarem, corrigirem ou manterem o software**. Sua atuação deve ser analisada conforme as atividades efetivamente realizadas e as instruções recebidas.
 
-## 3. Dados que podem ser tratados
+## 3. Princípios aplicáveis
 
-Dependendo das funcionalidades utilizadas, podem ser tratados:
+O tratamento deve observar, conforme aplicável, princípios como:
+
+- finalidade;
+- adequação;
+- necessidade;
+- livre acesso;
+- qualidade dos dados;
+- transparência;
+- segurança;
+- prevenção;
+- não discriminação;
+- responsabilização e prestação de contas.
+
+A coleta e utilização de informações devem ser compatíveis com a finalidade institucional que justificou o tratamento.
+
+## 4. Categorias de dados que podem ser tratados
+
+Conforme os módulos habilitados e as necessidades da operação, podem ser tratados:
 
 - nome e identificação funcional;
-- matrícula;
+- matrícula ou identificador institucional;
 - e-mail;
-- perfil e função de acesso;
-- registros de autenticação;
-- dados de equipe, plantão e escala;
-- registros de ocorrências;
-- informações fornecidas por solicitantes e envolvidos;
-- informações de localização ou endereço relacionadas a ocorrências;
-- registros de viaturas;
-- registros de itens operacionais;
-- histórico de alterações;
-- logs técnicos e registros de segurança.
+- perfil, função e permissões;
+- registros de autenticação e sessão;
+- dados de equipes, escalas e plantões;
+- dados de ocorrências e atendimentos;
+- nomes, contatos, descrições e outras informações fornecidas por solicitantes ou envolvidos;
+- endereços e referências de localização vinculadas a atendimentos;
+- dados de viaturas, postos e itens operacionais;
+- histórico de alterações e movimentações;
+- registros técnicos e de segurança;
+- documentos e anexos inseridos por usuários autorizados.
 
-Somente devem ser inseridos dados adequados, pertinentes e necessários à finalidade operacional.
+A existência de uma funcionalidade não significa que todos esses dados sejam necessariamente coletados em toda utilização.
 
-## 4. Finalidades
+## 5. Dados pessoais sensíveis
+
+Dependendo da natureza de uma ocorrência ou atendimento, um registro pode conter dados pessoais sensíveis ou informações cuja proteção exija cuidados adicionais.
+
+Usuários não devem inserir informações sensíveis quando forem desnecessárias.
+
+Quando o registro de determinado dado for indispensável à finalidade legal ou institucional, seu tratamento deverá ocorrer de acordo com a hipótese legal aplicável, as políticas internas e os controles de acesso definidos pelo órgão.
+
+## 6. Dados de crianças e adolescentes
+
+Quando uma ocorrência envolver criança ou adolescente, os usuários devem registrar apenas as informações necessárias e observar as normas específicas de proteção aplicáveis.
+
+Informações relacionadas a crianças e adolescentes devem receber proteção compatível com sua natureza e finalidade, evitando exposição, compartilhamento ou utilização para finalidade estranha ao atendimento.
+
+## 7. Finalidades do tratamento
 
 Os dados podem ser tratados para:
 
 - autenticar usuários;
 - controlar permissões;
-- registrar e acompanhar ocorrências;
+- registrar e acompanhar atendimentos;
+- organizar despacho e ocorrências;
 - administrar plantões;
-- organizar equipes, viaturas e postos;
+- organizar equipes e viaturas;
 - controlar itens operacionais;
-- produzir relatórios;
+- produzir relatórios e documentos;
 - manter histórico e rastreabilidade;
-- proteger o sistema contra uso indevido;
-- investigar incidentes de segurança;
-- cumprir obrigações legais e administrativas.
+- proteger o ambiente contra fraude e abuso;
+- investigar incidentes;
+- cumprir obrigações legais e administrativas;
+- exercer direitos e atender determinações de autoridades competentes.
 
-## 5. Dados inseridos pelos usuários
+## 8. Bases legais
 
-O usuário é responsável por inserir somente informações necessárias, pertinentes, verdadeiras e autorizadas.
+A base legal não é necessariamente a mesma para todos os dados ou operações.
 
-**Não devem ser inseridos dados pessoais excessivos, informações íntimas desnecessárias, senhas, segredos de autenticação ou informações sem relação com a finalidade operacional.**
+O controlador deverá definir a hipótese legal adequada a cada finalidade concreta, podendo envolver, conforme o caso, cumprimento de obrigação legal ou regulatória, execução de políticas públicas, exercício regular de direitos, proteção da vida, segurança, legítimo interesse quando juridicamente aplicável ou outras hipóteses previstas na legislação.
 
-Quando informações sensíveis forem indispensáveis ao atendimento de uma finalidade legal ou institucional, seu tratamento deverá seguir as regras e autorizações do órgão responsável.
+O simples uso do sistema não transforma todos os tratamentos em tratamentos baseados em consentimento.
 
-## 6. Base legal
+## 9. Necessidade e minimização
 
-A base legal aplicável a cada tratamento deve ser definida pelo controlador conforme a finalidade concreta e a legislação aplicável.
+Usuários devem inserir somente informações necessárias, pertinentes e adequadas ao atendimento ou rotina institucional.
 
-Quando o tratamento estiver relacionado à execução de políticas públicas, exercício de atribuições legais, cumprimento de obrigação legal ou regulatória, proteção da segurança ou outra hipótese prevista em lei, o tratamento deverá observar os respectivos requisitos legais.
+Não devem ser utilizados os campos do sistema para armazenar:
 
-## 7. Compartilhamento
+- senhas;
+- tokens ou chaves secretas;
+- dados íntimos sem necessidade;
+- informações pessoais sem relação com a ocorrência;
+- comentários discriminatórios ou ofensivos;
+- informações destinadas a finalidade particular.
 
-Dados poderão ser acessados ou compartilhados somente quando houver fundamento jurídico e necessidade operacional, administrativa, legal ou de segurança.
+## 10. Origem dos dados
 
-Podem existir integrações com provedores de infraestrutura, autenticação, hospedagem, banco de dados e outros serviços técnicos necessários ao funcionamento da aplicação.
+Os dados podem ser fornecidos diretamente por usuários, servidores, solicitantes, envolvidos ou outras fontes institucionais autorizadas.
 
-O acesso deve ser limitado conforme as permissões e regras estabelecidas pelo órgão responsável.
+O usuário que registra uma informação deve observar as regras internas aplicáveis à obtenção, conferência e utilização daquele dado.
 
-## 8. Segurança
+## 11. Compartilhamento e acesso
 
-O projeto utiliza recursos de segurança compatíveis com sua arquitetura, incluindo autenticação, autorização, políticas de acesso ao banco e controles técnicos.
+O acesso aos dados deve seguir o princípio da necessidade e as permissões atribuídas.
 
-Ainda assim, **nenhuma tecnologia conectada à internet é absolutamente invulnerável**.
+Pode haver compartilhamento ou acesso por:
 
-Os usuários devem proteger suas credenciais e comunicar imediatamente qualquer incidente ou suspeita de acesso indevido.
+- usuários autorizados do órgão;
+- administradores designados;
+- equipes responsáveis por atendimento ou despacho;
+- setores administrativos competentes;
+- autoridades públicas com competência legal;
+- provedores técnicos, quando necessário à prestação de serviços de infraestrutura;
+- terceiros autorizados por obrigação legal ou contrato aplicável.
 
-## 9. Incidentes e ataques cibernéticos
+Nenhum compartilhamento autoriza uso incompatível com a finalidade ou com a legislação.
 
-Na máxima extensão permitida pela legislação aplicável, os desenvolvedores e mantenedores técnicos não assumem responsabilidade automática por incidentes provocados por terceiros, incluindo invasões, malware, exploração de vulnerabilidades, comprometimento de credenciais, falhas de provedores, ataques de negação de serviço ou outros eventos fora de seu controle razoável.
+## 12. Provedores e infraestrutura de terceiros
 
-A responsabilidade legal de cada agente de tratamento será analisada conforme sua efetiva atuação, atribuições e a legislação aplicável.
+A aplicação pode utilizar serviços externos para hospedagem, banco de dados, autenticação, armazenamento, DNS, CDN, monitoramento ou outras funções técnicas.
 
-## 10. Retenção
+Esses provedores podem processar determinados dados técnicos necessários à prestação do serviço.
 
-Os dados podem ser mantidos pelo período necessário às finalidades institucionais, obrigações legais, auditoria, segurança, preservação de histórico e exercício regular de direitos.
+As práticas de cada fornecedor também estão sujeitas às suas próprias políticas e condições, sem prejuízo das obrigações assumidas pelo órgão controlador.
 
-Prazos específicos devem ser definidos pelo controlador conforme a natureza de cada informação e as normas aplicáveis.
+## 13. Segurança da informação
 
-## 11. Direitos dos titulares
+Podem ser utilizados controles como autenticação, autorização por perfil, políticas de acesso ao banco, registros de auditoria, proteção de sessão, validações de entrada, limitação de tentativas e outros mecanismos compatíveis com a arquitetura implantada.
 
-Nos termos da LGPD e conforme aplicável, o titular poderá exercer direitos relacionados aos seus dados pessoais perante o controlador responsável pelo tratamento.
+Medidas de segurança devem ser continuamente avaliadas e aprimoradas de acordo com riscos razoáveis.
 
-Solicitações devem ser encaminhadas ao canal oficial do órgão ou entidade responsável pela operação do CAD.
+Nenhum sistema conectado à internet pode oferecer garantia absoluta contra vulnerabilidades, ataques ou falhas.
 
-## 12. Cookies e armazenamento local
-
-O sistema pode utilizar armazenamento local do navegador para funcionalidades técnicas, como preferência de tema e manutenção de configurações da interface.
-
-O uso desses recursos deve ser limitado ao necessário para funcionamento, segurança e experiência do sistema.
-
-## 13. Autenticação e credenciais
+## 14. Credenciais e contas
 
 Credenciais são pessoais e intransferíveis.
 
-O usuário deve:
+O usuário deve manter senha, códigos, tokens e demais fatores de autenticação em sigilo.
 
-- utilizar senha individual;
-- não compartilhar senha;
-- não armazenar senha em locais inseguros;
-- encerrar sessões em equipamentos compartilhados;
-- comunicar imediatamente suspeita de comprometimento.
+A organização responsável deve adotar procedimentos de criação, aprovação, alteração, suspensão e revogação de contas compatíveis com seus controles internos.
 
-## 14. Responsabilidade do usuário e do órgão operador
+## 15. Logs, auditoria e rastreabilidade
 
-O usuário e o órgão responsável pela operação respondem pelo uso que fizerem dos dados, pelas informações inseridas e pelas decisões tomadas a partir deles, observadas as atribuições legais de cada parte.
+Para segurança e governança, podem ser registrados eventos como:
 
-O sistema é uma ferramenta tecnológica de apoio e não determina, por si só, a legalidade ou legitimidade de uma operação.
+- login e logout;
+- tentativas de autenticação;
+- alterações cadastrais;
+- criação, edição e encerramento de registros;
+- movimentações de itens;
+- ações administrativas;
+- eventos de segurança;
+- informações técnicas de sessão.
 
-## 15. Desenvolvedores e mantenedores
+Os registros de auditoria devem ser acessados somente por pessoas autorizadas e pelo tempo necessário à finalidade, observadas as obrigações legais aplicáveis.
 
-O desenvolvimento ou manutenção do software não significa que seus autores tenham acesso irrestrito aos dados operacionais do órgão.
+## 16. Retenção e eliminação
 
-Quando não houver acesso necessário à execução de atividades técnicas autorizadas, os desenvolvedores não deverão acessar dados operacionais.
+Os dados podem ser conservados enquanto necessários às finalidades institucionais, obrigações legais, auditoria, segurança, defesa de direitos, prestação de contas e preservação de registros operacionais.
 
-Quando houver acesso técnico autorizado, ele deverá ocorrer somente na medida necessária à manutenção, segurança, diagnóstico ou suporte.
+Os prazos de retenção devem ser definidos pelo controlador de acordo com a natureza dos documentos e com as normas aplicáveis.
 
-## 16. Alterações desta Política
+Quando não houver fundamento para manutenção, a eliminação ou anonimização deverá seguir os procedimentos institucionais e as limitações legais.
 
-Esta Política poderá ser atualizada para refletir mudanças legais, técnicas ou operacionais. A versão vigente ficará disponível no sistema.
+## 17. Direitos dos titulares
 
-## 17. Contato e solicitações
+Nos termos da LGPD e conforme a hipótese aplicável, o titular poderá exercer direitos relacionados aos seus dados pessoais, observadas as limitações legais próprias da administração pública, da segurança pública, de investigações e de outras situações previstas em lei.
 
-Questões relacionadas ao tratamento de dados pessoais devem ser direcionadas ao **órgão ou entidade responsável pela operação do Guardião GCM**, por seus canais administrativos oficiais.
+Solicitações devem ser encaminhadas ao **controlador responsável pela operação do CAD**, pelos canais oficiais disponibilizados pelo órgão.
 
-## 18. Disposição final
+## 18. Segurança pública, investigação e limitações legais
 
-Esta Política não elimina direitos previstos em lei nem cria, por si só, uma transferência automática de responsabilidade entre os agentes de tratamento.
+Determinados tratamentos relacionados a segurança pública, defesa do Estado, investigação ou persecução penal podem estar sujeitos a regimes jurídicos específicos e às limitações previstas na legislação.
 
-A atribuição de responsabilidades deve considerar a atividade efetivamente realizada por cada agente, suas competências e a legislação aplicável.
+Por isso, uma solicitação de acesso, alteração, eliminação ou divulgação de informação não será necessariamente atendida quando houver impedimento legal, risco à investigação, sigilo ou outra restrição legítima.
+
+## 19. Incidentes de segurança
+
+Incidentes ou suspeitas de incidente devem ser comunicados imediatamente ao responsável institucional.
+
+Podem ser adotadas medidas de contenção, preservação de evidências, bloqueio de contas, revogação de sessões, análise de logs e outras providências técnicas e administrativas.
+
+Quando houver obrigação legal de comunicação, o controlador deverá avaliar e cumprir os procedimentos e prazos aplicáveis.
+
+## 20. Ataques e atos de terceiros
+
+Nenhum ambiente conectado à internet está livre de ataques.
+
+Na máxima extensão permitida pela legislação, desenvolvedores e mantenedores técnicos não assumem responsabilidade automática por incidentes causados exclusivamente por terceiros, como invasões, malware, engenharia social, comprometimento de credenciais, ataques de negação de serviço, falhas de infraestrutura externa ou vulnerabilidades exploradas fora de seu controle razoável.
+
+A responsabilidade de cada agente deverá ser analisada conforme sua atuação efetiva, suas obrigações e a legislação aplicável.
+
+## 21. Desenvolvedores e acesso técnico
+
+O desenvolvimento e a manutenção do sistema não significam acesso irrestrito dos desenvolvedores aos dados do órgão.
+
+Quando suporte técnico exigir acesso, ele deve ser limitado ao necessário para diagnóstico, manutenção, segurança, correção ou evolução autorizada.
+
+Sempre que tecnicamente possível, devem ser priorizados dados mínimos, ambientes de teste, registros anonimizados ou outras formas de reduzir exposição desnecessária.
+
+## 22. Armazenamento local e tecnologias do navegador
+
+O sistema pode utilizar recursos do navegador, como armazenamento local, cookies técnicos ou mecanismos equivalentes, para autenticação, funcionamento, preferências e segurança.
+
+Esses recursos devem ser utilizados de forma compatível com a finalidade da aplicação.
+
+## 23. Transferência e acesso internacional
+
+Caso algum fornecedor de infraestrutura ou serviço técnico realize armazenamento ou tratamento fora do Brasil, a operação deverá observar os requisitos legais aplicáveis e as salvaguardas exigidas para a transferência internacional de dados.
+
+## 24. Responsabilidade do usuário
+
+O usuário é responsável por:
+
+- registrar somente informações necessárias;
+- respeitar sigilo e permissões;
+- proteger suas credenciais;
+- não compartilhar dados sem autorização;
+- comunicar incidentes;
+- não utilizar dados para finalidade particular;
+- seguir normas internas do órgão.
+
+## 25. Responsabilidade institucional
+
+Cabe ao órgão controlador definir políticas, bases legais, perfis, retenção, procedimentos de atendimento aos titulares, governança, segurança e demais decisões relativas ao tratamento, conforme sua competência.
+
+A plataforma não substitui a governança institucional.
+
+## 26. Alterações desta Política
+
+Esta Política poderá ser atualizada para refletir alterações legais, técnicas, operacionais ou de segurança.
+
+A versão vigente deverá permanecer disponível no sistema ou em canal institucional apropriado.
+
+Mudanças relevantes deverão ser comunicadas conforme os procedimentos definidos pelo órgão responsável.
+
+## 27. Contato
+
+Questões sobre tratamento de dados pessoais, exercício de direitos, incidentes ou informações de privacidade devem ser encaminhadas ao **órgão ou entidade responsável pela operação do Guardião GCM**, utilizando seus canais oficiais.
+
+## 28. Disposição final
+
+Esta Política descreve princípios e responsabilidades gerais e não substitui a análise jurídica da implantação concreta.
+
+**A simples criação, manutenção, hospedagem ou suporte técnico do software não transfere automaticamente aos desenvolvedores a condição de controlador dos dados nem a responsabilidade pelos atos praticados pelo órgão operador, seus usuários ou terceiros.**
+
+A responsabilidade de cada agente deverá ser determinada de acordo com sua atuação efetiva, suas atribuições, seus contratos ou vínculos e a legislação aplicável.
+
+> **Aviso:** para uso institucional, recomenda-se que o órgão operador valide esta Política com sua assessoria jurídica e com o responsável/encarregado pela proteção de dados, adequando canais, prazos de retenção, bases legais e procedimentos à realidade da implantação.
