@@ -31,7 +31,7 @@ function Viaturas() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("viaturas")
-        .select("*, ocorrencias!viaturas_ocorrencia_id_fkey(id, protocolo, natureza, created_at)")
+        .select("*, ocorrencias!viaturas_ocorrencia_id_fkey(id, protocolo, natureza, created_at), viatura_integrantes(equipe:equipe_id(id, nome, matricula, tipo))")
         .order("prefixo");
       if (error) throw error;
       return data;
@@ -104,7 +104,7 @@ function Viaturas() {
                 </span>
               </div>
               <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-muted-foreground">
-                <div className="flex items-center gap-1.5"><Users className="h-3.5 w-3.5" />{v.guarnicao || "Sem guarnição"}</div>
+                <div className="flex items-center gap-1.5"><Users className="h-3.5 w-3.5" />{(Array.isArray(v.viatura_integrantes) ? v.viatura_integrantes.map((x: { equipe?: { nome?: string } | null }) => x.equipe?.nome).filter(Boolean).join(", ") : "") || v.guarnicao || "Sem guarnição"}</div>
                 <div className="flex items-center gap-1.5"><Gauge className="h-3.5 w-3.5" />{v.km_atual != null ? `${v.km_atual.toLocaleString("pt-BR")} km` : "— km"}</div>
               </div>
               {v.observacao && <p className="mt-2 rounded-md bg-muted/50 p-2 text-xs">{v.observacao}</p>}
