@@ -383,9 +383,16 @@ export function ChatFlutuante() {
         <span className="relative flex h-8 w-8 items-center justify-center rounded-full bg-cyan-400/10 text-cyan-300">
           <MessageCircle className="h-5 w-5" />
           {unread > 0 && (
-            <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-[9px] font-black text-white ring-2 ring-[#07131f]">
+            <span
+              className="absolute -right-2 -top-2 flex h-6 min-w-6 items-center justify-center rounded-full border-2 border-[#07131f] bg-red-600 px-1.5 text-[10px] font-black text-white shadow-[0_0_0_2px_rgba(239,68,68,.18),0_4px_14px_rgba(239,68,68,.45)] animate-pulse"
+              aria-label={`${unread > 99 ? "99+" : unread} mensagem${unread === 1 ? "" : "ns"} pendente${unread === 1 ? "" : "s"}`}
+              title={`${unread > 99 ? "99+" : unread} mensagem${unread === 1 ? "" : "ns"} pendente${unread === 1 ? "" : "s"}`}
+            >
               {unread > 99 ? "99+" : unread}
             </span>
+          )}
+          {unread > 0 && (
+            <span className="absolute -right-3 -top-3 h-2.5 w-2.5 rounded-full bg-red-400 shadow-[0_0_12px_rgba(248,113,113,.9)] animate-ping" aria-hidden="true" />
           )}
         </span>
         <span>Chat</span>
