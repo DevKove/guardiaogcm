@@ -14,42 +14,6 @@ export type Database = {
   }
   public: {
     Tables: {
-      equipe: {
-        Row: {
-          id: string
-          nome: string
-          matricula: string | null
-          tipo: "GCM" | "Vigia"
-          funcao: string
-          ativo: boolean
-          observacao: string | null
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          nome: string
-          matricula?: string | null
-          tipo?: "GCM" | "Vigia"
-          funcao?: string
-          ativo?: boolean
-          observacao?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          nome?: string
-          matricula?: string | null
-          tipo?: "GCM" | "Vigia"
-          funcao?: string
-          ativo?: boolean
-          observacao?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
       avisos: {
         Row: {
           autor_id: string
@@ -76,6 +40,78 @@ export type Database = {
           titulo?: string
         }
         Relationships: []
+      }
+      equipe: {
+        Row: {
+          ativo: boolean
+          created_at: string
+          funcao: string
+          id: string
+          matricula: string | null
+          nome: string
+          observacao: string | null
+          tipo: string
+          updated_at: string
+        }
+        Insert: {
+          ativo?: boolean
+          created_at?: string
+          funcao?: string
+          id?: string
+          matricula?: string | null
+          nome: string
+          observacao?: string | null
+          tipo?: string
+          updated_at?: string
+        }
+        Update: {
+          ativo?: boolean
+          created_at?: string
+          funcao?: string
+          id?: string
+          matricula?: string | null
+          nome?: string
+          observacao?: string | null
+          tipo?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      escala_integrantes: {
+        Row: {
+          created_at: string
+          equipe_id: string
+          escala_id: string
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          equipe_id: string
+          escala_id: string
+          id?: string
+        }
+        Update: {
+          created_at?: string
+          equipe_id?: string
+          escala_id?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "escala_integrantes_equipe_id_fkey"
+            columns: ["equipe_id"]
+            isOneToOne: false
+            referencedRelation: "equipe"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "escala_integrantes_escala_id_fkey"
+            columns: ["escala_id"]
+            isOneToOne: false
+            referencedRelation: "escalas"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       escalas: {
         Row: {
@@ -140,130 +176,44 @@ export type Database = {
           },
         ]
       }
-      escala_integrantes: {
-        Row: { id: string; escala_id: string; equipe_id: string; created_at: string }
-        Insert: { id?: string; escala_id: string; equipe_id: string; created_at?: string }
-        Update: { id?: string; escala_id?: string; equipe_id?: string; created_at?: string }
-        Relationships: [
-          { foreignKeyName: "escala_integrantes_escala_id_fkey"; columns: ["escala_id"]; isOneToOne: false; referencedRelation: "escalas"; referencedColumns: ["id"] },
-          { foreignKeyName: "escala_integrantes_equipe_id_fkey"; columns: ["equipe_id"]; isOneToOne: false; referencedRelation: "equipe"; referencedColumns: ["id"] },
-        ]
-      }
       itens: {
         Row: {
-          id: string
-          categoria: Database["public"]["Enums"]["item_categoria"]
-          nome: string
-          identificacao: string | null
-          patrimonio: string | null
           ativo: boolean
-          observacao: string | null
-          criado_por: string | null
+          categoria: Database["public"]["Enums"]["item_categoria"]
           created_at: string
+          criado_por: string | null
+          id: string
+          identificacao: string | null
+          nome: string
+          observacao: string | null
+          patrimonio: string | null
           updated_at: string
         }
         Insert: {
-          id?: string
-          categoria: Database["public"]["Enums"]["item_categoria"]
-          nome: string
-          identificacao?: string | null
-          patrimonio?: string | null
           ativo?: boolean
-          observacao?: string | null
-          criado_por?: string | null
+          categoria: Database["public"]["Enums"]["item_categoria"]
           created_at?: string
+          criado_por?: string | null
+          id?: string
+          identificacao?: string | null
+          nome: string
+          observacao?: string | null
+          patrimonio?: string | null
           updated_at?: string
         }
         Update: {
-          id?: string
-          categoria?: Database["public"]["Enums"]["item_categoria"]
-          nome?: string
-          identificacao?: string | null
-          patrimonio?: string | null
           ativo?: boolean
-          observacao?: string | null
-          criado_por?: string | null
+          categoria?: Database["public"]["Enums"]["item_categoria"]
           created_at?: string
+          criado_por?: string | null
+          id?: string
+          identificacao?: string | null
+          nome?: string
+          observacao?: string | null
+          patrimonio?: string | null
           updated_at?: string
         }
         Relationships: []
-      }
-      plantao_itens: {
-        Row: {
-          id: string
-          plantao_id: string
-          item_id: string
-          status: Database["public"]["Enums"]["item_mov_status"]
-          retirado_por: string | null
-          retirado_em: string | null
-          entregue_por: string | null
-          entregue_em: string | null
-          conferido_por: string | null
-          conferido_em: string | null
-          observacao: string | null
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          plantao_id: string
-          item_id: string
-          status?: Database["public"]["Enums"]["item_mov_status"]
-          retirado_por?: string | null
-          retirado_em?: string | null
-          entregue_por?: string | null
-          entregue_em?: string | null
-          conferido_por?: string | null
-          conferido_em?: string | null
-          observacao?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          plantao_id?: string
-          item_id?: string
-          status?: Database["public"]["Enums"]["item_mov_status"]
-          retirado_por?: string | null
-          retirado_em?: string | null
-          entregue_por?: string | null
-          entregue_em?: string | null
-          conferido_por?: string | null
-          conferido_em?: string | null
-          observacao?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "plantao_itens_item_id_fkey"
-            columns: ["item_id"]
-            isOneToOne: false
-            referencedRelation: "itens"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "plantao_itens_plantao_id_fkey"
-            columns: ["plantao_id"]
-            isOneToOne: false
-            referencedRelation: "plantoes"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "plantao_itens_retirado_por_fkey"
-            columns: ["retirado_por"]
-            isOneToOne: false
-            referencedRelation: "equipe"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "plantao_itens_entregue_por_fkey"
-            columns: ["entregue_por"]
-            isOneToOne: false
-            referencedRelation: "equipe"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       ocorrencia_envolvidos: {
         Row: {
@@ -315,21 +265,21 @@ export type Database = {
           descricao: string
           id: string
           ocorrencia_id: string
-          usuario_id: string
+          usuario_id: string | null
         }
         Insert: {
           created_at?: string
           descricao: string
           id?: string
           ocorrencia_id: string
-          usuario_id?: string
+          usuario_id?: string | null
         }
         Update: {
           created_at?: string
           descricao?: string
           id?: string
           ocorrencia_id?: string
-          usuario_id?: string
+          usuario_id?: string | null
         }
         Relationships: [
           {
@@ -450,13 +400,220 @@ export type Database = {
           },
         ]
       }
-      plantao_integrantes: {
-        Row: { id: string; plantao_id: string; equipe_id: string; created_at: string }
-        Insert: { id?: string; plantao_id: string; equipe_id: string; created_at?: string }
-        Update: { id?: string; plantao_id?: string; equipe_id?: string; created_at?: string }
+      plantao_historico: {
+        Row: {
+          acao: string
+          created_at: string
+          dados: Json | null
+          id: string
+          plantao_id: string
+          usuario_id: string
+        }
+        Insert: {
+          acao: string
+          created_at?: string
+          dados?: Json | null
+          id?: string
+          plantao_id: string
+          usuario_id?: string
+        }
+        Update: {
+          acao?: string
+          created_at?: string
+          dados?: Json | null
+          id?: string
+          plantao_id?: string
+          usuario_id?: string
+        }
         Relationships: [
-          { foreignKeyName: "plantao_integrantes_plantao_id_fkey"; columns: ["plantao_id"]; isOneToOne: false; referencedRelation: "plantoes"; referencedColumns: ["id"] },
-          { foreignKeyName: "plantao_integrantes_equipe_id_fkey"; columns: ["equipe_id"]; isOneToOne: false; referencedRelation: "equipe"; referencedColumns: ["id"] },
+          {
+            foreignKeyName: "plantao_historico_plantao_id_fkey"
+            columns: ["plantao_id"]
+            isOneToOne: false
+            referencedRelation: "plantoes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      plantao_integrantes: {
+        Row: {
+          created_at: string
+          equipe_id: string
+          id: string
+          plantao_id: string
+        }
+        Insert: {
+          created_at?: string
+          equipe_id: string
+          id?: string
+          plantao_id: string
+        }
+        Update: {
+          created_at?: string
+          equipe_id?: string
+          id?: string
+          plantao_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plantao_integrantes_equipe_id_fkey"
+            columns: ["equipe_id"]
+            isOneToOne: false
+            referencedRelation: "equipe"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "plantao_integrantes_plantao_id_fkey"
+            columns: ["plantao_id"]
+            isOneToOne: false
+            referencedRelation: "plantoes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      plantao_item_movimentos: {
+        Row: {
+          created_at: string
+          entregue_em: string | null
+          entregue_por: string | null
+          id: string
+          item_id: string
+          plantao_id: string
+          registrado_por: string
+          retirado_em: string
+          retirado_por: string
+        }
+        Insert: {
+          created_at?: string
+          entregue_em?: string | null
+          entregue_por?: string | null
+          id?: string
+          item_id: string
+          plantao_id: string
+          registrado_por: string
+          retirado_em?: string
+          retirado_por: string
+        }
+        Update: {
+          created_at?: string
+          entregue_em?: string | null
+          entregue_por?: string | null
+          id?: string
+          item_id?: string
+          plantao_id?: string
+          registrado_por?: string
+          retirado_em?: string
+          retirado_por?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plantao_item_movimentos_entregue_por_fkey"
+            columns: ["entregue_por"]
+            isOneToOne: false
+            referencedRelation: "equipe"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "plantao_item_movimentos_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "itens"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "plantao_item_movimentos_plantao_id_fkey"
+            columns: ["plantao_id"]
+            isOneToOne: false
+            referencedRelation: "plantoes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "plantao_item_movimentos_retirado_por_fkey"
+            columns: ["retirado_por"]
+            isOneToOne: false
+            referencedRelation: "equipe"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      plantao_itens: {
+        Row: {
+          conferido_em: string | null
+          conferido_por: string | null
+          created_at: string
+          entregue_em: string | null
+          entregue_por: string | null
+          id: string
+          item_id: string
+          observacao: string | null
+          plantao_id: string
+          retirado_em: string | null
+          retirado_por: string | null
+          situacao: string
+          status: Database["public"]["Enums"]["item_mov_status"]
+          updated_at: string
+        }
+        Insert: {
+          conferido_em?: string | null
+          conferido_por?: string | null
+          created_at?: string
+          entregue_em?: string | null
+          entregue_por?: string | null
+          id?: string
+          item_id: string
+          observacao?: string | null
+          plantao_id: string
+          retirado_em?: string | null
+          retirado_por?: string | null
+          situacao?: string
+          status?: Database["public"]["Enums"]["item_mov_status"]
+          updated_at?: string
+        }
+        Update: {
+          conferido_em?: string | null
+          conferido_por?: string | null
+          created_at?: string
+          entregue_em?: string | null
+          entregue_por?: string | null
+          id?: string
+          item_id?: string
+          observacao?: string | null
+          plantao_id?: string
+          retirado_em?: string | null
+          retirado_por?: string | null
+          situacao?: string
+          status?: Database["public"]["Enums"]["item_mov_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plantao_itens_entregue_por_fkey"
+            columns: ["entregue_por"]
+            isOneToOne: false
+            referencedRelation: "equipe"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "plantao_itens_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "itens"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "plantao_itens_plantao_id_fkey"
+            columns: ["plantao_id"]
+            isOneToOne: false
+            referencedRelation: "plantoes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "plantao_itens_retirado_por_fkey"
+            columns: ["retirado_por"]
+            isOneToOne: false
+            referencedRelation: "equipe"
+            referencedColumns: ["id"]
+          },
         ]
       }
       plantao_registros: {
@@ -496,10 +653,10 @@ export type Database = {
       }
       plantoes: {
         Row: {
+          assinatura_codigo: string | null
           assinatura_em: string | null
           assinatura_hash: string | null
           assinatura_metodo: string | null
-          assinatura_codigo: string | null
           assinatura_nome: string | null
           assinatura_usuario_id: string | null
           atividades: string | null
@@ -514,30 +671,24 @@ export type Database = {
           informativo: string | null
           iniciado_em: string
           materiais: string | null
+          nome_plantao: string | null
           observacoes: string | null
           operador_id: string
           operador_radio: string | null
           operador_radio_id: string | null
-          nome_plantao: "ALPHA" | "BRAVO" | "CHARLIE" | "DELTA" | null
-          supervisor_id: string | null
           postos: Json
           resumo: Json | null
           status: string
           supervisor: string | null
+          supervisor_id: string | null
           turno: string
           updated_at: string
         }
         Insert: {
+          assinatura_codigo?: string | null
           assinatura_em?: string | null
           assinatura_hash?: string | null
           assinatura_metodo?: string | null
-          assinatura_codigo?: string | null
-          assinatura_nome?: string | null
-          assinatura_usuario_id?: string | null
-          assinatura_em?: string | null
-          assinatura_hash?: string | null
-          assinatura_metodo?: string | null
-          assinatura_codigo?: string | null
           assinatura_nome?: string | null
           assinatura_usuario_id?: string | null
           atividades?: string | null
@@ -552,24 +703,24 @@ export type Database = {
           informativo?: string | null
           iniciado_em?: string
           materiais?: string | null
+          nome_plantao?: string | null
           observacoes?: string | null
           operador_id?: string
           operador_radio?: string | null
           operador_radio_id?: string | null
-          nome_plantao?: "ALPHA" | "BRAVO" | "CHARLIE" | "DELTA" | null
-          supervisor_id?: string | null
           postos?: Json
           resumo?: Json | null
           status?: string
           supervisor?: string | null
+          supervisor_id?: string | null
           turno: string
           updated_at?: string
         }
         Update: {
+          assinatura_codigo?: string | null
           assinatura_em?: string | null
           assinatura_hash?: string | null
           assinatura_metodo?: string | null
-          assinatura_codigo?: string | null
           assinatura_nome?: string | null
           assinatura_usuario_id?: string | null
           atividades?: string | null
@@ -584,19 +735,34 @@ export type Database = {
           informativo?: string | null
           iniciado_em?: string
           materiais?: string | null
+          nome_plantao?: string | null
           observacoes?: string | null
           operador_id?: string
           operador_radio?: string | null
+          operador_radio_id?: string | null
           postos?: Json
           resumo?: Json | null
           status?: string
           supervisor?: string | null
+          supervisor_id?: string | null
           turno?: string
           updated_at?: string
         }
         Relationships: [
-          { foreignKeyName: "plantoes_supervisor_id_fkey"; columns: ["supervisor_id"]; isOneToOne: false; referencedRelation: "equipe"; referencedColumns: ["id"] },
-          { foreignKeyName: "plantoes_operador_radio_id_fkey"; columns: ["operador_radio_id"]; isOneToOne: false; referencedRelation: "equipe"; referencedColumns: ["id"] },
+          {
+            foreignKeyName: "plantoes_operador_radio_id_fkey"
+            columns: ["operador_radio_id"]
+            isOneToOne: false
+            referencedRelation: "equipe"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "plantoes_supervisor_id_fkey"
+            columns: ["supervisor_id"]
+            isOneToOne: false
+            referencedRelation: "equipe"
+            referencedColumns: ["id"]
+          },
         ]
       }
       postos_fixos: {
@@ -646,18 +812,21 @@ export type Database = {
       }
       profiles: {
         Row: {
+          aprovado: boolean
           created_at: string
           id: string
           matricula: string | null
           nome: string
         }
         Insert: {
+          aprovado?: boolean
           created_at?: string
           id: string
           matricula?: string | null
           nome?: string
         }
         Update: {
+          aprovado?: boolean
           created_at?: string
           id?: string
           matricula?: string | null
@@ -684,13 +853,52 @@ export type Database = {
         Relationships: []
       }
       viatura_integrantes: {
-        Row: { id: string; plantao_id: string; viatura_id: string; equipe_id: string; papel: "encarregado" | "condutor" | "auxiliar_1" | "auxiliar_2" | "integrante"; created_at: string }
-        Insert: { id?: string; plantao_id: string; viatura_id: string; equipe_id: string; papel?: "encarregado" | "condutor" | "auxiliar_1" | "auxiliar_2" | "integrante"; created_at?: string }
-        Update: { id?: string; plantao_id?: string; viatura_id?: string; equipe_id?: string; papel?: "encarregado" | "condutor" | "auxiliar_1" | "auxiliar_2" | "integrante"; created_at?: string }
+        Row: {
+          created_at: string
+          equipe_id: string
+          id: string
+          papel: string
+          plantao_id: string
+          viatura_id: string
+        }
+        Insert: {
+          created_at?: string
+          equipe_id: string
+          id?: string
+          papel?: string
+          plantao_id: string
+          viatura_id: string
+        }
+        Update: {
+          created_at?: string
+          equipe_id?: string
+          id?: string
+          papel?: string
+          plantao_id?: string
+          viatura_id?: string
+        }
         Relationships: [
-          { foreignKeyName: "viatura_integrantes_plantao_id_fkey"; columns: ["plantao_id"]; isOneToOne: false; referencedRelation: "plantoes"; referencedColumns: ["id"] },
-          { foreignKeyName: "viatura_integrantes_viatura_id_fkey"; columns: ["viatura_id"]; isOneToOne: false; referencedRelation: "viaturas"; referencedColumns: ["id"] },
-          { foreignKeyName: "viatura_integrantes_equipe_id_fkey"; columns: ["equipe_id"]; isOneToOne: false; referencedRelation: "equipe"; referencedColumns: ["id"] },
+          {
+            foreignKeyName: "viatura_integrantes_equipe_id_fkey"
+            columns: ["equipe_id"]
+            isOneToOne: false
+            referencedRelation: "equipe"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "viatura_integrantes_plantao_id_fkey"
+            columns: ["plantao_id"]
+            isOneToOne: false
+            referencedRelation: "plantoes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "viatura_integrantes_viatura_id_fkey"
+            columns: ["viatura_id"]
+            isOneToOne: false
+            referencedRelation: "viaturas"
+            referencedColumns: ["id"]
+          },
         ]
       }
       viaturas: {
@@ -754,24 +962,36 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      finalizar_plantao_assinado: {
-        Args: {
-          p_plantao_id: string
-          p_resumo: Json
-        }
-        Returns: Json
+      admin_approve_user: {
+        Args: { _actor: string; _user_id: string }
+        Returns: undefined
       }
-      iniciar_plantao: {
+      admin_set_user_access: {
         Args: {
-          p_nome_plantao: string
-          p_supervisor_id: string
-          p_integrantes: string[]
-          p_operador_radio_id?: string | null
-          p_data_inicio?: string
-          p_turno?: string | null
-          p_horario?: string | null
+          _actor: string
+          _matricula: string
+          _nome: string
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
         }
-        Returns: string
+        Returns: undefined
+      }
+      despachar_viatura: {
+        Args: { _ocorrencia_id: string; _viatura_id: string }
+        Returns: undefined
+      }
+      finalizar_ocorrencia: {
+        Args: {
+          _desfecho: string
+          _observacao?: string
+          _ocorrencia_id: string
+          _status: string
+        }
+        Returns: undefined
+      }
+      finalizar_plantao_assinado: {
+        Args: { p_plantao_id: string; p_resumo: Json }
+        Returns: Json
       }
       has_role: {
         Args: {
@@ -780,7 +1000,20 @@ export type Database = {
         }
         Returns: boolean
       }
+      iniciar_plantao: {
+        Args: {
+          p_data_inicio?: string
+          p_horario?: string
+          p_integrantes: string[]
+          p_nome_plantao: string
+          p_operador_radio_id?: string
+          p_supervisor_id: string
+          p_turno?: string
+        }
+        Returns: string
+      }
       is_staff: { Args: { _user_id: string }; Returns: boolean }
+      marcar_chegada: { Args: { _ocorrencia_id: string }; Returns: undefined }
       ocorrencia_bloqueada: {
         Args: {
           _plantao_id: string
@@ -933,9 +1166,9 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "supervisor", "operador"],
-      ocorrencia_status: ["aberta", "em_atendimento", "encerrada", "cancelada"],
       item_categoria: ["arma", "radio", "cad"],
       item_mov_status: ["pendente", "retirado", "devolvido", "conferido"],
+      ocorrencia_status: ["aberta", "em_atendimento", "encerrada", "cancelada"],
       viatura_status: [
         "disponivel",
         "em_deslocamento",
