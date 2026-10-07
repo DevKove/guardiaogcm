@@ -73,14 +73,7 @@ function AuthPage() {
             },
           },
         });
-        if (error) {
-        const msg = `${error.message ?? ""}`.toLowerCase();
-        if (msg.includes("email not confirmed") || msg.includes("email not confirmed")) {
-          setEmailNaoConfirmado(true);
-          return;
-        }
-        throw error;
-      }
+        if (error) throw error;
         if (!data.user) throw new Error("Não foi possível criar a conta.");
 
         setPending(true);
@@ -92,7 +85,14 @@ function AuthPage() {
         email: email.trim().toLowerCase(),
         password,
       });
-      if (error) throw error;
+      if (error) {
+        const msg = `${error.message ?? ""}`.toLowerCase();
+        if (msg.includes("email not confirmed")) {
+          setEmailNaoConfirmado(true);
+          return;
+        }
+        throw error;
+      }
 
       const { data: userData } = await supabase.auth.getUser();
       const { data: profile } = await supabase.from("profiles").select("aprovado").eq("id", userData.user?.id ?? "").maybeSingle();
