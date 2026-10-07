@@ -124,10 +124,10 @@ function Relatorios() {
           <BarChart data={s.bairro} layout="vertical" margin={{ left: 40 }}><XAxis type="number" allowDecimals={false} stroke="var(--muted-foreground)" fontSize={11} /><YAxis type="category" dataKey="nome" width={150} stroke="var(--muted-foreground)" fontSize={11} /><Tooltip {...tip} /><Bar dataKey="total" fill="var(--chart-3)" radius={[0, 3, 3, 0]} /></BarChart>
         </Chart>
         <Chart title="Por situação">
-          <PieChart><Pie data={s.status} dataKey="total" nameKey="nome" outerRadius={90} label={(e) => e.nome}>{s.status.map((_, i) => <Cell key={i} fill={CORES[i % 5]} />)}</Pie><Tooltip {...tip} /></PieChart>
+          <PieChart><Pie data={s.status} dataKey="total" nameKey="nome" outerRadius={90}>{s.status.map((_, i) => <Cell key={i} fill={CORES[i % CORES.length] ?? "var(--chart-1)"} />)}</Pie><Tooltip {...tip} /></PieChart>
         </Chart>
         <Chart title="Por origem do chamado">
-          <PieChart><Pie data={s.origem} dataKey="total" nameKey="nome" innerRadius={50} outerRadius={90} label={(e) => e.nome}>{s.origem.map((_, i) => <Cell key={i} fill={CORES[i % 5]} />)}</Pie><Tooltip {...tip} /></PieChart>
+          <PieChart><Pie data={s.origem} dataKey="total" nameKey="nome" innerRadius={50} outerRadius={90}>{s.origem.map((_, i) => <Cell key={i} fill={CORES[i % 5]} />)}</Pie><Tooltip {...tip} /></PieChart>
         </Chart>
       </div>
     </div>
