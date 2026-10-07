@@ -1000,6 +1000,14 @@ export type Database = {
         }
         Returns: boolean
       }
+      substituir_viatura_integrantes: {
+        Args: {
+          p_equipe_ids: string[]
+          p_plantao_id: string
+          p_viatura_id: string
+        }
+        Returns: undefined
+      }
       iniciar_plantao: {
         Args: {
           p_data_inicio?: string
