@@ -36,7 +36,9 @@ export async function salvarUsuario(data: {
 }
 
 export async function aprovarUsuario(id: string) {
-  const { error } = await supabase.rpc("admin_approve_user", { _actor: (await supabase.auth.getUser()).data.user?.id, _user_id: id });
+  const { data: authData, error: authError } = await supabase.auth.getUser();
+  if (authError || !authData.user?.id) throw new Error("Sessão administrativa não identificada.");
+  const { error } = await supabase.rpc("admin_approve_user", { _actor: authData.user.id, _user_id: id });
   if (error) throw new Error(error.message);
 }
 
