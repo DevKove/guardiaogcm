@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { BookOpen, ChevronRight, CircleHelp, X } from "lucide-react";
+import ajudaImage from "../../IMG/ajuda.png";
 
 const sections = [
   { title: "Acesso e navegação", items: [
