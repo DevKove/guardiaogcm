@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { MessageCircle, Search, Send, X, UserRound, Check, CheckCheck, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -29,7 +30,13 @@ export function ChatFlutuante() {
   const [sending, setSending] = useState(false);
   const [unread, setUnread] = useState(0);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setMounted(true);
+    return () => setMounted(false);
+  }, []);
 
   const filteredProfiles = useMemo(() => {
     const term = search.trim().toLocaleLowerCase("pt-BR");
@@ -366,7 +373,7 @@ export function ChatFlutuante() {
         </div>
       )}
 
-      <button
+      {mounted && createPortal(<button
         type="button"
         onClick={() => setOpen((value) => !value)}
         className={`!fixed !bottom-5 !right-5 !z-[9999] pointer-events-auto inline-flex h-14 items-center gap-2 rounded-full border border-cyan-300/30 bg-[#07131f] px-5 text-sm font-black uppercase tracking-[0.08em] text-white shadow-[0_12px_36px_rgba(0,0,0,.35)] transition hover:-translate-y-0.5 hover:border-cyan-300/60 hover:bg-[#0a1d2d] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/70 sm:bottom-7 sm:right-7 ${open ? "ring-2 ring-cyan-400/30" : ""}`}
@@ -382,7 +389,7 @@ export function ChatFlutuante() {
           )}
         </span>
         <span>Chat</span>
-      </button>
+      </button>, document.body)}
     </>
   );
 }
