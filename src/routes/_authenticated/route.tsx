@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { Shield, LogOut, LayoutList, PlusCircle, Users, Car, BarChart3, UserCircle, School, History, PlayCircle, Palette, Check, ChevronDown, Package, ChevronRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useMe } from "@/hooks/use-me";
+import { LegalFooter } from "@/components/legal-footer";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
@@ -271,6 +272,7 @@ function Layout() {
       <main className="mx-auto max-w-[1600px] px-4 py-5 lg:px-6 lg:py-6">
         <Outlet />
       </main>
+      <LegalFooter />
     </div>
   );
 }
