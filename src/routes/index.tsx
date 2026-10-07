@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Shield, Radio, FileText } from "lucide-react";
+import { LegalFooter } from "@/components/legal-footer";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -58,6 +59,7 @@ function Index() {
           ))}
         </div>
       </main>
+      <LegalFooter />
     </div>
   );
 }
