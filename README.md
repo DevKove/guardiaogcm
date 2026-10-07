@@ -21,7 +21,7 @@
 
 ## 🚨 Sobre o projeto
 
-O **Guardião GCM** é um CAD desenvolvido para centralizar a operação da Guarda Civil Municipal, reunindo em um único ambiente o **atendimento, despacho, ocorrências, viaturas, equipes, postos, plantões, itens operacionais, histórico e relatórios**.
+O **Guardião GCM** é um CAD desenvolvido para centralizar a operação da Guarda Civil Municipal, reunindo em um único ambiente o **atendimento, despacho, ocorrências, viaturas, equipes, postos, plantões, itens operacionais, histórico e relatórios**. O sistema também mantém rastreabilidade das guarnições vinculadas às viaturas durante o plantão.
 
 A interface foi pensada para uso operacional, com foco em **clareza, rapidez, rastreabilidade e controle de acesso**.
 
@@ -77,7 +77,7 @@ O Guardião GCM também funciona como **Progressive Web App (PWA)**, permitindo 
 |---|---|
 | 🚨 **Ocorrências** | Cadastro, classificação, despacho, chegada, atendimento, encerramento e histórico |
 | 🕐 **Plantão** | Abertura, acompanhamento em tempo real, registros, observações, equipe e encerramento |
-| 🚓 **Viaturas** | Cadastro, prefixo, placa, status, guarnição, quilometragem e disponibilidade |
+| 🚓 **Viaturas** | Cadastro, prefixo, placa, status, guarnição, quilometragem e disponibilidade; integrantes permanecem vinculados durante o plantão até alteração, remoção ou encerramento |
 | 👮 **Equipe** | Gestão de agentes, funções, equipes e vinculações operacionais |
 | 📍 **Postos fixos** | Cadastro, localização, responsáveis, horários e status |
 | 📊 **Relatórios** | Relatórios operacionais, histórico e documentos para impressão |
@@ -99,6 +99,9 @@ O **Plantão** é o centro do acompanhamento operacional.
 - Operador de rádio.
 - Equipe e horário.
 - Guarnições.
+- Vinculação de integrantes ativos da **Equipe** às viaturas.
+- Manutenção da guarnição durante o plantão até alteração, remoção ou encerramento.
+- Visualização dos integrantes atuais ao editar uma viatura.
 - Postos fixos.
 - Atividades.
 - Materiais.
@@ -212,6 +215,10 @@ A segurança é aplicada principalmente no **backend**, e não apenas na interfa
 > ⚠️ **Nunca coloque uma chave `service_role` ou `sb_secret_` no frontend ou em variáveis `VITE_*`.**
 
 O controle efetivo de autorização deve permanecer protegido pelas políticas e funções do banco.
+
+### 🔐 RLS das guarnições de viaturas
+
+A leitura dos integrantes vinculados às viaturas é protegida por **Row Level Security**, permitindo aos usuários autorizados consultar as guarnições do plantão aberto. A validação também exige integrantes ativos cadastrados em **Equipe** e plantão aberto para as operações de alteração.
 
 ---
 
@@ -440,6 +447,18 @@ Aplicação publicada
 
 ---
 
+# 🧰 Estado atual e restauração
+
+O ponto de restauração operacional atual está registrado no GitHub para preservar o estado validado do sistema antes de novas alterações.
+
+- **Ponto de restauração:** `restore/2026-10-07-guardiao-gcm-stable`
+- **Commit de referência:** `583ddb9dac6a5261147ff1556a93e5c085ab389a`
+- **Última correção de referência:** leitura segura da guarnição da viatura no plantão aberto.
+
+> O ponto de restauração deve ser preservado como referência antes de alterações estruturais, migrações de banco ou mudanças de segurança.
+
+---
+
 # 📌 Status
 
 <p align="center">
@@ -449,7 +468,9 @@ Aplicação publicada
   <img src="https://img.shields.io/badge/Backend-Supabase-16a34a?style=for-the-badge">
 </p>
 
-O sistema está em **desenvolvimento e validação contínua**, com frontend publicado no GitHub Pages, backend no Supabase e pipeline de build/deploy automatizado. O PWA está integrado ao frontend e preparado para instalação em navegadores compatíveis.
+**Atualização:** 07/10/2026
+
+O sistema está em **desenvolvimento e validação contínua**, com frontend publicado no GitHub Pages, backend no Supabase e pipeline de build/deploy automatizado. As funcionalidades de plantão e guarnição de viaturas possuem validações no frontend e backend, incluindo RLS para leitura dos vínculos do plantão aberto. O PWA está integrado ao frontend e preparado para instalação em navegadores compatíveis.
 
 Antes de considerar o sistema definitivamente homologado para uso operacional, todos os fluxos devem continuar sendo testados em ambiente controlado.
 
