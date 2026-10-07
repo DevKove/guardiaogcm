@@ -1,141 +1,257 @@
 # TERMOS DE USO — GUARDIÃO GCM
 
+**CAD — Central de Atendimento e Despacho**  
 **Última atualização:** 07/10/2026
 
-## 1. Objeto
+## 1. Apresentação e objeto
 
-O Guardião GCM é um sistema informatizado de apoio à atividade operacional, destinado ao registro, organização, acompanhamento e consulta de informações relacionadas a atendimento, despacho, ocorrências, plantões, equipes, viaturas, postos, itens operacionais e relatórios.
+O Guardião GCM é uma plataforma informatizada destinada a apoiar atividades administrativas e operacionais da Guarda Civil Municipal, especialmente registro, organização, acompanhamento, consulta e geração de relatórios relacionados a atendimentos, despacho, ocorrências, plantões, equipes, guarnições, viaturas, postos, itens operacionais e demais rotinas autorizadas.
 
-O sistema é uma ferramenta de apoio e **não substitui a legislação, regulamentos internos, procedimentos administrativos, ordens superiores, protocolos operacionais ou decisões tomadas por agentes públicos competentes**.
+O sistema constitui **ferramenta tecnológica de apoio**. Ele não substitui leis, decretos, regulamentos, regimentos, ordens de serviço, protocolos operacionais, procedimentos administrativos, determinações de autoridade competente ou o julgamento profissional do agente público.
 
-## 2. Aceitação
+## 2. Abrangência e definição de responsabilidades
 
-O acesso e a utilização do sistema pressupõem ciência e concordância com estes Termos de Uso, a Política de Privacidade e as normas internas aplicáveis ao órgão responsável pela operação.
+A utilização do sistema ocorre dentro de uma estrutura institucional. O órgão ou entidade responsável pela implantação define as finalidades de uso, perfis, permissões, rotinas e procedimentos internos.
 
-O usuário declara que utilizará o sistema somente para finalidades legítimas, institucionais e autorizadas.
+Cada usuário responde pelos atos praticados com sua conta e dentro de suas atribuições. Administradores respondem pelas ações administrativas que efetivamente executarem. O órgão operador responde pela governança institucional do sistema e pelos procedimentos sob sua competência.
 
-## 3. Acesso restrito
+Desenvolvedores, autores e mantenedores técnicos **não assumem, apenas por criar, hospedar, manter ou prestar suporte ao software, responsabilidade pelas decisões operacionais, administrativas ou disciplinares tomadas pelo órgão ou por seus usuários**.
 
-O sistema possui acesso controlado. Cada usuário é responsável:
+## 3. Aceitação
 
-- pela guarda de seu e-mail, senha, sessão e demais credenciais;
-- por não compartilhar credenciais;
-- por bloquear ou encerrar sua sessão quando deixar o equipamento;
-- por comunicar imediatamente qualquer suspeita de acesso indevido;
-- por utilizar somente as permissões concedidas ao seu perfil.
+O acesso ao sistema implica ciência destes Termos, da Política de Privacidade e das normas institucionais aplicáveis.
 
-A utilização de credenciais de terceiros, tentativa de elevação de privilégios, exploração de vulnerabilidades ou acesso a dados sem autorização é proibida.
+Caso o usuário não concorde com alguma disposição, deverá interromper o uso e comunicar a questão ao responsável institucional pelo sistema.
 
-## 4. Uso autorizado
+## 4. Elegibilidade e autorização de acesso
 
-É permitido utilizar o sistema para:
+O sistema é destinado a pessoas previamente autorizadas pelo órgão operador.
 
-- registrar e consultar informações operacionais dentro das atribuições do usuário;
-- acompanhar plantões e ocorrências conforme as permissões concedidas;
-- gerar relatórios e documentos autorizados;
-- administrar usuários, itens e configurações quando essa função estiver expressamente autorizada.
+O acesso é pessoal, condicionado ao perfil atribuído e limitado às funcionalidades necessárias ao exercício da função.
 
-## 5. Usos proibidos
+A existência de uma conta não significa autorização irrestrita a todos os registros, módulos ou informações.
+
+## 5. Credenciais e segurança da conta
+
+As credenciais são pessoais e intransferíveis. O usuário deve:
+
+- manter senha e demais fatores de autenticação em sigilo;
+- não compartilhar conta, senha, token ou sessão;
+- utilizar apenas equipamentos e redes autorizados quando houver regra institucional;
+- bloquear ou encerrar a sessão ao se afastar do equipamento;
+- comunicar imediatamente suspeita de comprometimento;
+- não permitir que terceiros utilizem sua conta.
+
+Atos realizados mediante uma conta poderão ser associados ao respectivo usuário para fins de segurança, auditoria e apuração, sem prejuízo da investigação de eventual comprometimento da credencial.
+
+## 6. Perfis, permissões e privilégio mínimo
+
+As permissões devem ser utilizadas exclusivamente dentro das atribuições concedidas.
+
+É proibido tentar obter privilégios superiores aos autorizados, explorar falhas para acessar funções administrativas, manipular identificadores, contornar regras de autorização ou acessar registros de outro usuário sem fundamento institucional.
+
+Administradores devem utilizar privilégios elevados somente quando necessários à administração do sistema.
+
+## 7. Uso autorizado
+
+O usuário poderá utilizar o Guardião GCM para finalidades institucionais autorizadas, incluindo:
+
+- registro e acompanhamento de atendimentos e ocorrências;
+- gerenciamento de plantões e equipes;
+- acompanhamento de guarnições e viaturas;
+- consulta e atualização de postos e itens operacionais;
+- registro de movimentações autorizadas de armas, rádios e demais itens;
+- elaboração e consulta de relatórios;
+- manutenção de informações administrativas dentro do perfil;
+- auditoria e acompanhamento operacional quando expressamente autorizado.
+
+## 8. Qualidade e integridade das informações
+
+Toda informação registrada deve ser, na medida do conhecimento do usuário, verdadeira, pertinente, atualizada, necessária e compatível com a finalidade do registro.
+
+É vedado:
+
+- inventar ocorrências ou fatos;
+- alterar deliberadamente informações para produzir resultado enganoso;
+- registrar conteúdo ofensivo, discriminatório ou estranho à finalidade;
+- apagar ou modificar informação para ocultar conduta, quando isso não estiver autorizado;
+- inserir dados pessoais excessivos;
+- utilizar campos operacionais para finalidades particulares.
+
+Correções devem seguir os mecanismos disponibilizados pelo sistema e os procedimentos internos do órgão.
+
+## 9. Uso indevido e condutas proibidas
 
 É expressamente proibido:
 
 - acessar dados sem autorização;
-- alterar, excluir ou ocultar informações para as quais não exista permissão;
-- utilizar o sistema para fins pessoais, políticos, comerciais ou estranhos à atividade autorizada;
-- inserir informação deliberadamente falsa, fraudulenta ou maliciosa;
-- compartilhar dados protegidos fora dos canais autorizados;
-- tentar contornar autenticação, RLS, controles de acesso ou mecanismos de segurança;
-- realizar varreduras, exploração, injeção de código, SQL injection, brute force, scraping abusivo ou qualquer tentativa de comprometimento;
-- introduzir malware, ransomware, scripts maliciosos ou arquivos perigosos;
-- utilizar informações do sistema para perseguir, ameaçar, constranger ou prejudicar terceiros;
-- reproduzir ou divulgar relatórios e dados protegidos sem autorização.
+- tentar quebrar, contornar ou desativar mecanismos de segurança;
+- realizar SQL injection, XSS, CSRF, brute force, credential stuffing ou exploração deliberada de vulnerabilidades;
+- realizar varreduras ou testes de intrusão sem autorização formal;
+- manipular requisições para obter dados de outros usuários;
+- tentar explorar IDOR ou falhas de controle de acesso;
+- inserir malware, ransomware, scripts destrutivos ou arquivos maliciosos;
+- interferir deliberadamente na disponibilidade do serviço;
+- utilizar scraping abusivo ou automatização que degrade a aplicação;
+- compartilhar credenciais ou facilitar acesso de terceiros;
+- utilizar informações para perseguição, ameaça, constrangimento, discriminação ou benefício pessoal;
+- utilizar o sistema para finalidade política, comercial ou pessoal não autorizada;
+- copiar, vender, publicar ou distribuir dados operacionais sem autorização.
 
-## 6. Responsabilidade pelo conteúdo
+## 10. Testes de segurança
 
-As informações inseridas no sistema são de responsabilidade do usuário e, conforme o caso, do órgão ou unidade que realiza o registro.
+Testes de segurança somente podem ser realizados quando expressamente autorizados pelo responsável institucional ou técnico.
 
-O usuário deve conferir a exatidão, pertinência, legalidade e necessidade das informações antes de salvá-las.
+A descoberta de uma vulnerabilidade deve ser comunicada de forma responsável, evitando exploração além do necessário para comprovação.
 
-Os desenvolvedores e mantenedores técnicos do software **não são responsáveis pela veracidade, legalidade, finalidade, contexto, interpretação ou consequência administrativa, civil ou criminal das informações inseridas pelos usuários**.
+O usuário não deve transformar um teste autorizado em tentativa de obtenção, alteração ou destruição de dados reais.
 
-## 7. Segurança e incidentes
+## 11. Dados, documentos e anexos
 
-São adotadas medidas técnicas de segurança compatíveis com a arquitetura do sistema, incluindo autenticação, controle de acesso e políticas de banco de dados quando configuradas.
+Arquivos e documentos enviados ao sistema devem possuir relação direta com a finalidade operacional autorizada.
 
-Entretanto, **nenhum sistema conectado à internet pode garantir segurança absoluta, disponibilidade ininterrupta ou inexistência de vulnerabilidades**.
+O usuário deve observar as regras internas de classificação, sigilo, compartilhamento e retenção de documentos.
 
-Os usuários e gestores devem comunicar imediatamente suspeitas de comprometimento, credenciais expostas, acesso indevido ou comportamento anormal.
+Não devem ser enviados arquivos executáveis suspeitos, conteúdo malicioso, documentos pessoais desnecessários ou material que viole direitos de terceiros.
 
-## 8. Ataques, invasões e atos de terceiros
+## 12. Plantões, ocorrências e registros operacionais
 
-Na máxima extensão permitida pela legislação aplicável, os desenvolvedores, autores, mantenedores e gestores técnicos do software **não respondem por danos, perdas, indisponibilidade, alteração, destruição, exposição ou acesso indevido decorrentes de atos de terceiros, ataques cibernéticos, invasões, malware, credenciais comprometidas, falhas de provedores de infraestrutura, indisponibilidade de serviços de terceiros ou eventos fora de seu controle razoável**.
+Registros de plantão, ocorrências, movimentações, equipes e itens podem possuir valor administrativo, operacional ou probatório conforme as regras do órgão.
 
-Essa disposição não pretende excluir responsabilidades que sejam legalmente inderrogáveis.
+O sistema não determina a validade jurídica de um registro apenas por armazená-lo.
 
-## 9. Provedores de terceiros
+Alterações, correções, assinaturas, aprovações e encerramentos devem respeitar as permissões e os procedimentos institucionais.
 
-O sistema pode depender de serviços de terceiros, incluindo hospedagem, autenticação, banco de dados, infraestrutura, DNS, CDN e serviços de comunicação.
+## 13. Relatórios e documentos gerados
 
-A disponibilidade e o funcionamento desses serviços estão sujeitos às respectivas condições, limitações e incidentes.
+Relatórios, PDFs, históricos e demais documentos produzidos pelo sistema representam informações existentes na base no momento de sua geração.
 
-## 10. Disponibilidade e continuidade
+Antes de utilizar um documento para finalidade administrativa, o usuário autorizado deve conferir seu conteúdo e observar os procedimentos internos aplicáveis.
 
-O sistema pode sofrer manutenção, atualizações, indisponibilidade, alterações de infraestrutura ou interrupções temporárias.
+A geração automática de um relatório não constitui, por si só, certificação independente da veracidade dos dados de origem.
 
-Nenhuma garantia de disponibilidade permanente é oferecida.
+## 14. Auditoria, rastreabilidade e registros técnicos
 
-O órgão responsável pela operação deve manter procedimentos próprios de contingência, continuidade operacional e preservação de registros quando necessários.
+O sistema poderá registrar eventos de autenticação, acesso, alterações, operações administrativas, movimentações, erros e informações técnicas necessárias à segurança.
 
-## 11. Decisões operacionais
+Esses registros poderão ser utilizados para:
 
-O sistema apenas registra, organiza e apresenta informações. **Decisões operacionais, administrativas, disciplinares, policiais ou de qualquer outra natureza são de responsabilidade das pessoas e autoridades competentes que as tomam.**
+- auditoria;
+- investigação de incidentes;
+- prevenção de fraude e abuso;
+- análise de segurança;
+- manutenção;
+- continuidade operacional;
+- cumprimento de obrigações legais;
+- apuração administrativa autorizada.
 
-Nenhum relatório, classificação, alerta ou informação exibida pelo sistema constitui, por si só, ordem, determinação ou decisão administrativa.
+A existência de logs não significa que todo evento possa ser recuperado indefinidamente.
 
-## 12. Limitação de responsabilidade
+## 15. Monitoramento de segurança
 
-Na máxima extensão permitida pela legislação brasileira, os desenvolvedores, autores, mantenedores e gestores técnicos do Guardião GCM não serão responsáveis por:
+Atividades técnicas podem ser monitoradas automaticamente para identificar comportamento anômalo, tentativas de acesso indevido, falhas de autenticação, abuso de recursos e incidentes.
 
-- uso indevido ou não autorizado do sistema;
+Medidas preventivas podem incluir limitação de tentativas, bloqueio temporário, revogação de sessão, suspensão de conta ou outras ações compatíveis com a segurança do ambiente.
+
+## 16. Disponibilidade, manutenção e continuidade
+
+O sistema pode ficar temporariamente indisponível por manutenção, atualização, falha técnica, indisponibilidade de internet, energia, hospedagem, banco de dados, DNS, CDN ou outros serviços.
+
+Não é garantida disponibilidade ininterrupta.
+
+O órgão operador deve possuir procedimentos próprios de contingência quando a continuidade do serviço for necessária, inclusive para situações de indisponibilidade de rede ou infraestrutura.
+
+## 17. Serviços de terceiros
+
+O funcionamento pode depender de provedores externos de hospedagem, autenticação, banco de dados, armazenamento, DNS, CDN, envio de mensagens e outros componentes.
+
+Esses serviços possuem condições, limites, políticas, atualizações e incidentes próprios.
+
+Na máxima extensão permitida pela legislação, indisponibilidades ou falhas originadas exclusivamente nesses serviços não são automaticamente atribuíveis aos desenvolvedores do Guardião GCM.
+
+## 18. Segurança cibernética e eventos fora de controle
+
+Nenhum sistema conectado à internet pode garantir segurança absoluta contra todas as ameaças existentes ou futuras.
+
+Podem ocorrer ataques, exploração de vulnerabilidades desconhecidas, comprometimento de credenciais, malware, engenharia social, falhas de infraestrutura, interrupções de provedores, eventos de força maior ou outros acontecimentos fora do controle razoável dos responsáveis técnicos.
+
+Na máxima extensão permitida pela legislação, desenvolvedores, autores e mantenedores técnicos não respondem automaticamente por danos decorrentes exclusivamente de atos de terceiros ou eventos fora de seu controle, sem prejuízo das responsabilidades que a lei não permita afastar.
+
+## 19. Decisões e responsabilidade operacional
+
+O Guardião GCM pode apresentar dados, alertas, classificações, históricos e indicadores, mas não substitui a autoridade humana.
+
+Decisões policiais, administrativas, disciplinares, operacionais ou de atendimento são tomadas pelos agentes e autoridades competentes.
+
+O usuário deve analisar o contexto e as informações disponíveis antes de tomar qualquer decisão.
+
+## 20. Limitação de responsabilidade
+
+Na máxima extensão permitida pela legislação brasileira, os desenvolvedores, autores, mantenedores e gestores técnicos do software não serão responsabilizados automaticamente por:
+
 - atos praticados por usuários ou terceiros;
-- informações incorretas inseridas no sistema;
-- decisões tomadas com base nas informações registradas;
-- perda causada por falha de equipamento do usuário;
-- indisponibilidade de internet, energia ou infraestrutura de terceiros;
-- ataques cibernéticos ou comprometimento de credenciais;
-- falhas ou indisponibilidade de serviços externos;
-- danos indiretos, consequenciais, incidentais ou decorrentes de uso incompatível com estes Termos.
+- uso fora das finalidades autorizadas;
+- informações falsas, incompletas ou incorretas inseridas por usuários;
+- decisões tomadas exclusivamente pelo órgão ou seus agentes;
+- divulgação indevida realizada por usuário autorizado;
+- comprometimento de credenciais por negligência do titular;
+- falhas de equipamentos, redes ou sistemas sob responsabilidade de terceiros;
+- interrupções de internet, energia, hospedagem ou infraestrutura externa;
+- ataques cibernéticos e eventos de segurança provocados por terceiros;
+- indisponibilidade ou alteração de serviços externos;
+- danos indiretos, incidentais ou consequenciais decorrentes de uso incompatível com estes Termos.
 
-Nada neste documento exclui responsabilidade que não possa ser legalmente afastada.
+Nenhuma disposição pretende afastar responsabilidade que seja legalmente inderrogável ou direitos que não possam ser renunciados.
 
-## 13. Auditoria e registros
+## 21. Suspensão, bloqueio e revogação
 
-A operação poderá manter registros técnicos, logs, históricos de acesso e alterações para fins de segurança, auditoria, investigação de incidentes, continuidade operacional e cumprimento de obrigações legais.
+O acesso poderá ser temporariamente bloqueado, suspenso ou revogado quando houver:
 
-## 14. Suspensão de acesso
-
-O acesso poderá ser suspenso ou revogado em caso de:
-
-- uso indevido;
 - suspeita de comprometimento da conta;
+- tentativa de invasão;
 - violação de segurança;
+- uso incompatível com as atribuições;
 - descumprimento destes Termos;
-- determinação administrativa ou legal.
+- determinação do órgão competente;
+- obrigação legal ou regulatória.
 
-## 15. Propriedade intelectual
+A medida de segurança não impede posterior apuração dos fatos.
 
-Código, arquitetura, identidade visual, textos, componentes, recursos gráficos e demais elementos do sistema pertencem aos respectivos titulares e não podem ser copiados, redistribuídos ou explorados sem autorização.
+## 22. Propriedade intelectual e identidade do sistema
 
-## 16. Alterações
+Código-fonte, arquitetura, componentes próprios, textos, identidade visual, marcas, elementos gráficos e demais materiais possuem titulares de direitos correspondentes.
 
-Estes Termos podem ser atualizados para refletir mudanças técnicas, operacionais ou legais. A versão vigente será disponibilizada no próprio sistema.
+A autorização de uso do sistema não transfere propriedade intelectual ao usuário.
 
-## 17. Lei aplicável
+## 23. Alterações e evolução do sistema
 
-Estes Termos são interpretados conforme a legislação brasileira, respeitados os direitos e responsabilidades que não possam ser afastados por contrato ou declaração unilateral.
+O sistema poderá receber correções, atualizações, mudanças de interface, novos módulos, alterações de segurança ou modificações de arquitetura.
 
-## 18. Disposição final
+Funcionalidades podem ser alteradas, substituídas ou descontinuadas quando necessário para segurança, manutenção, compatibilidade ou evolução tecnológica.
 
-A utilização do Guardião GCM deve ocorrer de forma responsável, segura, legítima e compatível com as atribuições institucionais do usuário.
+## 24. Comunicações e reporte de incidentes
 
-**O uso do sistema não transfere aos desenvolvedores ou mantenedores técnicos a responsabilidade pelos atos praticados pelos usuários, pelo órgão operador ou por terceiros.**
+Suspeitas de invasão, exposição de dados, uso indevido, credencial comprometida, comportamento anormal ou vulnerabilidade devem ser comunicadas imediatamente ao responsável institucional ou canal técnico definido pelo órgão operador.
+
+O usuário deve preservar evidências e evitar apagar ou modificar registros relacionados ao incidente quando isso puder prejudicar a apuração.
+
+## 25. Violação destes Termos
+
+O descumprimento poderá resultar em advertência, restrição de acesso, suspensão, revogação da conta e encaminhamento para apuração administrativa ou às autoridades competentes, quando cabível.
+
+As medidas devem observar as competências e procedimentos do órgão responsável.
+
+## 26. Lei aplicável e foro competente
+
+Estes Termos são interpretados segundo a legislação brasileira e as normas institucionais aplicáveis ao órgão operador, respeitados direitos e responsabilidades que não possam ser afastados.
+
+## 27. Disposição final
+
+O uso do Guardião GCM deve ser responsável, seguro, legítimo, necessário e compatível com as atribuições do usuário.
+
+**O simples fato de uma pessoa ou empresa desenvolver, manter ou prestar suporte técnico ao software não transfere para ela as decisões, atos, registros ou responsabilidades operacionais do órgão que utiliza a plataforma.**
+
+Em qualquer situação, a responsabilidade jurídica deverá ser analisada conforme a conduta efetivamente praticada, a competência de cada agente, o vínculo existente e a legislação aplicável.
+
+> **Aviso:** estes Termos são uma política de uso do sistema e não substituem revisão jurídica específica. Para implantação institucional, recomenda-se validação pela assessoria jurídica e pelo responsável por proteção de dados do órgão.
+
