@@ -110,7 +110,7 @@ function Painel() {
               {plantaoAtual && (
                 <a href={`${import.meta.env.BASE_URL}plantao`} className="inline-flex items-center gap-1 font-semibold text-success hover:underline">
                   <Activity className="h-3.5 w-3.5" /> Atualização em tempo real
-                </Link>
+                </a>
               )}
             </div>
             </div>
