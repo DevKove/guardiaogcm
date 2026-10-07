@@ -37,18 +37,7 @@ function Painel() {
   });
 
 
-  async function iniciarPlantao() {
-    if (!me) return;
-    const { data, error } = await supabase.from("plantoes").insert({
-      operador_id: me.id, data_inicio: atual.data, turno: atual.turno, horario: atual.horario, status: "aberto",
-    }).select("id").single();
-    if (error) {
-      toast.error(error.code === "23505" ? "Já existe um plantão aberto. Finalize-o antes de iniciar outro." : error.message);
-      qc.invalidateQueries({ queryKey: ["plantao-atual"] });
-      return;
-    }
-    toast.success("Plantão iniciado.");
-    qc.invalidateQueries({ queryKey: ["plantao-atual"] });
+  function iniciarPlantao() {
     navigate({ to: "/plantao" });
   }
 
