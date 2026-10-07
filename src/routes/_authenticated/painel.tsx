@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -19,6 +19,7 @@ export const Route = createFileRoute("/_authenticated/painel")({
 function Painel() {
   // O painel usa o título institucional do shell; não renderizar cabeçalho "Ocorrências" aqui.
   const qc = useQueryClient();
+  const navigate = useNavigate();
   const { data: me } = useMe();
   const atual = turnoAtual();
   // Exibe o histórico completo por padrão; os cartões permitem filtrar somente as ativas.
@@ -103,7 +104,7 @@ function Painel() {
             {plantaoAtual ? (
               <Link to="/plantao/$id" params={{ id: plantaoAtual.id }} className="inline-flex items-center rounded-md border px-4 py-2 text-sm font-semibold hover:bg-accent">Abrir plantão / relatório</Link>
             ) : (
-              <Link to="/plantao" className={`inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90 ${carregandoPlantao || !me ? "pointer-events-none opacity-50" : ""}`} aria-disabled={carregandoPlantao || !me}><PlayCircle className="h-4 w-4" /> Iniciar plantão</Link>
+              <Link to="/plantao" search={{}} className={`inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90 ${carregandoPlantao || !me ? "pointer-events-none opacity-50" : ""}`} aria-disabled={carregandoPlantao || !me}><PlayCircle className="h-4 w-4" /> Iniciar plantão</Link>
             )}
           </div>
         </div>
