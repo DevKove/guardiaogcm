@@ -106,6 +106,15 @@ function RootComponent() {
   const router = useRouter();
 
   useEffect(() => {
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register(`${import.meta.env.BASE_URL}sw.js`, { scope: import.meta.env.BASE_URL })
+          .catch((error) => console.warn("PWA: falha ao registrar o service worker.", error));
+      }, { once: true });
+    }
+  }, []);
+
+  useEffect(() => {
     const saved = window.localStorage.getItem("cad-theme");
     const validThemes = ["claro", "escuro", "cyberpunk", "oceano", "floresta"];
     document.documentElement.dataset["theme"] = saved && validThemes.includes(saved) ? saved : "escuro";
