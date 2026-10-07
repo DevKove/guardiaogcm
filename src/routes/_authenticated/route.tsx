@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useMe } from "@/hooks/use-me";
 import { LegalFooter } from "@/components/legal-footer";
 import { AjudaFlutuante } from "@/components/ajuda-flutuante";
+import { ChatFlutuante } from "@/components/chat-flutuante";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
@@ -275,6 +276,7 @@ function Layout() {
       </main>
       <LegalFooter />
       <AjudaFlutuante />
+      <ChatFlutuante />
     </div>
   );
 }
