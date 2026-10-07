@@ -181,13 +181,8 @@ function ViaturaDialog({ f: init, onClose, podeTudo, podeEditarGuarnicao }: { f:
       setEquipeIds(init.equipe_ids);
     }
   }, [init]);
-  useEffect(() => {
-    if (!init?.id || !plantao?.id) return;
-    void supabase.from("viatura_integrantes").select("equipe_id").eq("viatura_id", init.id).eq("plantao_id", plantao.id).then(({ data }) => {
-      setEquipeIds((data ?? []).map((x) => x.equipe_id));
-    });
-  }, [init?.id, plantao?.id]);
-
+  // O campo de integrantes inicia vazio. O usuário adiciona cada integrante manualmente pelo botão +.
+  // Os vínculos existentes continuam visíveis no card da viatura, mas não são pré-selecionados no formulário.
   async function salvar(e: React.FormEvent) {
     e.preventDefault();
     if (!init?.id) {
