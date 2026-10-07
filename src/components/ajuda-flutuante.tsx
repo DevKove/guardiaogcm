@@ -42,7 +42,7 @@ const sections = [
 
 export function AjudaFlutuante() {
   const [open, setOpen] = useState(false);
-  const asset = import.meta.env.BASE_URL + "IMG/ajuda.png";
+  // Usa o caminho publicado como primeira opção e o arquivo do repositório como fallback.\n  // Isso evita que o botão fique vazio quando o GitHub Pages ainda estiver propagando o diretório IMG.\n  const asset = import.meta.env.BASE_URL + "IMG/ajuda.png";\n  const assetFallback = "https://raw.githubusercontent.com/DevKove/guardiaogcm/main/IMG/ajuda.png";
 
   return (
     <>
@@ -53,7 +53,7 @@ export function AjudaFlutuante() {
         aria-label="Abrir instruções de uso"
         title="Ajuda e instruções de uso"
       >
-        <img src={asset} alt="" aria-hidden="true" className="h-full w-full rounded-full object-contain" />
+        <img\n          src={asset}\n          alt=""\n          aria-hidden="true"\n          className="h-full w-full rounded-full object-contain"\n          onError={(event) => {\n            if (event.currentTarget.src !== assetFallback) event.currentTarget.src = assetFallback;\n          }}\n        />
       </button>
 
       {open && (
@@ -67,7 +67,7 @@ export function AjudaFlutuante() {
           <section className="relative flex max-h-[88vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-cyan-400/25 bg-background text-foreground shadow-2xl">
             <header className="flex shrink-0 items-center gap-3 border-b border-border bg-card px-4 py-3 sm:px-5">
               <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-cyan-400/30 bg-cyan-400/5">
-                <img src={asset} alt="" aria-hidden="true" className="h-9 w-9 object-contain" />
+                <img\n                  src={asset}\n                  alt=""\n                  aria-hidden="true"\n                  className="h-9 w-9 object-contain"\n                  onError={(event) => {\n                    if (event.currentTarget.src !== assetFallback) event.currentTarget.src = assetFallback;\n                  }}\n                />
               </div>
               <div className="min-w-0 flex-1">
                 <h2 id="ajuda-titulo" className="text-base font-black tracking-wide sm:text-lg">Instruções de uso</h2>
