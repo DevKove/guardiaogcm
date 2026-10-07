@@ -5,6 +5,7 @@ import { Shield, LogOut, LayoutList, PlusCircle, Users, Car, BarChart3, UserCirc
 import { supabase } from "@/integrations/supabase/client";
 import { useMe } from "@/hooks/use-me";
 import { LegalFooter } from "@/components/legal-footer";
+import { AjudaFlutuante } from "@/components/ajuda-flutuante";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
@@ -273,6 +274,7 @@ function Layout() {
         <Outlet />
       </main>
       <LegalFooter />
+      <AjudaFlutuante />
     </div>
   );
 }
