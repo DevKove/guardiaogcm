@@ -129,7 +129,7 @@ function Viaturas() {
                 </Link>
               )}
               <div className="mt-3 flex gap-1 border-t pt-3">
-                {me?.isSupervisor && (
+                {me && (
                   <Button size="sm" variant="ghost" onClick={() => setEdit({ id: v.id, prefixo: v.prefixo, placa: v.placa ?? "", modelo: v.modelo ?? "", tipo: v.tipo, guarnicao: v.guarnicao ?? "", equipe_ids: [], km_atual: v.km_atual?.toString() ?? "", observacao: v.observacao ?? "" })}>
                     <Pencil className="h-3.5 w-3.5" /> Editar
                   </Button>
@@ -199,31 +199,99 @@ function ViaturaDialog({ f: init, onClose, podeTudo, podeEditarGuarnicao }: { f:
 
   async function salvar(e: React.FormEvent) {
     e.preventDefault();
-    if (equipeIds.length && !plantao?.id) return void toast.error("É necessário ter um plantão aberto para vincular integrantes à viatura.");
-    const permitidos = equipeIds.filter((id) => plantaoMembros.includes(id));
-    if (permitidos.length !== equipeIds.length) return void toast.error("A guarnição só pode usar integrantes do plantão atual.");
-    const membros = efetivo.filter((m) => permitidos.includes(m.id));
-    const payload = {
-      prefixo: f.prefixo, placa: f.placa || null, modelo: f.modelo || null, tipo: f.tipo,
-      guarnicao: membros.map((m) => m.nome).join(", ") || null,
-      km_atual: f.km_atual ? Number(f.km_atual) : null, observacao: f.observacao || null,
-    };
-    const { data: viaturaSalva, error } = f.id
-      ? await supabase.from("viaturas").update(payload as never).eq("id", f.id).select("id").single()
-      : await supabase.from("viaturas").insert(payload as never).select("id").single();
-    if (error) return void toast.error(error.message);
+    if (!init?.id) {
+      if (!podeTudo) return void toast.error("Somente supervisores podem cadastrar uma nova viatura.");
+      const { data: viaturaSalva, error } = await supabase.from("viaturas").insert({
+        prefixo: f.prefixo,
+        placa: f.placa || null,
+        modelo: f.modelo || null,
+        tipo: f.tipo,
+        guarnicao: null,
+        km_atual: f.km_atual ? Number(f.km_atual) : null,
+        observacao: f.observacao || null,
+      } as never).select("id").single();
+      if (error) return void toast.error(error.message);
+      toast.success("Viatura cadastrada");
+      onClose();
+      qc.invalidateQueries({ queryKey: ["viaturas"] });
+      return void viaturaSalva;
+    }
 
-    if (plantao?.id && viaturaSalva?.id) {
-      const { error: delError } = await supabase.from("viatura_integrantes").delete().eq("viatura_id", viaturaSalva.id).eq("plantao_id", plantao.id);
+    if (!plantao?.id) {
+      return void toast.error("É necessário ter um plantão aberto para alterar os integrantes da guarnição.");
+    }
+
+    const permitidos = equipeIds.filter((id) => plantaoMembros.includes(id));
+    if (permitidos.length !== equipeIds.length) {
+      return void toast.error("A guarnição só pode usar integrantes do plantão atual.");
+    }
+
+    if (!podeTudo) {
+      // Operador comum: RLS permite alterar somente os vínculos da viatura no plantão aberto.
+      const { error: delError } = await supabase
+        .from("viatura_integrantes")
+        .delete()
+        .eq("viatura_id", init.id)
+        .eq("plantao_id", plantao.id);
       if (delError) return void toast.error("Não foi possível atualizar a guarnição: " + delError.message);
-      if (equipeIds.length) {
+
+      if (permitidos.length) {
         const { error: insError } = await supabase.from("viatura_integrantes").insert(
-          equipeIds.map((equipe_id) => ({ plantao_id: plantao.id, viatura_id: viaturaSalva.id, equipe_id, papel: "integrante" })),
+          permitidos.map((equipe_id) => ({
+            plantao_id: plantao.id,
+            viatura_id: init.id,
+            equipe_id,
+            papel: "integrante",
+          })),
         );
         if (insError) return void toast.error("Não foi possível gravar os integrantes: " + insError.message);
       }
+
+      toast.success("Integrantes da guarnição atualizados.");
+      onClose();
+      qc.invalidateQueries({ queryKey: ["viaturas"] });
+      return;
     }
-    toast.success(f.id ? "Viatura atualizada" : "Viatura cadastrada");
+
+    const membros = efetivo.filter((m) => permitidos.includes(m.id));
+    const payload = {
+      prefixo: f.prefixo,
+      placa: f.placa || null,
+      modelo: f.modelo || null,
+      tipo: f.tipo,
+      guarnicao: membros.map((m) => m.nome).join(", ") || null,
+      km_atual: f.km_atual ? Number(f.km_atual) : null,
+      observacao: f.observacao || null,
+    };
+
+    const { data: viaturaSalva, error } = await supabase
+      .from("viaturas")
+      .update(payload as never)
+      .eq("id", init.id)
+      .select("id")
+      .single();
+    if (error) return void toast.error(error.message);
+
+    const { error: delError } = await supabase
+      .from("viatura_integrantes")
+      .delete()
+      .eq("viatura_id", viaturaSalva.id)
+      .eq("plantao_id", plantao.id);
+    if (delError) return void toast.error("Não foi possível atualizar a guarnição: " + delError.message);
+
+    if (permitidos.length) {
+      const { error: insError } = await supabase.from("viatura_integrantes").insert(
+        permitidos.map((equipe_id) => ({
+          plantao_id: plantao.id,
+          viatura_id: viaturaSalva.id,
+          equipe_id,
+          papel: "integrante",
+        })),
+      );
+      if (insError) return void toast.error("Não foi possível gravar os integrantes: " + insError.message);
+    }
+
+    toast.success("Viatura atualizada");
     onClose();
     qc.invalidateQueries({ queryKey: ["viaturas"] });
   }
@@ -254,7 +322,7 @@ function ViaturaDialog({ f: init, onClose, podeTudo, podeEditarGuarnicao }: { f:
               {efetivo.map((m) => <option key={m.id} value={m.id} disabled={!plantaoMembros.includes(m.id)}>{m.nome} · {m.tipo}{m.matricula ? ` · ${m.matricula}` : ""}{!plantaoMembros.includes(m.id) ? " · fora do plantão atual" : ""}</option>)}
             </select>
             {!plantao?.id && <p className="text-xs text-warning">Inicie um plantão para vincular integrantes à viatura.</p>}
-            <p className="text-xs text-muted-foreground">Os integrantes são carregados automaticamente do cadastro de Equipe. Somente integrantes ativos pertencentes ao plantão atual podem ser vinculados à guarnição.</p>
+            <p className="text-xs text-muted-foreground">Os integrantes são carregados automaticamente do cadastro de Equipe. Você pode alterar a guarnição do plantão atual; os demais campos da viatura ficam protegidos para usuários sem permissão de supervisão.</p>
           </div>
           <div className="space-y-1"><Label>Quilometragem atual</Label><Input type="number" min={0} value={f.km_atual} onChange={set("km_atual")} /></div>
           <div className="col-span-2 space-y-1"><Label>Observações</Label><Textarea rows={2} value={f.observacao} onChange={set("observacao")} /></div>
