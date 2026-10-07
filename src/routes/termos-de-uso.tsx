@@ -1,47 +1,43 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Shield, ArrowLeft } from "lucide-react";
+import { ArrowLeft, Shield } from "lucide-react";
 
 export const Route = createFileRoute("/termos-de-uso")({
-  head: () => ({ meta: [{ title: "Termos de Uso · Guardião GCM" }, { name: "description", content: "Termos de Uso do Guardião GCM." }] }),
+  head: () => ({
+    meta: [
+      { title: "Termos de Uso · Guardião GCM" },
+      { name: "description", content: "Termos de Uso do Guardião GCM — CAD Central de Atendimento e Despacho." },
+    ],
+  }),
   component: TermsPage,
 });
 
-function TermsPage() {
-  return (
-    <div className="min-h-screen bg-background text-foreground">
-      <div className="stripe-top h-2" />
-      <header className="border-b border-border bg-card">
-        <div className="mx-auto flex max-w-4xl items-center justify-between gap-4 px-5 py-5">
-          <Link to="/" className="flex items-center gap-3">
-            <Shield className="h-7 w-7 text-primary" />
-            <div><div className="font-bold">CAD GUARDA MUNICIPAL</div><div className="text-[10px] uppercase tracking-wider text-muted-foreground">Guardião GCM</div></div>
-          </Link>
-          <Link to="/auth" className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:underline"><ArrowLeft className="h-4 w-4" /> Acesso ao sistema</Link>
-        </div>
-      </header>
-      <main className="mx-auto max-w-4xl px-5 py-10">
-        <article className="prose prose-slate max-w-none dark:prose-invert">
-          <h1>Termos de Uso</h1>
-          <p><strong>Guardião GCM · CAD — Central de Atendimento e Despacho</strong></p>
-          <p className="text-sm text-muted-foreground">Última atualização: 07/10/2026</p>
-          <Section title="1. Objeto">O Guardião GCM é um sistema informatizado de apoio à atividade operacional, destinado ao registro, organização, acompanhamento e consulta de informações relacionadas a atendimento, despacho, ocorrências, plantões, equipes, viaturas, postos, itens operacionais e relatórios.</Section>
-          <Section title="2. Aceitação">O acesso e a utilização do sistema pressupõem ciência e concordância com estes Termos de Uso, a Política de Privacidade e as normas internas aplicáveis ao órgão responsável pela operação.</Section>
-          <Section title="3. Acesso restrito">Cada usuário é responsável pela guarda de suas credenciais, por não compartilhá-las, por encerrar sua sessão em equipamentos compartilhados e por comunicar suspeitas de acesso indevido.</Section>
-          <Section title="4. Uso autorizado">O sistema deve ser utilizado somente para finalidades legítimas, institucionais e autorizadas, dentro das permissões concedidas ao usuário.</Section>
-          <Section title="5. Usos proibidos"><ul><li>Acessar dados sem autorização.</li><li>Contornar autenticação, RLS ou controles de acesso.</li><li>Inserir informação deliberadamente falsa ou maliciosa.</li><li>Realizar SQL injection, brute force, varreduras abusivas ou exploração de vulnerabilidades.</li><li>Introduzir malware ou código malicioso.</li><li>Divulgar dados protegidos sem autorização.</li></ul></Section>
-          <Section title="6. Conteúdo e decisões">As informações inseridas são de responsabilidade de quem as registra e do órgão operador, conforme suas atribuições. O sistema é ferramenta de apoio e não substitui decisões de autoridades, normas ou procedimentos institucionais.</Section>
-          <Section title="7. Segurança e terceiros">Nenhum sistema conectado à internet é absolutamente invulnerável. O sistema pode depender de provedores externos de hospedagem, autenticação, banco de dados e infraestrutura.</Section>
-          <Section title="8. Limitação de responsabilidade">Na máxima extensão permitida pela legislação aplicável, os desenvolvedores, autores, mantenedores e gestores técnicos não respondem por uso indevido, atos de usuários ou terceiros, informações incorretas, decisões tomadas com base nos registros, indisponibilidade de internet ou infraestrutura, ataques cibernéticos, malware, credenciais comprometidas, falhas de serviços externos ou outros eventos fora de seu controle razoável. Esta cláusula não pretende excluir responsabilidades que a lei não permita afastar.</Section>
-          <Section title="9. Auditoria">Podem ser mantidos logs, históricos e registros técnicos para segurança, auditoria, investigação de incidentes, continuidade operacional e cumprimento de obrigações legais.</Section>
-          <Section title="10. Suspensão">O acesso poderá ser suspenso ou revogado em caso de uso indevido, violação de segurança, suspeita de comprometimento, descumprimento destes termos ou determinação administrativa/legal.</Section>
-          <Section title="11. Lei aplicável">Aplicam-se a legislação brasileira e as normas institucionais do órgão responsável pela operação.</Section>
-          <div className="not-prose mt-10 rounded-lg border border-primary/20 bg-primary/5 p-5 text-sm text-muted-foreground">O uso do sistema não transfere aos desenvolvedores ou mantenedores técnicos a responsabilidade pelos atos praticados pelos usuários, pelo órgão operador ou por terceiros, observados os limites legais.</div>
-        </article>
-      </main>
-    </div>
-  );
-}
+const sections = [
+  ["1. Apresentação e objeto", "O Guardião GCM é uma plataforma de apoio às atividades administrativas e operacionais da Guarda Civil Municipal, destinada ao registro, organização, acompanhamento, consulta e geração de relatórios relacionados a atendimentos, despacho, ocorrências, plantões, equipes, guarnições, viaturas, postos e itens operacionais. O sistema é ferramenta tecnológica de apoio e não substitui legislação, regulamentos, ordens de serviço, protocolos, decisões de autoridade ou julgamento profissional."],
+  ["2. Responsabilidades", "O órgão operador define finalidades, perfis, permissões e procedimentos. Cada usuário responde pelos atos praticados com sua conta e dentro de suas atribuições. Administradores respondem pelas ações administrativas que efetivamente executarem. Desenvolvedores e mantenedores técnicos não assumem, apenas por criar, hospedar, manter ou prestar suporte ao software, responsabilidade pelas decisões operacionais, administrativas ou disciplinares do órgão ou de seus usuários."],
+  ["3. Aceitação", "O acesso pressupõe ciência destes Termos, da Política de Privacidade e das normas institucionais aplicáveis. Quem não concordar deve interromper o uso e comunicar a questão ao responsável institucional."],
+  ["4. Acesso e credenciais", "O acesso é restrito a pessoas autorizadas. Credenciais são pessoais e intransferíveis. O usuário deve manter senha, tokens e sessões em sigilo, encerrar a sessão em equipamentos compartilhados e comunicar imediatamente suspeitas de comprometimento. A existência de uma conta não significa autorização irrestrita a todos os módulos."],
+  ["5. Privilégios e permissões", "É proibido tentar elevar privilégios, acessar funções administrativas sem autorização, manipular identificadores, contornar regras de autorização ou acessar registros de terceiros sem fundamento institucional. Administradores devem usar privilégios elevados somente quando necessários."],
+  ["6. Uso autorizado", "O sistema pode ser usado para registro e acompanhamento de atendimentos e ocorrências, gestão de plantões, equipes, viaturas e postos, controle de itens, elaboração de relatórios, manutenção cadastral e auditoria, sempre dentro das permissões e finalidades institucionais."],
+  ["7. Integridade das informações", "Os registros devem ser verdadeiros, pertinentes, atualizados, necessários e compatíveis com sua finalidade. É proibido inventar fatos, adulterar informações para resultado enganoso, inserir conteúdo ofensivo ou usar campos operacionais para finalidades particulares. Correções devem seguir os mecanismos do sistema e os procedimentos internos."],
+  ["8. Condutas proibidas", "É proibido acessar dados sem autorização, contornar segurança, realizar SQL injection, XSS, CSRF, brute force, credential stuffing, exploração deliberada de vulnerabilidades, varreduras não autorizadas, tentativa de IDOR, malware, ransomware, scripts destrutivos, interferência deliberada na disponibilidade, scraping abusivo, compartilhamento de credenciais ou uso de dados para perseguição, ameaça, discriminação, benefício pessoal ou divulgação não autorizada."],
+  ["9. Testes de segurança", "Testes de segurança somente podem ocorrer mediante autorização. Vulnerabilidades devem ser comunicadas de forma responsável, sem exploração além do necessário para comprovação e sem acesso, alteração ou destruição de dados reais."],
+  ["10. Documentos e anexos", "Arquivos enviados devem possuir relação direta com a finalidade autorizada. Devem ser observadas as regras internas de sigilo, classificação e retenção. Não devem ser enviados arquivos maliciosos, documentos pessoais desnecessários ou material que viole direitos de terceiros."],
+  ["11. Plantões, ocorrências e relatórios", "Registros de plantão, ocorrências, movimentações, equipes e itens podem possuir relevância administrativa ou operacional. O armazenamento pelo sistema não determina, sozinho, a validade jurídica do registro. Relatórios e PDFs representam os dados existentes no momento da geração e devem ser conferidos antes de utilização oficial."],
+  ["12. Auditoria e rastreabilidade", "Podem ser mantidos logs de autenticação, acesso, alterações, operações administrativas, movimentações, erros e eventos de segurança para auditoria, investigação, prevenção de abuso, manutenção, continuidade e cumprimento de obrigações legais."],
+  ["13. Monitoramento de segurança", "Atividades técnicas podem ser analisadas para detectar comportamento anômalo, tentativas de acesso indevido, falhas de autenticação e abuso. Medidas preventivas podem incluir limitação de tentativas, bloqueio, revogação de sessão ou suspensão."],
+  ["14. Disponibilidade e continuidade", "O sistema pode sofrer manutenção, atualizações ou interrupções por falhas de internet, energia, hospedagem, banco de dados, DNS, CDN ou outros serviços. Não é garantida disponibilidade ininterrupta. O órgão operador deve manter procedimentos de contingência quando a continuidade for necessária."],
+  ["15. Terceiros e infraestrutura", "A aplicação pode depender de serviços externos de hospedagem, autenticação, banco de dados, armazenamento, DNS, CDN ou comunicação. Esses serviços possuem condições e incidentes próprios e sua indisponibilidade não é automaticamente atribuível aos desenvolvedores."],
+  ["16. Ataques e eventos fora de controle", "Nenhum sistema conectado à internet pode garantir segurança absoluta contra ameaças atuais ou futuras. Na máxima extensão permitida pela legislação, desenvolvedores, autores e mantenedores não respondem automaticamente por danos decorrentes exclusivamente de ataques, malware, engenharia social, credenciais comprometidas, falhas externas ou outros eventos fora de seu controle razoável, sem afastar responsabilidades legalmente inderrogáveis."],
+  ["17. Decisões operacionais", "O sistema apresenta informações e ferramentas de apoio, mas decisões policiais, administrativas, disciplinares ou operacionais são tomadas pelos agentes e autoridades competentes. Nenhum alerta, classificação ou relatório constitui, por si só, ordem ou decisão administrativa."],
+  ["18. Limitação de responsabilidade", "Na máxima extensão permitida pela legislação brasileira, desenvolvedores, autores, mantenedores e gestores técnicos não são automaticamente responsáveis por atos de usuários ou terceiros, uso fora da finalidade, dados incorretos inseridos por usuários, decisões do órgão, credenciais comprometidas por seus titulares, falhas de equipamentos ou serviços externos, ataques cibernéticos e danos indiretos decorrentes de uso incompatível com estes Termos."],
+  ["19. Suspensão e revogação", "O acesso poderá ser bloqueado, suspenso ou revogado diante de comprometimento de conta, tentativa de invasão, violação de segurança, uso incompatível com as atribuições, descumprimento destes Termos ou determinação administrativa ou legal."],
+  ["20. Propriedade intelectual", "Código, arquitetura, componentes próprios, textos, identidade visual, marcas e elementos gráficos possuem seus respectivos titulares. A autorização de uso não transfere propriedade intelectual ao usuário."],
+  ["21. Alterações", "O sistema poderá receber correções, atualizações, novos módulos, mudanças de interface ou arquitetura. Funcionalidades podem ser modificadas ou descontinuadas por razões de segurança, manutenção, compatibilidade ou evolução."],
+  ["22. Incidentes", "Suspeitas de invasão, exposição de dados, uso indevido, credencial comprometida ou vulnerabilidade devem ser comunicadas imediatamente ao canal institucional ou técnico definido. Quando possível, evidências devem ser preservadas para apuração."],
+  ["23. Violação dos Termos", "O descumprimento poderá resultar em restrição de acesso, suspensão, revogação da conta e encaminhamento para apuração administrativa ou às autoridades competentes, quando cabível."],
+  ["24. Lei aplicável e disposição final", "Aplicam-se a legislação brasileira e as normas institucionais do órgão operador. O simples fato de desenvolver, manter ou prestar suporte técnico não transfere ao responsável técnico as decisões, atos, registros ou responsabilidades operacionais do órgão. A responsabilidade jurídica deve ser analisada conforme a conduta efetiva, competência e legislação aplicável."],
+];
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
-  return <section className="mt-7"><h2 className="text-xl font-bold">{title}</h2><div className="mt-2 leading-7 text-muted-foreground">{children}</div></section>;
+function TermsPage() {
+  return <div className="min-h-screen bg-background text-foreground"><div className="stripe-top h-2" /><header className="border-b border-border bg-card"><div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-5 py-5"><Link to="/" className="flex items-center gap-3"><Shield className="h-7 w-7 text-primary" /><div><div className="font-bold">CAD GUARDA MUNICIPAL</div><div className="text-[10px] uppercase tracking-wider text-muted-foreground">Guardião GCM</div></div></Link><Link to="/auth" className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:underline"><ArrowLeft className="h-4 w-4" /> Acesso ao sistema</Link></div></header><main className="mx-auto max-w-5xl px-5 py-10"><article className="prose prose-slate max-w-none dark:prose-invert"><h1>Termos de Uso</h1><p><strong>Guardião GCM · CAD — Central de Atendimento e Despacho</strong></p><p className="text-sm text-muted-foreground">Última atualização: 07/10/2026</p>{sections.map(([title,body])=><section key={title} className="mt-8"><h2>{title}</h2><p>{body}</p></section>)}<div className="not-prose mt-10 rounded-xl border border-primary/20 bg-primary/5 p-5 text-sm leading-6 text-muted-foreground"><strong className="text-foreground">Importante:</strong> estes Termos são uma política de uso do sistema e não substituem revisão jurídica específica. Para implantação institucional, recomenda-se validação pela assessoria jurídica e pelo responsável por proteção de dados do órgão.</div></article></main></div>;
 }
