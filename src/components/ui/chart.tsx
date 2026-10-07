@@ -106,6 +106,7 @@ type ChartTooltipContentProps = React.ComponentProps<"div"> & {
   payload?: TooltipItem[];
   label?: string | number;
   labelFormatter?: (value: string | number, payload?: TooltipItem[]) => React.ReactNode;
+  labelClassName?: string;
   formatter?: (value: string | number, name: string | number, item: TooltipItem, index: number, payload?: Record<string, unknown>) => React.ReactNode;
   hideLabel?: boolean;
   hideIndicator?: boolean;
