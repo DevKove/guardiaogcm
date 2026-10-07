@@ -119,7 +119,7 @@ function Imprimir() {
           <h3 className="mb-1 border-b font-bold uppercase">Histórico</h3>
           {hist.map((h) => (
             <div key={h.id} className="py-0.5 cad-print-history-row">
-              <span className="font-mono text-xs">{fmtData(h.created_at)}</span> — {h.usuario_id ? pm.get(h.usuario_id)?.nome : undefined ?? "Sistema"}: <span className="whitespace-pre-wrap">{descricaoHistorico(h.descricao)}</span>
+              <span className="font-mono text-xs">{fmtData(h.created_at)}</span> — {h.usuario_id ? (pm.get(h.usuario_id)?.nome || "Sistema") : "Sistema"}: <span className="whitespace-pre-wrap">{descricaoHistorico(h.descricao)}</span>
             </div>
           ))}
         </div>
