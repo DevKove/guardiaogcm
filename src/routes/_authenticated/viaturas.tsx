@@ -230,7 +230,7 @@ function ViaturaDialog({ f: init, onClose, podeTudo, podeEditarGuarnicao }: { f:
         const { error: insError } = await supabase.from("viatura_integrantes").insert(
           permitidos.map((equipe_id) => ({
             plantao_id: plantao.id,
-            viatura_id: init.id,
+            viatura_id: init.id!,
             equipe_id,
             papel: "integrante",
           })),
@@ -274,7 +274,7 @@ function ViaturaDialog({ f: init, onClose, podeTudo, podeEditarGuarnicao }: { f:
       const { error: insError } = await supabase.from("viatura_integrantes").insert(
         permitidos.map((equipe_id) => ({
           plantao_id: plantao.id,
-          viatura_id: viaturaSalva.id,
+          viatura_id: viaturaSalva.id!,
           equipe_id,
           papel: "integrante",
         })),
