@@ -66,6 +66,18 @@ jobs:
             exit 1
           fi
 
+          # O diretório IMG fica na raiz do repositório e não é copiado automaticamente
+          # pelo build. O sistema usa esses arquivos como assets públicos no GitHub Pages.
+          if [ -d "IMG" ]; then
+            rm -rf ".output/public/IMG"
+            cp -R "IMG" ".output/public/IMG"
+            echo "Assets IMG publicados:"
+            find ".output/public/IMG" -maxdepth 2 -type f | sort | head -200
+          else
+            echo "ERROR: diretório IMG não encontrado no repositório."
+            exit 1
+          fi
+
           touch ".output/public/.nojekyll"
           echo "GitHub Pages files:"
           find ".output/public" -maxdepth 2 -type f | sort | head -200
