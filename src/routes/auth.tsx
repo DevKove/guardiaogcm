@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { LegalFooter } from "@/components/legal-footer";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
@@ -29,6 +30,7 @@ function AuthPage() {
   const [aceitouTermos, setAceitouTermos] = useState(false);
   const [loading, setLoading] = useState(false);
   const [pending, setPending] = useState(false);
+  const [emailNaoConfirmado, setEmailNaoConfirmado] = useState(false);
 
   async function checkSession() {
     const { data } = await supabase.auth.getSession();
@@ -71,7 +73,14 @@ function AuthPage() {
             },
           },
         });
-        if (error) throw error;
+        if (error) {
+        const msg = `${error.message ?? ""}`.toLowerCase();
+        if (msg.includes("email not confirmed") || msg.includes("email not confirmed")) {
+          setEmailNaoConfirmado(true);
+          return;
+        }
+        throw error;
+      }
         if (!data.user) throw new Error("Não foi possível criar a conta.");
 
         setPending(true);
