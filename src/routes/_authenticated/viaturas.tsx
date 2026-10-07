@@ -220,25 +220,12 @@ function ViaturaDialog({ f: init, onClose, podeTudo, podeEditarGuarnicao }: { f:
     }
 
     if (!podeTudo) {
-      // Operador comum: RLS permite alterar somente os vínculos da viatura no plantão aberto.
-      const { error: delError } = await supabase
-        .from("viatura_integrantes")
-        .delete()
-        .eq("viatura_id", init.id)
-        .eq("plantao_id", plantao.id);
-      if (delError) return void toast.error("Não foi possível atualizar a guarnição: " + delError.message);
-
-      if (permitidos.length) {
-        const { error: insError } = await supabase.from("viatura_integrantes").insert(
-          permitidos.map((equipe_id) => ({
-            plantao_id: plantao.id,
-            viatura_id: init.id!,
-            equipe_id,
-            papel: "integrante",
-          })),
-        );
-        if (insError) return void toast.error("Não foi possível gravar os integrantes: " + insError.message);
-      }
+      const { error: rpcError } = await supabase.rpc("substituir_viatura_integrantes", {
+        p_viatura_id: init.id,
+        p_plantao_id: plantao.id,
+        p_equipe_ids: permitidos,
+      });
+      if (rpcError) return void toast.error("Não foi possível gravar os integrantes: " + rpcError.message);
 
       toast.success("Integrantes da guarnição atualizados.");
       onClose();
@@ -265,24 +252,12 @@ function ViaturaDialog({ f: init, onClose, podeTudo, podeEditarGuarnicao }: { f:
       .single();
     if (error) return void toast.error(error.message);
 
-    const { error: delError } = await supabase
-      .from("viatura_integrantes")
-      .delete()
-      .eq("viatura_id", viaturaSalva.id)
-      .eq("plantao_id", plantao.id);
-    if (delError) return void toast.error("Não foi possível atualizar a guarnição: " + delError.message);
-
-    if (permitidos.length) {
-      const { error: insError } = await supabase.from("viatura_integrantes").insert(
-        permitidos.map((equipe_id) => ({
-          plantao_id: plantao.id,
-          viatura_id: viaturaSalva.id!,
-          equipe_id,
-          papel: "integrante",
-        })),
-      );
-      if (insError) return void toast.error("Não foi possível gravar os integrantes: " + insError.message);
-    }
+    const { error: rpcError } = await supabase.rpc("substituir_viatura_integrantes", {
+      p_viatura_id: viaturaSalva.id,
+      p_plantao_id: plantao.id,
+      p_equipe_ids: permitidos,
+    });
+    if (rpcError) return void toast.error("Não foi possível gravar os integrantes: " + rpcError.message);
 
     toast.success("Viatura atualizada");
     onClose();
