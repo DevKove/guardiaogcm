@@ -45,13 +45,8 @@ begin
       select 1 from public.equipe e
       where e.id = x.id and e.ativo = true
     )
-    or not exists (
-      select 1 from public.plantao_integrantes pi
-      where pi.plantao_id = p_plantao_id
-        and pi.equipe_id = x.id
-    )
   ) then
-    raise exception 'Todos os integrantes devem estar selecionados no plantão atual e ativos.';
+    raise exception 'Todos os integrantes devem estar cadastrados como ativos em Equipe.';
   end if;
 
   delete from public.viatura_integrantes
@@ -66,3 +61,27 @@ $$;
 
 revoke all on function public.substituir_viatura_integrantes(uuid, uuid, uuid[]) from public, anon;
 grant execute on function public.substituir_viatura_integrantes(uuid, uuid, uuid[]) to authenticated;
+
+
+-- A guarnição da viatura pode usar qualquer integrante ativo cadastrado em Equipe.
+-- A exigência de pertencimento ao plantão foi removida; o plantão continua
+-- obrigatório como contexto da escala e permanece aberto durante a edição.
+create or replace function public.validar_viatura_integrante_plantao()
+returns trigger
+language plpgsql
+set search_path = public
+as $function$
+begin
+  if not exists (
+    select 1
+    from public.plantoes p
+    join public.equipe e on e.id = new.equipe_id
+    where p.id = new.plantao_id
+      and p.status = 'aberto'
+      and e.ativo = true
+  ) then
+    raise exception 'O integrante da viatura deve estar cadastrado como ativo em Equipe e o plantão deve estar aberto';
+  end if;
+  return new;
+end;
+$function$;
