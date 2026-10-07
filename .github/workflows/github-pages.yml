@@ -9,6 +9,11 @@ on:
       - main
   workflow_dispatch:
 
+# Evita dois deployments do GitHub Pages concorrendo pelo mesmo ambiente.
+concurrency:
+  group: github-pages
+  cancel-in-progress: true
+
 permissions:
   contents: read
   pages: write
