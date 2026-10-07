@@ -141,6 +141,8 @@ export function ChatFlutuante() {
       return;
     }
 
+    const userId = currentUserId;
+    const selectedId = selected.id;
     let cancelled = false;
 
     async function loadConversation() {
@@ -149,7 +151,7 @@ export function ChatFlutuante() {
         .from("mensagens_chat")
         .select("id,remetente_id,destinatario_id,mensagem,lida_em,created_at")
         .or(
-          `and(remetente_id.eq.${currentUserId},destinatario_id.eq.${selected.id}),and(remetente_id.eq.${selected.id},destinatario_id.eq.${currentUserId})`,
+          `and(remetente_id.eq.${userId},destinatario_id.eq.${selectedId}),and(remetente_id.eq.${selectedId},destinatario_id.eq.${userId})`,
         )
         .order("created_at", { ascending: true })
         .limit(200);
@@ -162,8 +164,8 @@ export function ChatFlutuante() {
       await supabase
         .from("mensagens_chat")
         .update({ lida_em: new Date().toISOString() })
-        .eq("destinatario_id", currentUserId)
-        .eq("remetente_id", selected.id)
+        .eq("destinatario_id", userId)
+        .eq("remetente_id", selectedId)
         .is("lida_em", null);
 
       if (!cancelled) {
