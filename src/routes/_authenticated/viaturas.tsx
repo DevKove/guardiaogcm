@@ -1,4 +1,5 @@
-// Deploy marker: viatura crew selector fix — show all active Equipe members.\nimport { createFileRoute, Link } from "@tanstack/react-router";
+// Deploy marker: viatura crew selector fix — show all active Equipe members.
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
